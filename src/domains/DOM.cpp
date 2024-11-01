@@ -4,7 +4,7 @@
 #include <Geode/Modify.hpp>
 #include <queue>
 
-#include "../stuff.h"
+#include "../stuff.hpp"
 
 bool DOMDomainDisabled = true;
 
@@ -236,7 +236,7 @@ $domainMethod(describeNode) {
     });
   } else {
     return geode::Err(
-      std::make_tuple(404, "Node doesn't exist.")
+      std::make_tuple(-32602, "Node doesn't exist.")
     );
   }
 }
@@ -262,7 +262,7 @@ $domainMethod(getAttributes) {
     });
   } else {
     return geode::Err(
-      std::make_tuple(404, "Node doesn't exist.")
+      std::make_tuple(-32602, "Node doesn't exist.")
     );
   }
 }
@@ -274,7 +274,7 @@ $domainMethod(getAttribute) {
     });
   } else {
     return geode::Err(
-      std::make_tuple(404, "Node doesn't exist.")
+      std::make_tuple(-32602, "Node doesn't exist.")
     );
   }
 }
@@ -287,7 +287,7 @@ $domainMethod(getBoxModel) {
     });
   } else {
     return geode::Err(
-      std::make_tuple(404, "Node doesn't exist.")
+      std::make_tuple(-32602, "Node doesn't exist.")
     );
   }
 }
@@ -295,12 +295,16 @@ $domainMethod(getDocument) {
   CCNode* node = CCDirector::sharedDirector()->getRunningScene(); 
   if (node) {
     DOMDomainDisabled = false;
+    int depth = 1;
+    if (!params["depth"].is_null()) {
+      depth = params["depth"].as_int();
+    }
     return geode::Ok(matjson::Object{
-      {"root",DOMNode(node)}
+      {"root",DOMNode(node,depth)}
     });
   } else {
     return geode::Err(
-      std::make_tuple(404, "No running scene.")
+      std::make_tuple(-32602, "No running scene.")
     );
   }
 }
@@ -347,8 +351,39 @@ $domainMethod(getNodeForLocation) {
     });
   } else {
     return geode::Err(
-      std::make_tuple(404, "No running scene.")
+      std::make_tuple(-32602, "No running scene.")
     );
+  }
+}
+$domainMethod(moveTo) {
+  auto targetId = as_type_or<int>(params["nodeId"],-1);
+  auto destId = as_type_or<int>(params["targetNodeId"],-1);
+  if (targetId<0 || destId<0) {
+    return geode::Err(
+      std::make_tuple(-32602, "you stupid");
+    );
+  } 
+  auto target = getNodeAt(targetId);
+  auto dest = getNodeAt(destId);
+  if (target == nullptr) {
+    return geode::Err(
+      std::make_tuple(
+        -32602, fmt::format(
+          "Node with identifier '{}' (as 'nodeId') not found.",
+          targetId
+        )
+      )
+    )
+  }
+  if (dest == nullptr) {
+    return geode::Err(
+      std::make_tuple(
+        -32602, fmt::format(
+          "Node with identifier '{}' (as 'targetNodeId') not found.",
+          destId
+        )
+      )
+    )
   }
 }
 CCObject* cocosObjOf(matjson::Value& val) {
@@ -380,7 +415,7 @@ $domainMethod(setAttribute) {
     return geode::Ok(matjson::Object{});
   } else {
     return geode::Err(
-      std::make_tuple(404, "Node doesn't exist.")
+      std::make_tuple(-32602, "Node doesn't exist.")
     );
   }
 }
