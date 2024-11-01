@@ -14,7 +14,7 @@ bool Protocol::init() {
     if (msg->type == ix::WebSocketMessageType::Message) {
       auto j = matjson::parse(msg->str);
       if (j["id"].is_null()) {
-        c.sendText(errorResponseStr(-1,400,"Requests must have an ID."));
+        c.sendText(errorResponseStr(-1,-32600,"Requests must have an ID."));
         return;
       } 
       int id = j["id"].as_int();
@@ -27,7 +27,7 @@ bool Protocol::init() {
       decltype(functions)::value_type::second_type method;
       auto i = functions.find(methodName);
       if (i==functions.end()) {
-        c.sendText(errorResponseStr(id,400,"Method "+methodName+" does not exist."));
+        c.sendText(errorResponseStr(id,-32601,"'"+methodName+"' wasn't found."));
         return;
       }
       FunctionReturnType ret = i->second(j["params"].as_object());
