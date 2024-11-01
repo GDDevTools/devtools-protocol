@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Geode/utils/Result.hpp"
 #include <Geode/loader/Dispatch.hpp>
 #include <matjson.hpp>
