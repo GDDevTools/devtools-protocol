@@ -5,7 +5,7 @@ set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(USE_ZLIB OFF)
 
-project(GeodeDevToolsProtocol VERSION 1.0.0)
+project(Puppeteer VERSION 1.0.0)
 
 file(GLOB_RECURSE src src/*.cpp)
 file(GLOB_RECURSE incl src/*.hpp)

@@ -84,7 +84,7 @@ void Protocol::registerFunction(std::string funcName, decltype(Protocol::functio
   functions.insert_or_assign(funcName, f);
 };
 
-void fireEvent(std::string eventName, matjson::Object const &content) {
+void fireEvent(std::string eventName, matjson::Value const &content) {
   if (prot) {
     prot->broadcastEvent(eventName, content);
   }
