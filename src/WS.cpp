@@ -1,23 +1,28 @@
 #include "WS.hpp"
-#include <ixwebsocket/IXNetSystem.h>
-#include <ixwebsocket/IXWebSocketMessageType.h>
+//#include <ixwebsocket/IXNetSystem.h>
+#include <ixwebsocket/IXWebSocketServer.h>
 #include <matjson.hpp>
-#include <memory>
 
 std::shared_ptr<Protocol> prot = nullptr;
+/// theres only one protocol instance for the entire lifetime so
+ix::WebSocketServer* ws;
 
 bool Protocol::init() {
   ix::initNetSystem();
-  ws = std::make_unique<ix::WebSocketServer>(1412);
+  ws = new ix::WebSocketServer(1313,"127.0.0.1");
 
   ws->setOnClientMessageCallback([this](std::shared_ptr<ix::ConnectionState> s, ix::WebSocket& c, const ix::WebSocketMessagePtr& msg){
-    if (msg->type == ix::WebSocketMessageType::Message) {
+    if (msg->type == ix::WebSocketMessageType::Message || !msg->str.empty()) {
       auto j = matjson::parse(msg->str);
       if (j["id"].is_null()) {
-        c.sendText(errorResponseStr(-1,-32600,"Requests must have an ID."));
+        c.sendText(errorResponseStr(-1,-32602,"Requests must have an ID."));
         return;
       } 
       int id = j["id"].as_int();
+      if (std::find(usedIds.begin(), usedIds.end(), id) != usedIds.end()) {
+        c.sendText(errorResponseStr(id, -32602, "ID already used."));
+        return;
+      }
       int usedIdsSize = usedIds.size();
       if (usedIdsSize%50==0) {
         usedIds.reserve(usedIdsSize+50);
@@ -42,7 +47,10 @@ bool Protocol::init() {
   });
   ws->disablePerMessageDeflate();
   ws->disablePong();
-  ws->listenAndStart();
+  ws->start();
+  auto r = ws->listen();
+  if (!r.first) {throw std::runtime_error(r.second);};
+  geode::log::debug("we are living, loving and lying with this one");
   running = true;
   return true;
 }
@@ -72,6 +80,7 @@ std::shared_ptr<Protocol> Protocol::get() {
 };
 
 void Protocol::broadcastEvent(std::string eventName, matjson::Value const& content) {
+  if (ws==nullptr) return;
   for (auto& c : ws->getClients()) {
     c->send(matjson::Value(matjson::Object{
       {"method", eventName},
@@ -92,9 +101,6 @@ void fireEvent(std::string eventName, matjson::Value const &content) {
   
 void Protocol::close() {
   if (running) {
-    for (auto& c : ws->getClients()) {
-      c->close(1, "See you next time!");
-    }
     ws->stop();
   }
   running = false;

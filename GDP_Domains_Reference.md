@@ -8,121 +8,324 @@ Except from some derivations (such as `Browser` domain renamed to `Game`), this 
 > **Note 2** most of this docs will sound similar to the docs from the aforementioned protocol and it's intended. Don't ask anything about that.
 
 
-## `DOM` Domain
+<style type="text/css">
+  tbody>tr>td:first-child {text-align: right}
+</style>
+
+# `DOM` Domain
 its what you see, you made that super duper excellently!  
 (thats the cocos2d node tree)  
 (node ids is actually the address of the node, the more you know)  
 
-### Methods
+## Methods
 
-#### DOM.describeNode
+### DOM.describeNode
 Describes node given its id, does not require domain to be enabled. Does not start tracking any objects, can be used for automation.
 
-| Parameters | |
-|---|---|
-| nodeId | **[NodeId](#domnodeid)**<br>The node identifier |
-| depth<br>(optional) | **int**<br>The maximum depth at which children should be retrieved, defaults to 1. Use -1 for the entire subtree or provide an integer larger than 0. |
 
-| Return Object | |
-|---|---|
-| node | **[Node](#domnode)**<br>Node description |
+<table><thead>
+  <tr>
+    <th colspan="2">Parameters</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeID</a></strong><br>Id of the node to retrieve attributes for.</td>
+  </tr>
+  <tr>
+    <td><code>depth</code></td>
+    <td><strong>integer</strong><br>The maximum depth at which children should be retrieved, defaults to 1. Use -1 for the entire subtree or provide an integer larger than 0.</td>
+  </tr>
+</tbody>
+</table>
 
-#### DOM.disable
+<table><thead>
+  <tr>
+    <th colspan="2">Return Object</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td><code>node</code></td>
+    <td><strong><a href="#domnode">Node</a></strong><br>Node description</td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.disable
 Disables DOM agent.
 
-#### DOM.enable
+### DOM.enable
 Enables DOM agent.
 
-#### DOM.getAttributes
+### DOM.getAttributes
 Returns attributes for the specified node.  
 
-| Parameters | |
-|---|---|
-| nodeId | **[NodeId](#domnodeid)**<br>Id of the node to retrieve attributes for. |
+<table><thead>
+  <tr>
+    <th colspan="2">Parameters</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeID</a></strong><br>Id of the node to retrieve attributes for.</td>
+  </tr>
+</tbody>
+</table>
 
-| Return Object | |
-|---|---|
-| attributes | **object[string, [AttributeType](#domattributetype)]**<br>An interleaved array of node attribute names and values. |
+<table><thead>
+  <tr>
+    <th colspan="2">Return Object</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td><code>attributes</code></td>
+    <td><strong>object[string, <a href="#domattributetype">AttributeType</a>]</strong><br>An interleaved array of node attribute names and values.</td>
+  </tr>
+</tbody>
+</table>
 
-#### DOM.getAttribute
+### DOM.getAttribute
 Returns a specific attribute for the specified node.  
 
-| Parameters | |
-|---|---|
-| nodeId | **[NodeId](#domnodeid)**<br>Id of the node to retrieve attributes for. |
-| name | **string**<br>Name of the attribute. |
+<table><thead>
+  <tr>
+    <th colspan="2">Parameters</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeID</a></strong><br>Id of the node to retrieve attributes for.</td>
+  </tr>
+  <tr>
+    <td><code>name</code></td>
+    <td><strong>string</strong><br>Name of the attribute.</td>
+  </tr>
+</tbody>
+</table>
 
-| Return Object | |
-|---|---|
-| value | **[AttributeType](#domattributetype)**<br>Value of the requested attribute. |
+<table><thead>
+  <tr>
+    <th colspan="2">Return Object</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td><code>value</code></td>
+    <td><strong><a href="#domattributetype">AttributeType</a></strong><br>Value of the requested attribute.</td>
+  </tr>
+</tbody>
+</table>
 
-#### DOM.getBoxModel
+### DOM.getBoxModel
 Returns boxes for the given node.
 
-| Parameters | |
-|---|---|
-| nodeId | **[NodeId](#domnodeid)**<br>Identifier of the node. |
+<table><thead>
+  <tr>
+    <th colspan="2">Parameters</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeID</a></strong><br>Identifier of the node.</td>
+  </tr>
+</tbody>
+</table>
 
-| Return Object | |
-|---|---|
-| model | **[BoxModel](#domattributetype)**<br>Box model for the node. |
+<table><thead>
+  <tr>
+    <th colspan="2">Return Object</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td><code>model</code></td>
+    <td><strong><a href="#domboxmodel">BoxModel</a></strong><br>Box model for the node.</td>
+  </tr>
+</tbody>
+</table>
 
-#### DOM.getDocument
+### DOM.getDocument
 Returns the root DOM node (which is the current scene) (and optionally the subtree) to the caller. Implicitly enables the DOM domain events for the current target.
 
-| Parameters | |
-|---|---|
-| depth<br>(optional) | **integer**<br>The maximum depth at which children should be retrieved, defaults to 1. Use -1 for the entire subtree or provide an integer larger than 0. |
+<table><thead>
+  <tr>
+    <th colspan="2">Parameters</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td><code>depth</code></td>
+    <td><strong>integer</strong><br>The maximum depth at which children should be retrieved, defaults to 1. Use -1 for the entire subtree or provide an integer larger than 0.</td>
+  </tr>
+</tbody>
+</table>
 
-| Return Object | |
-|---|---|
-| node | **[Node](#domnode)**<br>Node description |
+<table><thead>
+  <tr>
+    <th colspan="2">Return Object</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td><code>node</code></td>
+    <td><strong><a href="#domnode">Node</a></strong><br>Node description.</td>
+  </tr>
+</tbody>
+</table>
 
-#### DOM.getNodeForLocation
+### DOM.getNodeForLocation
 Returns node id at given location. Depending on whether DOM domain is enabled, nodeId is either returned or not.
 
-| Parameters | |
-|---|---|
-| x | **integer**<br>X coordinate. |
-| y | **integer**<br>Y coordinate. |
+<table><thead>
+  <tr>
+    <th colspan="2">Parameters</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td><code>x</code></td>
+    <td><strong>integer</strong><br>X coordinate.</td>
+  </tr>
+  <tr>
+    <td><code>y</code></td>
+    <td><strong>integer</strong><br>Y coordinate.</td>
+  </tr>
+</tbody>
+</table>
 
-| Return Object | |
-|---|---|
-| nodeId | **[NodeId](#domnodeid)**<br>Id of the node at given coordinates, only when enabled and requested document. |
+<table><thead>
+  <tr>
+    <th colspan="2">Return Object</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeID</a></strong><br>Id of the node at given coordinates, only when enabled and requested document.</td>
+  </tr>
+</tbody>
+</table>
 
-### Types 
-#### DOM.BoxModel
+## Types 
+### DOM.BoxModel
 Box model.  
 Type: **object**
-**Properties**
 
-| Name | Description |
-|---|---|
-| width | **integer**<br>Node width. |
-| height | **integer**<br>Node height. |
+<table><thead>
+  <tr>
+    <th colspan="2">Properties</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td><code>width</code></td>
+    <td><strong>integer</strong><br>Node width.</td>
+  </tr>
+  <tr>
+    <td><code>height</code></td>
+    <td><strong>integer</strong><br>Node height.</td>
+  </tr>
+</tbody>
+</table>
 
-#### DOM.AttributeType
+### DOM.AttributeType
 The supported attribute type.  
 Allowed Types: `string, int, bool, array, object, {nodeId: int}`  
 TODO: figure out how to differentiate between Node and object
 
-#### DOM.Node
+### DOM.Node
 DOM interaction is implemented in terms of mirror objects that represent the actual DOM nodes. DOMNode is a base node mirror type.  
 Type: **object**
 
-**Properties**
+<table><thead>
+  <tr>
+    <th colspan="2">Properties</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong><br>Node identifier that is passed into the rest of the DOM messages as the <code>nodeId</code>. Backend will only push node with given <code>id</code> once. It is aware of all requested nodes and will only fire DOM events for nodes known to the client.</td>
+  </tr>
+  <tr>
+    <td><code>parentId</code><br>(optional)</td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong><br>The id of the parent node if any.</td>
+  </tr>
+  <tr>
+    <td><code>childNodeCount</code></td>
+    <td><strong>integer</strong><br>The id of the parent node if any.</td>
+  </tr>
+  <tr>
+    <td><code>children</code></td>
+    <td><strong>array[<a href="#domnode">Node</a>]</strong><br>TChild nodes of this node when requested with children.</td>
+  </tr>
+  <tr>
+    <td><code>attributes</code></td>
+    <td><strong>object[string, <a href="#domattributetype">AttributeType</a>]</strong><br>Attributes of this node in the form of an object <code>{name1: value1, name2: value2, ...}</code></td>
+  </tr>
+</tbody>
+</table>
 
-| Name | Description |
-|---|---|
-| nodeId | **[NodeId](#domnodeid)**<br>Node identifier that is passed into the rest of the DOM messages as the `nodeId`. Backend will only push node with given `id` once. It is aware of all requested nodes and will only fire DOM events for nodes known to the client. |
-| parentId<br>(optional) |  The id of the parent node if any. |
-| childNodeCount | Child count for this node. |
-| children | Child nodes of this node when requested with children. |
-| attributes | Attributes of this node in the form of an object `{name1: value1, name2: value2, ...}` |
-
-#### DOM.NodeId
+### DOM.NodeId
 Unique DOM node identifier.  
 In GDP's case, it's the address of the node.  
 Type: **integer**
 
-#### Game
+# `Game` Domain
+held the player's game session hostage
+
+## Methods
+### Game.close
+Close game gracefully.
+
+### Game.crash
+Close game gracelessly. (raises an std::runtime_error)
+
+### Game.restart
+Restart game gracefully.
+
+### Game.getVersion
+Returns version information.
+
+<table><thead>
+  <tr>
+    <th colspan="2">Return Object</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td><code>protocolVersion</code></td>
+    <td><strong>tuple[int, int, int]</strong><br>This mod's version in the style of <code>[major, minor, patch]</code></td>
+  </tr>
+  <tr>
+    <td><code>loaderVersion</code></td>
+    <td><strong>tuple[int, int, int]</strong><br>Geode version in the style of <code>[major, minor, patch]</code></td>
+  </tr>
+  <tr>
+    <td><code>gameVersion</code></td>
+    <td><strong>string</strong><br>Geometry Dash version.</td>
+  </tr>
+</tbody>
+</table>
+
+# `Input` Domain
+Will this be the next macro bot?
+
+## Methods
+### Input.dispatchKeyEvent
+Dispatches a key event to the game.
+
+<table><thead>
+  <tr>
+    <th colspan="2">Parameters</th>
+  </tr></thead>
+<tbody>
+  <tr>
+    <td><code>type</code></td>
+    <td><strong>string</strong><br>Type of the key event.<br>Allowed values: `keyDown, keyUp, char`</td>
+  </tr>
+  <tr>
+    <td><code>modifiers</code><br>(optional)</td>
+    <td><strong>integer</strong><br>Bit field representing pressed modifier keys. Alt=1, Ctrl=2, Meta/Command=4, Shift=8 (default: 0).</td>
+  </tr>
+  <tr>
+    <td><code>text</code><br>(optional)</td>
+    <td><strong>string</strong><br>Text as generated by processing a virtual key code with a keyboard layout. Does nothing if left empty or <code>type</code> is not <code>char</code></td>
+  </tr>
+  <tr>
+    <td><code>code</code><br>(optional)</td>
+    <td><strong>char</strong><br>just a character. might change in future but this is reasonable.<br>only supports some ascii characters defined in geode enumKeyCodes</td>
+  </tr>
+</tbody>
+</table>

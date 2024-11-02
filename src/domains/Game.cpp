@@ -9,7 +9,7 @@ $domainMethod(close) {
   });
   return geode::Ok(matjson::Object{});
 };
-}
+};
 $domainMethod(crash) {
   geode::queueInMainThread([]{
     throw std::runtime_error("Manually initiated crash");
@@ -31,7 +31,7 @@ $domainMethod(getVersion) {
     {"loaderVersion", matjson::Array{loaderVer.getMajor(), loaderVer.getMinor(), loaderVer.getPatch()}},
     {"gameVersion", gameVer},
   });
-}
+};
 enum class WindowState {
   normal,minimized,maximized,fullscreen
 };
@@ -94,7 +94,7 @@ class $modify(cocos2d::CCEGLView) {
   void onGLFWWindowPosCallback(GLFWwindow* win, int x, int y) {
     cocos2d::CCEGLView::onGLFWWindowPosCallback(win, x, y);
     winPos.x = x;
-    winPos.y = y
+    winPos.y = y;
   }
   void onGLFWWindowIconifyFunCallback(GLFWwindow* win, int iconified) {
     cocos2d::CCEGLView::onGLFWWindowIconifyFunCallback(win, iconified);
@@ -107,7 +107,7 @@ class $modify(cocos2d::CCEGLView) {
     cocos2d::CCEGLView::toggleFullScreen(full, borderless);
     state = full ? WindowState::fullscreen : WindowState::normal;
   }
-}
+};
 #endif
 
 $domainMethod(getWindowBounds) {
@@ -132,11 +132,11 @@ $domainMethod(setWindowBounds) {
   );
   auto newState = matjson::Serialize<WindowState>::from_json(params["windowState"]);
   if (newState == WindowState::fullscreen) {
-    gl->toggleFullScreen(true);
+    gl->toggleFullScreen(true,false);
   }
   else {
     if (state == WindowState::fullscreen) {
-      gl->toggleFullScreen(false);
+      gl->toggleFullScreen(false,false);
     }
     if (newState == WindowState::minimized) {
       gl->iconify();

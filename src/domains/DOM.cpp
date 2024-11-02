@@ -29,21 +29,26 @@ struct CCNode2 : geode::Modify<CCNode2, CCNode> {
     std::unordered_map<std::string, CCObject*> m_userObjects;
     int depth = 0;
   };
+  /*
   void retain() {
     if (retainCount()==0) s_nodes[nodeIdOf(this)] = this;
     CCNode::retain();
   }
   void release() {
-    if (retainCount()==1) s_nodes.erase(nodeIdOf(this));
+    if (retainCount()==1) {
+      s_nodes.erase(nodeIdOf(this));
+      unallocateNodeId(this);
+    }
     CCNode::release();
   }
+  */
   // attribs
   void setUserObject(std::string const &id, CCObject *value);
   // dom
   void updateNodeDepth() {
     auto p = static_cast<CCNode2*>(m_pParent);
     if (p==nullptr) m_fields->depth = 0;
-    m_fields->depth = p->m_fields->depth+1;
+    else m_fields->depth = p->m_fields->depth+1;
     for (auto* c : geode::cocos::CCArrayExt<CCNode2*>(m_pChildren)) {
       c->updateNodeDepth();
     }
@@ -160,16 +165,20 @@ DOMNode::DOMNode(CCNode *node, int depth)
     }
   }
 
+  /*
   auto modify = static_cast<CCNode2*>(node);
+  if (IsDebuggerPresent() && !DOMDomainDisabled) DebugBreak();
   auto fields = modify->m_fields;
   for (auto& pair : fields->m_userObjects) {
     attributes[pair.first] = jsonValueOf(pair.second);
   }
+  */
 }
 
 void CCNode2::removeChild(CCNode *child) {
   CCNode::removeChild(child);
-  if (DOMDomainDisabled) return;
+  //if (DOMDomainDisabled) return;
+  if (true) return;
   fireDOMEvent("childNodeRemoved", {
     {"parentNodeId", nodeIdOf(this)}, 
     {"nodeId", nodeIdOf(child)}
@@ -178,15 +187,17 @@ void CCNode2::removeChild(CCNode *child) {
 
 void CCNode2::addChild(CCNode *child) {
   auto p = child->getParent();
-  if (p)
-    removeChild(child);
   CCNode::addChild(child);
-  if (DOMDomainDisabled) return;
-  fireDOMEvent("childNodeInserted", {
+  if (true) return;
+  //if (DOMDomainDisabled) return;
+  matjson::Object resp{
     {"parentNodeId", nodeIdOf(this)},
-    {"previousNodeId", nodeIdOf(p)},
     {"node", DOMNode(child)}
-  });
+  };
+  if (p) {
+    resp["previousNodeId"] = nodeIdOf(p);
+  }
+  fireDOMEvent("childNodeInserted", resp);
 }
 
 void CCNode2::setUserObject(std::string const &id, CCObject *value) {
@@ -202,8 +213,10 @@ void CCNode2::setUserObject(std::string const &id, CCObject *value) {
   } else {
     m_fields->m_userObjects.erase(id);
     if (DOMDomainDisabled) return;
-    fireDOMEvent("attributeRemoved",
-                 {{"nodeId", nodeIdOf(this)}, {"name", id}});
+    fireDOMEvent("attributeRemoved", {
+      {"nodeId", nodeIdOf(this)}, 
+      {"name", id}
+    });
   }
 }
 

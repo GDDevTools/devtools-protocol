@@ -67,6 +67,7 @@ $execute {
     "geode::log::vlogImpl",
     tulip::hook::TulipConvention::Thiscall
   ).unwrapOr(nullptr);
+  if (vlogHook) vlogHook->disable();
   auto p = Protocol::get();
   p->registerFunction("Log.disable", &disableLog);
   p->registerFunction("Log.enable", &enableLog);

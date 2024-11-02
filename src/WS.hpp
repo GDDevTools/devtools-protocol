@@ -1,9 +1,10 @@
-#pragma once
+
+#ifndef __fuck_you__
+#define __fuck_you__
 
 #include "Geode/utils/Result.hpp"
 #include <Geode/loader/Dispatch.hpp>
 #include <matjson.hpp>
-#include <ixwebsocket/IXWebSocketServer.h>
 
 class Protocol {
 public:
@@ -14,7 +15,6 @@ public:
   bool running = false;
 private:
   std::vector<int> usedIds;
-  std::unique_ptr<ix::WebSocketServer> ws;
   std::unordered_map<std::string, std::function<FunctionReturnType(matjson::Object&)>> functions;
 
   std::string successResponseStr(int id, matjson::Value const& resp);
@@ -38,9 +38,14 @@ namespace errors {
       std::make_tuple(-32602, msg)
     );
   }
+  inline Protocol::FunctionReturnType requiredParameter(std::string param) {
+    return invalidParameter("Required parameter '"+param+"' not present.");
+  }
   inline Protocol::FunctionReturnType internalError(std::string msg) {
     return geode::Err(
       std::make_tuple(-32603, msg)
     );
   }
 }
+
+#endif // __fuck_you__

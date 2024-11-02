@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 3.21)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
+set(CMAKE_OSX_ARCHITECTURES "arm64")
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+#set(GEODE_DISABLE_PRECOMPILED_HEADERS ON)
 set(USE_ZLIB OFF)
+
+add_compile_definitions(WIN32_LEAN_AND_MEAN)
 
 project(Puppeteer VERSION 1.0.0)
 
@@ -25,10 +28,13 @@ add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
 setup_geode_mod(${PROJECT_NAME})
 
-CPMAddPackage("gh:machinezone/IXWebSocket#e03c0be")
+CPMAddPackage("gh:machinezone/IXWebSocket#c5a02f1")
 target_link_libraries(${PROJECT_NAME} ixwebsocket)
 
 if (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "GNU")
     target_compile_options(ixwebsocket PRIVATE --target=i686-pc-windows-msvc)
     target_link_options(ixwebsocket PRIVATE --target=i686-pc-windows-msvc)
 endif()
+
+# idk what this does
+target_include_directories(${PROJECT_NAME} PRIVATE src)

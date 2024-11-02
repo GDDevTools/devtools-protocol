@@ -1,5 +1,6 @@
 #include <Geode/Geode.hpp> 
 #include <climits>
+#include "WS.hpp"
 
 $execute {
   for (auto* hook : geode::Mod::get()->getHooks()) {
@@ -8,4 +9,5 @@ $execute {
     // can prevent events from sending
     hook->setPriority(INT_MAX);
   }
+  Protocol::get()->init();
 }

@@ -3,7 +3,8 @@
 #include "../WS.hpp"
 #include "../stuff.hpp"
 
-void fireNetworkEvent(std::string eventName, matjson::Value const &content) {  fireEvent("Network."+eventName, content);
+void fireNetworkEvent(std::string eventName, matjson::Value const &content) {  
+  fireEvent("Network."+eventName, content);
 };
 
 bool NetworkDomainDisabled = true;
@@ -73,7 +74,7 @@ $domainMethod(getRequestPostData) {
       {"body", i->second}
     });
   }
-  return geode::Err(std::make_tuple(404, "No request with specified ID or the request does not have a POST data."));
+  return errors::internalError("No request with specified ID or the request does not have a POST data.");
 }
 $execute {
   auto p = Protocol::get();
