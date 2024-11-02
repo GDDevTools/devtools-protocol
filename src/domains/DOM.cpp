@@ -356,35 +356,52 @@ $domainMethod(getNodeForLocation) {
   }
 }
 $domainMethod(moveTo) {
-  auto targetId = as_type_or<int>(params["nodeId"],-1);
-  auto destId = as_type_or<int>(params["targetNodeId"],-1);
-  if (targetId<0 || destId<0) {
-    return geode::Err(
-      std::make_tuple(-32602, "you stupid");
-    );
-  } 
+  // parameters check
+  int targetId = 0;
+  if (true) {
+    auto v = params["nodeId"];
+    if (v.is_null()) return errors::invalidParameter("'nodeId' not provided.");
+    targetId = v.as_int();
+  }
+  auto destId = 0;
+  if (true) {
+    auto v = params["targetNodeId"];
+    if (v.is_null()) return errors::invalidParameter("'targetNodeId' not provided.");
+    destId = v.as_int();
+  }
+  if (
+    !params["insertBeforeNodeId"].is_null()
+    &&
+    !params["insertAfterNodeId"].is_null()
+  ){
+    return errors::invalidParameter("'insertBeforeNodeId' and 'insertAfterNodeId' cannot both be defined.");
+  }
+  auto beforeId = as_type_or<int>(params["insertBeforeNodeId"],-1);
+  auto afterId = as_type_or<int>(params["insertAfterNodeId"],-1);
+
+  // node check
   auto target = getNodeAt(targetId);
   auto dest = getNodeAt(destId);
   if (target == nullptr) {
-    return geode::Err(
-      std::make_tuple(
-        -32602, fmt::format(
-          "Node with identifier '{}' (as 'nodeId') not found.",
-          targetId
-        )
-      )
-    )
+    return errors::invalidParameter(fmt::format(
+      "Node with identifier '{}' (as 'nodeId') not found.",
+      targetId 
+    ));
   }
   if (dest == nullptr) {
-    return geode::Err(
-      std::make_tuple(
-        -32602, fmt::format(
-          "Node with identifier '{}' (as 'targetNodeId') not found.",
-          destId
-        )
-      )
-    )
+    return errors::invalidParameter(fmt::format(
+      "Node with identifier '{}' (as 'targetNodeId') not found.",
+      destId
+    ));
   }
+  auto insertBefore = params["insertBeforeNodeId"];
+  auto insertAfter = params["insertAfterNodeId"];
+  if (!insertBefore.is_null())
+  dest->insertBefore(target, getNodeAt(insertBefore.as_int()));
+  else if (!insertAfter.is_null())
+  dest->insertAfter(target, getNodeAt(insertAfter.as_int()));
+  else dest->addChild(target);
+  return geode::Ok(matjson::Object{});
 }
 CCObject* cocosObjOf(matjson::Value& val) {
   if (val.is_null()) return nullptr;
@@ -434,6 +451,7 @@ $execute {
   p->registerFunction("DOM.getBoxModel", &getBoxModel);
   p->registerFunction("DOM.getDocument", &getDocument);
   p->registerFunction("DOM.getNodeForLocation", &getNodeForLocation);
+  p->registerFunction("DOM.moveTo", &moveTo);
   p->registerFunction("DOM.removeAttribute", &removeAttribute);
   p->registerFunction("DOM.setAttribute", &setAttribute);
 }

@@ -31,3 +31,11 @@ public:
 
 void fireEvent(std::string eventName, matjson::Value const &content);
 #define $domainMethod(method) Protocol::FunctionReturnType method(matjson::Object& params)
+
+namespace errors {
+  inline Protocol::FunctionReturnType invalidParameter(std::string msg) {
+    return geode::Err(
+      std::make_tuple(-32602, msg)
+    );
+  }
+}

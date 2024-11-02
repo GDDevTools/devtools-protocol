@@ -1,10 +1,11 @@
-# GD DevTools Protocol Domains Reference
+GD DevTools Protocol Domains Reference (INCOMPLETE)
+---
 
 Except from some derivations (such as `Browser` domain renamed to `Game`), this api is similar to the [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/) so if you're familiar with it then there shouldn't be any issues working with this :D
 
-**Note** that this reference ==only documents what's currently available in the mod itself==, so don't expect every features of CDP available (especially the early releases of the mod)
-
-**Note 2** most of this docs will sound similar to the docs from the aforementioned protocol and it's intended. Don't ask anything about that.
+> **Note** that this reference ==only documents what's currently available in the mod itself==, so don't expect every features of CDP available (especially the early releases of the mod)
+> 
+> **Note 2** most of this docs will sound similar to the docs from the aforementioned protocol and it's intended. Don't ask anything about that.
 
 
 ## `DOM` Domain
