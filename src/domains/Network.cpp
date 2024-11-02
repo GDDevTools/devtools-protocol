@@ -1,18 +1,13 @@
 #include <Geode/Geode.hpp>
 #include <Geode/utils/web.hpp>
-#include <chrono>
 #include "../WS.hpp"
+#include "../stuff.hpp"
 
 void fireNetworkEvent(std::string eventName, matjson::Value const &content) {  fireEvent("Network."+eventName, content);
 };
 
 bool NetworkDomainDisabled = true;
 
-int now() {
-  return std::chrono::duration_cast<std::chrono::seconds>(
-    std::chrono::system_clock::now().time_since_epoch()
-  ).count();
-}
 #define wrSelf geode::utils::web::WebRequest* self
 
 std::map<std::size_t, std::string> responseBody;

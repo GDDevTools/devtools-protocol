@@ -38,4 +38,9 @@ namespace errors {
       std::make_tuple(-32602, msg)
     );
   }
+  inline Protocol::FunctionReturnType internalError(std::string msg) {
+    return geode::Err(
+      std::make_tuple(-32603, msg)
+    );
+  }
 }
