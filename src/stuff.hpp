@@ -27,3 +27,5 @@ inline int now() {
     std::chrono::system_clock::now().time_since_epoch()
   ).count();
 }
+
+GEODE_NOINLINE uintptr_t getModule(const char* module);

@@ -19,7 +19,7 @@ its what you see, you made that super duper excellently!
 
 ## Methods
 
-### DOM.describeNode
+### DOM.`describeNode`
 Describes node given its id, does not require domain to be enabled. Does not start tracking any objects, can be used for automation.
 
 <table>
@@ -52,13 +52,13 @@ Describes node given its id, does not require domain to be enabled. Does not sta
 </tbody>
 </table>
 
-### DOM.disable
+### DOM.`disable`
 Disables DOM agent.
 
-### DOM.enable
+### DOM.`enable`
 Enables DOM agent.
 
-### DOM.getAttributes
+### DOM.`getAttributes`
 Returns attributes for the specified node.  
 
 <table>
@@ -87,7 +87,7 @@ Returns attributes for the specified node.
 </tbody>
 </table>
 
-### DOM.getAttribute
+### DOM.`getAttribute`
 Returns a specific attribute for the specified node.  
 
 <table>
@@ -120,7 +120,7 @@ Returns a specific attribute for the specified node.
 </tbody>
 </table>
 
-### DOM.getBoxModel
+### DOM.`getBoxModel`
 Returns boxes for the given node.
 
 <table>
@@ -149,7 +149,7 @@ Returns boxes for the given node.
 </tbody>
 </table>
 
-### DOM.getDocument
+### DOM.`getDocument`
 Returns the root DOM node (which is the current scene) (and optionally the subtree) to the caller. Implicitly enables the DOM domain events for the current target.
 
 <table>
@@ -178,7 +178,7 @@ Returns the root DOM node (which is the current scene) (and optionally the subtr
 </tbody>
 </table>
 
-### DOM.getNodeForLocation
+### DOM.`getNodeForLocation`
 Returns node id at given location. Depending on whether DOM domain is enabled, nodeId is either returned or not.
 
 <table>
@@ -211,7 +211,7 @@ Returns node id at given location. Depending on whether DOM domain is enabled, n
 </tbody>
 </table>
 
-### DOM.moveTo
+### DOM.`moveTo`
 Moves node into the new container, optionally places it before/after the given anchor.
 > `insertBeforeNodeId` and `insertAfterNodeId` **cannot** both be defined.
 
@@ -254,7 +254,7 @@ Moves node into the new container, optionally places it before/after the given a
 </table>
 
 ## Types 
-### DOM.BoxModel
+### DOM.`BoxModel`
 Box model.  
 Type: **object**
 
@@ -276,12 +276,12 @@ Type: **object**
 </tbody>
 </table>
 
-### DOM.AttributeType
+### DOM.`AttributeType`
 The supported attribute type.  
 Allowed Types: `string, int, bool, array, object, {nodeId: int}`  
 TODO: figure out how to differentiate between Node and object
 
-### DOM.Node
+### DOM.`Node`
 DOM interaction is implemented in terms of mirror objects that represent the actual DOM nodes. DOMNode is a base node mirror type.  
 Type: **object**
 
@@ -315,7 +315,7 @@ Type: **object**
 </tbody>
 </table>
 
-### DOM.NodeId
+### DOM.`NodeId`
 Unique DOM node identifier.  
 In GDP's case, it's the address of the node.  
 Type: **integer**
@@ -324,16 +324,16 @@ Type: **integer**
 held the player's game session hostage
 
 ## Methods
-### Game.close
+### Game.`close`
 Close game gracefully.
 
-### Game.crash
+### Game.`crash`
 Close game gracelessly. (raises an std::runtime_error)
 
-### Game.restart
+### Game.`restart`
 Restart game gracefully.
 
-### Game.getVersion
+### Game.`getVersion`
 Returns version information.
 
 <table>
@@ -363,7 +363,7 @@ Will this be the next macro bot?
 > **NOTE:** Input events are ALWAYS sent 1 frame later because it has to occur on main thread
 
 ## Methods
-### Input.dispatchKeyEvent
+### Input.`dispatchKeyEvent`
 Dispatches a key event to the game.
 
 <table>
@@ -392,7 +392,7 @@ Dispatches a key event to the game.
 </tbody>
 </table>
 
-### Input.dispatchMouseEvent
+### Input.`dispatchMouseEvent`
 Dispatches a mouse event to the page.
 
 <table>
@@ -432,3 +432,48 @@ Dispatches a mouse event to the page.
   </tr>
 </tbody>
 </table>
+
+# `Network` Domain
+Network domain allows tracking network activities of the page. It exposes information about http, data and other requests and responses, their headers, bodies, etc.
+
+## Methods
+### Network.`getResponseBody`
+e
+
+## Events
+### Network.`requestWillBeSent`
+Fired when page is about to send HTTP request.
+<table>
+<thead>
+  <tr>
+    <th colspan="2">Parameters</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>requestId</code></td>
+    <td><strong>integer</strong><br>Request identifier<br>Note that this is only unique across an <code>initiator</code></td>
+  </tr>
+  <tr>
+    <td><code>request</code></td>
+    <td><strong><a href="#networkrequest">Request</a></strong><br>Request data.</td>
+  </tr>
+  <tr>
+    <td><code>timestamp</code></td>
+    <td><strong><a href="#networktimesinceepoch">TimeSinceEpoch</a></strong><br>Timestamp.</td>
+  </tr>
+  <tr>
+    <td><code>initiator</code></td>
+    <td><strong>string</strong><br>Request initiator<br>Allowed Values: <code>cocos, geode</code></td>
+  </tr>
+</tbody>
+</table>
+
+## Types
+### Network.`Request`
+HTTP request data.  
+Type: **object**
+
+### Network.`TimeSinceEpoch`
+UTC time in seconds, counted from January 1, 1970.  
+Type: **integer**
