@@ -1,4 +1,5 @@
 #include "WS.hpp"
+#include "Geode/loader/Loader.hpp"
 //#include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocketServer.h>
 #include <matjson.hpp>
@@ -35,14 +36,17 @@ bool Protocol::init() {
         c.sendText(errorResponseStr(id,-32601,"'"+methodName+"' wasn't found."));
         return;
       }
+      // to be safe
+      geode::queueInMainThread([this,i,&c,id,&j]{
       FunctionReturnType ret = i->second(j["params"].as_object());
-      if (ret.isErr()) {
-        auto err = ret.unwrapErr();
-        c.sendText(errorResponseStr(id, std::get<0>(err), std::get<1>(err)));
+        if (ret.isErr()) {
+          auto err = ret.unwrapErr();
+          c.sendText(errorResponseStr(id, std::get<0>(err), std::get<1>(err)));
+          return;
+        }
+        c.sendText(successResponseStr(id, ret.unwrap()));
         return;
-      }
-      c.sendText(successResponseStr(id, ret.unwrap()));
-      return;
+      });
     }
   });
   ws->disablePerMessageDeflate();

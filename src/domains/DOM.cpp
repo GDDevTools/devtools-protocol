@@ -29,7 +29,6 @@ struct CCNode2 : geode::Modify<CCNode2, CCNode> {
     std::unordered_map<std::string, CCObject*> m_userObjects;
     int depth = 0;
   };
-  /*
   void retain() {
     if (retainCount()==0) s_nodes[nodeIdOf(this)] = this;
     CCNode::retain();
@@ -41,7 +40,6 @@ struct CCNode2 : geode::Modify<CCNode2, CCNode> {
     }
     CCNode::release();
   }
-  */
   // attribs
   void setUserObject(std::string const &id, CCObject *value);
   // dom

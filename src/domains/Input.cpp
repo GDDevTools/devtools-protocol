@@ -1,4 +1,8 @@
 #include "../WS.hpp"
+// clangd is bad
+#include "Geode/cocos/robtop/mouse_dispatcher/CCMouseDispatcher.h"
+#include "Geode/cocos/touch_dispatcher/CCTouchDispatcher.h"
+#include "Geode/utils/cocos.hpp"
 #include <Geode/cocos/CCDirector.h>
 #include <Geode/cocos/robtop/keyboard_dispatcher/CCKeyboardDispatcher.h>
 
