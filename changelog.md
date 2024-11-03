@@ -1,2 +1,2 @@
-# 1.0.0
-- Edit this file to change your mod's changelog.
+# 0.9.7
+Initial release, still figuring out what to add for essential needs.
