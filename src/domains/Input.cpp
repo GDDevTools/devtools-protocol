@@ -132,10 +132,10 @@ $domainMethod(handleCharEvent) {
 
   return geode::Ok(matjson::Object{});
 }
+bool ignoreInputs = false;
 $domainMethod(dispatchKeyEvent) {
-  auto typeV = params["type"];
-  if (typeV.is_null()) {return errors::requiredParameter("type");}
-  auto type = typeV.as_string();
+  if (ignoreInputs) return geode::Ok(matjson::Object{});
+  auto type = params["type"].as_string();
   if (type == "keyDown") return handleKeyDownEvent(params);
   if (type == "keyUp") return handleKeyUpEvent(params);
   if (type == "char") return handleCharEvent(params);
@@ -148,18 +148,11 @@ const std::string mouseButton[8] = {
 int touchId = 0;
 geode::cocos::CCArrayExt<cocos2d::CCTouch*> touches;
 $domainMethod(dispatchMouseEvent) {
-  auto typeV = params.find("type");
-  if (typeV == params.end()) return errors::requiredParameter("type");
-  auto type = typeV->second;
+  if (ignoreInputs) return geode::Ok(matjson::Object{});
+  auto type = params["type"].as_string();
   if (type != "mouseWheel") {
-    float x,y;
-    if (true) {
-      if (params.find("x") == params.end()) return errors::requiredParameter("x");
-      x = params["x"].as_double();
-      if (params.find("y") == params.end()) return errors::requiredParameter("y");
-      y = params["y"].as_double();
-    }
-    if (params.find("button") == params.end()) return errors::requiredParameter("button");
+    float x = params["x"].as_double();
+    float y = params["y"].as_double();
     std::string button = params["button"].as_string();
     int buttonId = std::distance(mouseButton, std::find(mouseButton, mouseButton + 8, button));
 
@@ -177,14 +170,16 @@ $domainMethod(dispatchMouseEvent) {
     touch->setTouchInfo(touchId, x, y);
     auto set = cocos2d::CCSet::create();
     set->addObject(touch);
-    if (type == "mousePressed") {
-      cocos2d::CCDirector::get()->getTouchDispatcher()->touchesBegan(set,new cocos2d::CCEvent());
-    } else if (type == "mouseReleased") {
-      cocos2d::CCDirector::get()->getTouchDispatcher()->touchesEnded(set,new cocos2d::CCEvent());
-      //cocos2d::CCDirector::get()->getTouchDispatcher()->touchesCancelled(set,new cocos2d::CCEvent());
-    } else {
-      cocos2d::CCDirector::get()->getTouchDispatcher()->touchesMoved(set,new cocos2d::CCEvent());
-    }
+    geode::queueInMainThread([type,set]{
+      if (type == "mousePressed") {
+        cocos2d::CCDirector::get()->getTouchDispatcher()->touchesBegan(set,nullptr);
+      } else if (type == "mouseReleased") {
+        cocos2d::CCDirector::get()->getTouchDispatcher()->touchesEnded(set,nullptr);
+        //cocos2d::CCDirector::get()->getTouchDispatcher()->touchesCancelled(set,nullptr);
+      } else {
+        cocos2d::CCDirector::get()->getTouchDispatcher()->touchesMoved(set,nullptr);
+      }
+    });
   } else {
     int x = 0,y = 0;
     if (true) {
@@ -193,14 +188,20 @@ $domainMethod(dispatchMouseEvent) {
       auto y2 = params["deltaY"];
       if (!y2.is_null()) y = y2.as_double();
     }
-    cocos2d::CCDirector::get()->getMouseDispatcher()->dispatchScrollMSG(x,y);
+    geode::queueInMainThread([x,y]{
+      cocos2d::CCDirector::get()->getMouseDispatcher()->dispatchScrollMSG(x,y);
+    });
   }
   return geode::Ok(matjson::Object{});
 }
-
+$domainMethod(setIgnoreInputEvents) {
+  ignoreInputs = params["input"].as_bool();
+  return geode::Ok(matjson::Object{});
+}
 $execute {
   auto p = Protocol::get();
   p->registerFunction("Input.dispatchKeyEvent", &dispatchKeyEvent);
-  p->registerFunction("Input.dispatchMouseEvent", &dispatchMouseEvent);
+  p->registerFunction("Input.dispatchMouseEvent", &dispatchMouseEvent, {"type","x","y","button"});
+  p->registerFunction("Input.setIgnoreInputEvents", &setIgnoreInputEvents, {"input"});
 }
 //{"id":0,"method":"Input.dispatchMouseEvent","params":{"type":"mousePressed","x":284,"y":160}}

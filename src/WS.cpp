@@ -3,6 +3,7 @@
 //#include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocketServer.h>
 #include <matjson.hpp>
+#include "stuff.hpp"
 
 std::shared_ptr<Protocol> prot = nullptr;
 /// theres only one protocol instance for the entire lifetime so
@@ -10,7 +11,7 @@ ix::WebSocketServer* ws;
 
 bool Protocol::init() {
   ix::initNetSystem();
-  ws = new ix::WebSocketServer(1313,"127.0.0.1");
+  ws = new ix::WebSocketServer(1412,"127.0.0.1");
 
   ws->setOnClientMessageCallback([this](std::shared_ptr<ix::ConnectionState> s, ix::WebSocket& c, const ix::WebSocketMessagePtr& msg){
     if (msg->type == ix::WebSocketMessageType::Message || !msg->str.empty()) {
@@ -19,7 +20,13 @@ bool Protocol::init() {
         c.sendText(errorResponseStr(-1,-32602,"Requests must have an ID."));
         return;
       } 
-      int id = j["id"].as_int();
+      int id;
+      auto idOptional = as_optional_of<int>(j["id"]);
+      if (idOptional.has_value()) id = idOptional.value();
+      else {
+        c.sendText(errorResponseStr(-1, -32602, "Invalid 'id' type."));
+        return;
+      }
       if (std::find(usedIds.begin(), usedIds.end(), id) != usedIds.end()) {
         c.sendText(errorResponseStr(id, -32602, "ID already used."));
         return;
@@ -36,17 +43,22 @@ bool Protocol::init() {
         c.sendText(errorResponseStr(id,-32601,"'"+methodName+"' wasn't found."));
         return;
       }
-      // to be safe
-      geode::queueInMainThread([this,i,&c,id,&j]{
-      FunctionReturnType ret = i->second(j["params"].as_object());
-        if (ret.isErr()) {
-          auto err = ret.unwrapErr();
-          c.sendText(errorResponseStr(id, std::get<0>(err), std::get<1>(err)));
+      auto params = j["params"].as_object();
+      for (auto& p : i->second.second) {
+        auto it = params.find(p);
+        if (it!=params.end()) {
+          c.sendText(errorResponseStr(id,-32602,"Required parameter '"+p+"' not present."));
           return;
         }
-        c.sendText(successResponseStr(id, ret.unwrap()));
+      }
+      FunctionReturnType ret = i->second.first(params);
+      if (ret.isErr()) {
+        auto err = ret.unwrapErr();
+        c.sendText(errorResponseStr(id, std::get<0>(err), std::get<1>(err)));
         return;
-      });
+      }
+      c.sendText(successResponseStr(id, ret.unwrap()));
+      return;
     }
   });
   ws->disablePerMessageDeflate();
@@ -93,8 +105,12 @@ void Protocol::broadcastEvent(std::string eventName, matjson::Value const& conte
   }
 }
 
-void Protocol::registerFunction(std::string funcName, decltype(Protocol::functions)::value_type::second_type f) { 
-  functions.insert_or_assign(funcName, f);
+void Protocol::registerFunction(
+  std::string funcName, 
+  decltype(Protocol::functions)::value_type::second_type::first_type f,
+  decltype(Protocol::functions)::value_type::second_type::second_type requiredParams
+) { 
+  functions.insert_or_assign(funcName, std::make_pair(f,requiredParams));
 };
 
 void fireEvent(std::string eventName, matjson::Value const &content) {

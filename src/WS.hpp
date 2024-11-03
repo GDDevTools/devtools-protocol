@@ -15,7 +15,15 @@ public:
   bool running = false;
 private:
   std::vector<int> usedIds;
-  std::unordered_map<std::string, std::function<FunctionReturnType(matjson::Object&)>> functions;
+  std::unordered_map<
+    std::string, // method name
+    std::pair<
+      std::function<FunctionReturnType(matjson::Object&)>, // function
+      std::vector< // required parameters
+        std::string // name
+      >
+    >
+  > functions;
 
   std::string successResponseStr(int id, matjson::Value const& resp);
   std::string errorResponseStr(int id, int code, std::string message);
@@ -24,13 +32,19 @@ public:
   static std::shared_ptr<Protocol> get();
 
   void broadcastEvent(std::string eventName, matjson::Value const& content);
-  void registerFunction(std::string funcName, decltype(functions)::value_type::second_type function);
+  void registerFunction(
+    std::string funcName, 
+    decltype(functions)::value_type::second_type::first_type function,
+    decltype(functions)::value_type::second_type::second_type requiredParams = {}
+  );
   ~Protocol() {close();};
   void close();
 };
 
 void fireEvent(std::string eventName, matjson::Value const &content);
+
 #define $domainMethod(method) Protocol::FunctionReturnType method(matjson::Object& params)
+#define $domainAsyncMethod(method) void method(matjson::Object& params, void(Protocol::FunctionReturnType) finish)
 
 namespace errors {
   inline Protocol::FunctionReturnType invalidParameter(std::string msg) {

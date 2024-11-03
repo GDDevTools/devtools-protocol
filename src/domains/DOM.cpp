@@ -220,18 +220,20 @@ void CCNode2::setUserObject(std::string const &id, CCObject *value) {
 
 
 #include <Geode/modify/CCDirector.hpp>
-class $modify(CCDirector) {
-  void replaceScene(CCScene* scene) {
-    CCDirector::replaceScene(scene);
+struct directorhook : geode::Modify<directorhook, CCDirector> {
+  bool replaceScene(CCScene* scene) {
+    bool ret = CCDirector::replaceScene(scene);
     if (!geode::cast::typeinfo_cast<CCTransitionScene*>(scene)) {
       fireDOMEvent("documentUpdated");
-    }
+    };
+    return ret;
   }
-  void pushScene(CCScene* scene) {
-    CCDirector::pushScene(scene);
+  bool pushScene(CCScene* scene) {
+    bool ret = CCDirector::pushScene(scene);
     if (!geode::cast::typeinfo_cast<CCTransitionScene*>(scene)) {
       fireDOMEvent("documentUpdated");
     }
+    return ret;
   }
 };
 
@@ -454,15 +456,15 @@ $domainMethod(removeAttribute) {
 
 $execute {
   auto p = Protocol::get();
-  p->registerFunction("DOM.describeNode", &describeNode);
+  p->registerFunction("DOM.describeNode", &describeNode, {"nodeId"});
   p->registerFunction("DOM.disable", &disableDOM);
   p->registerFunction("DOM.enable", &enableDOM);
-  p->registerFunction("DOM.getAttributes", &getAttributes);
-  p->registerFunction("DOM.getAttribute", &getAttribute);
-  p->registerFunction("DOM.getBoxModel", &getBoxModel);
+  p->registerFunction("DOM.getAttributes", &getAttributes, {"nodeId"});
+  p->registerFunction("DOM.getAttribute", &getAttribute, {"nodeId", "name"});
+  p->registerFunction("DOM.getBoxModel", &getBoxModel, {"nodeId"});
   p->registerFunction("DOM.getDocument", &getDocument);
-  p->registerFunction("DOM.getNodeForLocation", &getNodeForLocation);
-  p->registerFunction("DOM.moveTo", &moveTo);
-  p->registerFunction("DOM.removeAttribute", &removeAttribute);
-  p->registerFunction("DOM.setAttribute", &setAttribute);
+  p->registerFunction("DOM.getNodeForLocation", &getNodeForLocation, {"nodeId", "x", "y"});
+  p->registerFunction("DOM.moveTo", &moveTo, {"nodeId","targetNodeId"});
+  p->registerFunction("DOM.removeAttribute", &removeAttribute, {"nodeId","name"});
+  p->registerFunction("DOM.setAttribute", &setAttribute, {"nodeId","name","value"});
 }

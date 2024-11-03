@@ -8,7 +8,7 @@
 	},
 	"id": "henrysck075.puppeteer",
 	"name": "GD DevTools Protocol",
-	"version": "v1.0.0",
+	"version": "v0.9.7",
 	"developer": "Honoka Kousaka",
 	"description": "fake cocos python bindings' backend"
 }

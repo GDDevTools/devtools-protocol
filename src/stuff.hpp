@@ -11,6 +11,13 @@ int nodeIdOf(CCNode* node);
 void unallocateNodeId(CCNode* node);
 
 template<typename T>
+// as_optional_of<Type>()
+std::optional<T> as_optional_of(matjson::Value const& v) {
+  if (v.is<T>()) return std::optional(v.as<T>());
+  return std::nullopt;
+}
+
+template<typename T>
 T as_type_or(matjson::Value const& v, T d) {
   if (v.is<T>()) return v.as<T>();
   return d;

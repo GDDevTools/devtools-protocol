@@ -22,11 +22,12 @@ its what you see, you made that super duper excellently!
 ### DOM.describeNode
 Describes node given its id, does not require domain to be enabled. Does not start tracking any objects, can be used for automation.
 
-
-<table><thead>
+<table>
+<thead>
   <tr>
     <th colspan="2">Parameters</th>
-  </tr></thead>
+  </tr>
+</thead>
 <tbody>
   <tr>
     <td><code>nodeId</code></td>
@@ -37,12 +38,12 @@ Describes node given its id, does not require domain to be enabled. Does not sta
     <td><strong>integer</strong><br>The maximum depth at which children should be retrieved, defaults to 1. Use -1 for the entire subtree or provide an integer larger than 0.</td>
   </tr>
 </tbody>
-</table>
 
-<table><thead>
+<thead>
   <tr>
     <th colspan="2">Return Object</th>
-  </tr></thead>
+  </tr>
+</thead>
 <tbody>
   <tr>
     <td><code>node</code></td>
@@ -60,22 +61,24 @@ Enables DOM agent.
 ### DOM.getAttributes
 Returns attributes for the specified node.  
 
-<table><thead>
+<table>
+<thead>
   <tr>
     <th colspan="2">Parameters</th>
-  </tr></thead>
+  </tr>
+</thead>
 <tbody>
   <tr>
     <td><code>nodeId</code></td>
     <td><strong><a href="#domnodeid">NodeID</a></strong><br>Id of the node to retrieve attributes for.</td>
   </tr>
 </tbody>
-</table>
 
-<table><thead>
+<thead>
   <tr>
     <th colspan="2">Return Object</th>
-  </tr></thead>
+  </tr>
+</thead>
 <tbody>
   <tr>
     <td><code>attributes</code></td>
@@ -87,10 +90,12 @@ Returns attributes for the specified node.
 ### DOM.getAttribute
 Returns a specific attribute for the specified node.  
 
-<table><thead>
+<table>
+<thead>
   <tr>
     <th colspan="2">Parameters</th>
-  </tr></thead>
+  </tr>
+</thead>
 <tbody>
   <tr>
     <td><code>nodeId</code></td>
@@ -101,12 +106,12 @@ Returns a specific attribute for the specified node.
     <td><strong>string</strong><br>Name of the attribute.</td>
   </tr>
 </tbody>
-</table>
 
-<table><thead>
+<thead>
   <tr>
     <th colspan="2">Return Object</th>
-  </tr></thead>
+  </tr>
+</thead>
 <tbody>
   <tr>
     <td><code>value</code></td>
@@ -118,22 +123,24 @@ Returns a specific attribute for the specified node.
 ### DOM.getBoxModel
 Returns boxes for the given node.
 
-<table><thead>
+<table>
+<thead>
   <tr>
     <th colspan="2">Parameters</th>
-  </tr></thead>
+  </tr>
+</thead>
 <tbody>
   <tr>
     <td><code>nodeId</code></td>
     <td><strong><a href="#domnodeid">NodeID</a></strong><br>Identifier of the node.</td>
   </tr>
 </tbody>
-</table>
 
-<table><thead>
+<thead>
   <tr>
     <th colspan="2">Return Object</th>
-  </tr></thead>
+  </tr>
+</thead>
 <tbody>
   <tr>
     <td><code>model</code></td>
@@ -145,22 +152,24 @@ Returns boxes for the given node.
 ### DOM.getDocument
 Returns the root DOM node (which is the current scene) (and optionally the subtree) to the caller. Implicitly enables the DOM domain events for the current target.
 
-<table><thead>
+<table>
+<thead>
   <tr>
     <th colspan="2">Parameters</th>
-  </tr></thead>
+  </tr>
+</thead>
 <tbody>
   <tr>
     <td><code>depth</code></td>
     <td><strong>integer</strong><br>The maximum depth at which children should be retrieved, defaults to 1. Use -1 for the entire subtree or provide an integer larger than 0.</td>
   </tr>
 </tbody>
-</table>
 
-<table><thead>
+<thead>
   <tr>
     <th colspan="2">Return Object</th>
-  </tr></thead>
+  </tr>
+</thead>
 <tbody>
   <tr>
     <td><code>node</code></td>
@@ -172,10 +181,12 @@ Returns the root DOM node (which is the current scene) (and optionally the subtr
 ### DOM.getNodeForLocation
 Returns node id at given location. Depending on whether DOM domain is enabled, nodeId is either returned or not.
 
-<table><thead>
+<table>
+<thead>
   <tr>
     <th colspan="2">Parameters</th>
-  </tr></thead>
+  </tr>
+</thead>
 <tbody>
   <tr>
     <td><code>x</code></td>
@@ -186,12 +197,54 @@ Returns node id at given location. Depending on whether DOM domain is enabled, n
     <td><strong>integer</strong><br>Y coordinate.</td>
   </tr>
 </tbody>
-</table>
 
-<table><thead>
+<thead>
   <tr>
     <th colspan="2">Return Object</th>
-  </tr></thead>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeID</a></strong><br>Id of the node at given coordinates, only when enabled and requested document.</td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.moveTo
+Moves node into the new container, optionally places it before/after the given anchor.
+> `insertBeforeNodeId` and `insertAfterNodeId` **cannot** both be defined.
+
+<table>
+<thead>
+  <tr>
+    <th colspan="2">Parameters</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong><br>Id of the node to move.</td>
+  </tr>
+  <tr>
+    <td><code>targetNodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong><br>Id of the element to drop the moved node into.</td>
+  </tr>
+  <tr>
+    <td><code>insertBeforeNodeId</code><br>(optional)</td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong><br>Drop node before this one (if absent, the moved node becomes the last child of <code>targetNodeId</code>).</td>
+  </tr>
+  <tr>
+    <td><code>insertAfterNodeId</code><br>(optional)</td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong><br>Drop node after this one (if absent, the moved node becomes the last child of <code>targetNodeId</code>).</td>
+  </tr>
+</tbody>
+
+<thead>
+  <tr>
+    <th colspan="2">Return Object</th>
+  </tr>
+</thead>
 <tbody>
   <tr>
     <td><code>nodeId</code></td>
@@ -205,10 +258,12 @@ Returns node id at given location. Depending on whether DOM domain is enabled, n
 Box model.  
 Type: **object**
 
-<table><thead>
+<table>
+<thead>
   <tr>
     <th colspan="2">Properties</th>
-  </tr></thead>
+  </tr>
+</thead>
 <tbody>
   <tr>
     <td><code>width</code></td>
@@ -230,10 +285,12 @@ TODO: figure out how to differentiate between Node and object
 DOM interaction is implemented in terms of mirror objects that represent the actual DOM nodes. DOMNode is a base node mirror type.  
 Type: **object**
 
-<table><thead>
+<table>
+<thead>
   <tr>
     <th colspan="2">Properties</th>
-  </tr></thead>
+  </tr>
+</thead>
 <tbody>
   <tr>
     <td><code>nodeId</code></td>
@@ -279,10 +336,12 @@ Restart game gracefully.
 ### Game.getVersion
 Returns version information.
 
-<table><thead>
+<table>
+<thead>
   <tr>
     <th colspan="2">Return Object</th>
-  </tr></thead>
+  </tr>
+</thead>
 <tbody>
   <tr>
     <td><code>protocolVersion</code></td>
@@ -301,15 +360,18 @@ Returns version information.
 
 # `Input` Domain
 Will this be the next macro bot?
+> **NOTE:** Input events are ALWAYS sent 1 frame later because it has to occur on main thread
 
 ## Methods
 ### Input.dispatchKeyEvent
 Dispatches a key event to the game.
 
-<table><thead>
+<table>
+<thead>
   <tr>
     <th colspan="2">Parameters</th>
-  </tr></thead>
+  </tr>
+</thead>
 <tbody>
   <tr>
     <td><code>type</code></td>
@@ -326,6 +388,47 @@ Dispatches a key event to the game.
   <tr>
     <td><code>code</code><br>(optional)</td>
     <td><strong>char</strong><br>just a character. might change in future but this is reasonable.<br>only supports some ascii characters defined in geode enumKeyCodes</td>
+  </tr>
+</tbody>
+</table>
+
+### Input.dispatchMouseEvent
+Dispatches a mouse event to the page.
+
+<table>
+<thead>
+  <tr>
+    <th colspan="2">Parameters</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>type</code></td>
+    <td><strong>string</strong><br>Type of the key event.<br>Allowed values: `keyDown, keyUp, char`</td>
+  </tr>
+  <tr>
+    <td><code>x</code></td>
+    <td><strong>integer</strong><br>X coordinate of the event relative to the main frame's viewport in Cocos2d point.</td>
+  </tr>
+  <tr>
+    <td><code>y</code></td>
+    <td><strong>integer</strong><br>Y coordinate of the event relative to the main frame's viewport in Cocos2d point (which is 0 in the bottom and screen height on the top).</td>
+  </tr>
+  <tr>
+    <td><code>modifiers</code><br>(optional)</td>
+    <td><strong>integer</strong><br>Bit field representing pressed modifier keys. Alt=1, Ctrl=2, Meta/Command=4, Shift=8 (default: 0).</td>
+  </tr>
+  <tr>
+    <td><code>button</code></td>
+    <td><strong>string</strong><br>Mouse button (default: "none").<br>Allowed Values: <code>none, left, middle, right, back, forward</code></td>
+  </tr>
+  <tr>
+    <td><code>deltaX</code><br>(optional)</td>
+    <td><strong>integer</strong><br>X delta in Cocos2d point for mouse wheel event (default: 0).</td>
+  </tr>
+  <tr>
+    <td><code>deltaY</code><br>(optional)</td>
+    <td><strong>integer</strong><br>Y delta in Cocos2d point for mouse wheel event (default: 0).</td>
   </tr>
 </tbody>
 </table>
