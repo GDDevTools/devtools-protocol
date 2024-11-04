@@ -77,6 +77,7 @@ geode::utils::web::WebTask send(wrSelf, std::string_view method, std::string_vie
 geode::Hook* wrSendHook;
 #pragma endregion
 
+// this abomination is untested
 #pragma region Cocos2d HttpClient
 
 // There might be like 5 response handler function in gd but we have to 
