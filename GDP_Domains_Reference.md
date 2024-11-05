@@ -13,9 +13,7 @@ Except from some derivations (such as `Browser` domain renamed to `Game`), this 
 </style>
 
 # `DOM` Domain
-its what you see, you made that super duper excellently!  
-(thats the cocos2d node tree)  
-(node ids is actually the address of the node, the more you know)  
+This domain exposes DOM read/write operations. Each DOM Node is represented with its mirror object that has an `id`. This `id` can be used to get additional information on the Node, and more. It is important that client receives DOM events only for the nodes that are known to the client. Backend keeps track of the nodes that were sent to the client and never sends the same node twice. It is client's responsibility to collect information about the nodes that were sent to the client.
 
 ## Methods
 
@@ -254,6 +252,11 @@ Moves node into the new container, optionally places it before/after the given a
 </table>
 
 ## Types 
+### DOM.`AttributeType`
+The supported attribute type.  
+Allowed Types: `string, int, bool, array, object`  
+TODO: figure out how to differentiate between Node and object
+
 ### DOM.`BoxModel`
 Box model.  
 Type: **object**
@@ -276,11 +279,6 @@ Type: **object**
 </tbody>
 </table>
 
-### DOM.`AttributeType`
-The supported attribute type.  
-Allowed Types: `string, int, bool, array, object, {nodeId: int}`  
-TODO: figure out how to differentiate between Node and object
-
 ### DOM.`Node`
 DOM interaction is implemented in terms of mirror objects that represent the actual DOM nodes. DOMNode is a base node mirror type.  
 Type: **object**
@@ -302,11 +300,11 @@ Type: **object**
   </tr>
   <tr>
     <td><code>childNodeCount</code></td>
-    <td><strong>integer</strong><br>The id of the parent node if any.</td>
+    <td><strong>integer</strong><br>Child count for this node.</td>
   </tr>
   <tr>
     <td><code>children</code></td>
-    <td><strong>array[<a href="#domnode">Node</a>]</strong><br>TChild nodes of this node when requested with children.</td>
+    <td><strong>array[<a href="#domnode">Node</a>]</strong><br>Child nodes of this node when requested with children.</td>
   </tr>
   <tr>
     <td><code>attributes</code></td>

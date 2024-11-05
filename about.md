@@ -16,11 +16,14 @@ An offline copy of it can be found in the mod's `.geode` file, under `GDP_Domain
 In the future I might add the ability to test domain methods in-game, but for now, https://tryitands.ee
 
 # Frequently Asked Questions
+## What's the port
+1412
+
 ## How is the protocol defined?
 idk i just did
 
 ## Can I get the protocol as JSON?
-no
+yeah just send the "getProtocols" command
 
 ## Does the protocol support multiple simultaneous clients?
 I haven't tested it yet but I think if IXWebSocket supports it then yeah you can

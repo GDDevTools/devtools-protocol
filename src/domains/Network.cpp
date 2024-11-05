@@ -4,6 +4,7 @@
 #include "../WS.hpp"
 #include "../stuff.hpp"
 
+
 void fireNetworkEvent(std::string eventName, matjson::Value const &content) {  
   fireEvent("Network."+eventName, content);
 };
@@ -77,6 +78,7 @@ geode::utils::web::WebTask send(wrSelf, std::string_view method, std::string_vie
 geode::Hook* wrSendHook;
 #pragma endregion
 
+/*
 // this abomination is untested
 #pragma region Cocos2d HttpClient
 
@@ -215,16 +217,18 @@ $execute {
 
 #pragma endregion
 
+*/
+
 $domainMethod(disableNetwork) {
   NetworkDomainDisabled = true;
   if (wrSendHook) wrSendHook->disable();
-  if (ccDispatchHook) ccDispatchHook->disable();
+  //if (ccDispatchHook) ccDispatchHook->disable();
   return geode::Ok(matjson::Object{});
 }
 $domainMethod(enableNetwork) {
   NetworkDomainDisabled = false;
   if (wrSendHook) wrSendHook->enable();
-  if (ccDispatchHook) ccDispatchHook->enable();
+  //if (ccDispatchHook) ccDispatchHook->enable();
   return geode::Ok(matjson::Object{});
 }
 $domainMethod(getRequestPostData) {
