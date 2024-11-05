@@ -433,7 +433,7 @@ Dispatches a mouse event to the page.
 </tbody>
 </table>
 
-# `Network` Domain
+# `Network` Domain (Unavailable)
 Network domain allows tracking network activities of the page. It exposes information about http, data and other requests and responses, their headers, bodies, etc.
 
 ## Methods

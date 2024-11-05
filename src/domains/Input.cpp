@@ -2,7 +2,9 @@
 // clangd is bad
 #include "Geode/cocos/robtop/mouse_dispatcher/CCMouseDispatcher.h"
 #include "Geode/cocos/touch_dispatcher/CCTouchDispatcher.h"
-#include "Geode/utils/cocos.hpp"
+#include "stuff.hpp"
+#include <Geode/utils/cocos.hpp>
+#include <Geode/loader/Loader.hpp>
 #include <Geode/cocos/CCDirector.h>
 #include <Geode/cocos/robtop/keyboard_dispatcher/CCKeyboardDispatcher.h>
 
@@ -71,12 +73,15 @@ $domainMethod(handleKeyDownEvent) {
       disp->getCommandKeyPressed() || !bit(mod,4)
     );
   }
-  auto codeV = params["code"];
-  if (codeV.is_string()) {
-    disp->dispatchKeyboardMSG(
-      keyEnumForChar(std::tolower(codeV.as_string()[0])),
-      true, false
-    );
+  auto code = as_optional_of<std::string>(params["code"]);
+  if (code.has_value()) {
+    auto j = code.value();
+    geode::queueInMainThread([j,disp]{
+      disp->dispatchKeyboardMSG(
+        keyEnumForChar(std::tolower(j[0])),
+        true, false
+      );
+    });
   }
   return geode::Ok(matjson::Object{});
 }
@@ -92,12 +97,15 @@ $domainMethod(handleKeyUpEvent) {
       disp->getCommandKeyPressed() && !bit(mod,4)
     );
   }
-  auto codeV = params["code"];
-  if (codeV.is_string()) {
+  auto code = as_optional_of<std::string>(params["code"]);
+  if (code.has_value()) {
+    auto j = code.value();
+    geode::queueInMainThread([j,disp]{
     disp->dispatchKeyboardMSG(
-      keyEnumForChar(std::tolower(codeV.as_string()[0])),
+      keyEnumForChar(std::tolower(j[0])),
       false, false
     );
+    });
   }
   return geode::Ok(matjson::Object{});
 }
@@ -119,16 +127,18 @@ $domainMethod(handleCharEvent) {
     );
   }
 
-  auto codeV = params["code"];
-  if (codeV.is_string()) {
-    for (char c : codeV.as_string()) {
-      disp->dispatchKeyboardMSG(
-        keyEnumForChar(std::tolower(c)),
-        false, false
-      );
+  auto code = as_optional_of<std::string>(params["code"]);
+  geode::queueInMainThread([code,disp,shift,alt,ctrl,cmd]{
+    if (code.has_value()) {
+      for (char c : code.value()) {
+        disp->dispatchKeyboardMSG(
+          keyEnumForChar(std::tolower(c)),
+          false, false
+        );
+      }
     }
-  }
-  disp->updateModifierKeys(shift,ctrl,alt,cmd);
+    disp->updateModifierKeys(shift,ctrl,alt,cmd);
+  });
 
   return geode::Ok(matjson::Object{});
 }

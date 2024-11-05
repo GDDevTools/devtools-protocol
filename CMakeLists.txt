@@ -12,6 +12,7 @@ project(Puppeteer VERSION 1.0.0)
 
 file(GLOB_RECURSE src src/*.cpp)
 file(GLOB_RECURSE incl src/*.hpp)
+message(DEBUG src)
 add_library(${PROJECT_NAME} SHARED
     ${src}
     ${incl}

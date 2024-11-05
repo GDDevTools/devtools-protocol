@@ -14,13 +14,16 @@ inline void fireDOMEvent(std::string eventName, matjson::Object const& content =
 
 static std::unordered_map<int, CCNode*> s_nodes;
 
-CCNode* getNodeAt(int addr) {
-  if (s_nodes.find(addr)!=s_nodes.end()) {
-    return s_nodes[addr];
+CCNode* getNodeAt(int id) {
+  if (id < 0) return nullptr;
+  if (s_nodes.find(id)!=s_nodes.end()) {
+    return s_nodes[id];
   } else {
     return nullptr;
   }
 }
+
+int highestNodeId = 0;
 
 #include <Geode/modify/CCNode.hpp>
 struct CCNode2 : geode::Modify<CCNode2, CCNode> {
@@ -28,15 +31,19 @@ struct CCNode2 : geode::Modify<CCNode2, CCNode> {
     // a copy of the thing from GeodeNodeMetadata
     std::unordered_map<std::string, CCObject*> m_userObjects;
     int depth = 0;
+    int nodeId = 0;
   };
+  void constructor() {
+    cocos2d::CCNode();
+    m_fields->nodeId = ++highestNodeId;
+  }
   void retain() {
-    if (retainCount()==0) s_nodes[nodeIdOf(this)] = this;
+    if (retainCount()==0) s_nodes[m_fields->nodeId] = this;
     CCNode::retain();
   }
   void release() {
     if (retainCount()==1) {
-      s_nodes.erase(nodeIdOf(this));
-      unallocateNodeId(this);
+      s_nodes.erase(m_fields->nodeId);
     }
     CCNode::release();
   }
@@ -60,7 +67,7 @@ struct CCNode2 : geode::Modify<CCNode2, CCNode> {
   void fireChildCountEvent() {
     if (DOMDomainDisabled) return;
     fireDOMEvent("childNodeCountUpdated", {
-      {"nodeId",nodeIdOf(this)}, 
+      {"nodeId",m_fields->nodeId}, 
       {"childNodeCount",getChildrenCount()}
     });
   }
@@ -154,6 +161,10 @@ matjson::Value jsonValueOf(CCObject* obj) {
   return "CCObject (unsupported)";
 };
 
+int nodeIdOf(CCNode* n) {
+  return static_cast<CCNode2*>(n)->m_fields->nodeId;
+}
+
 DOMNode::DOMNode(CCNode *node, int depth)
   : nodeId(nodeIdOf(node)), parentId(nodeIdOf(node)), childNodeCount(node->getChildrenCount()) {
   children.reserve(childNodeCount);
@@ -238,7 +249,7 @@ struct directorhook : geode::Modify<directorhook, CCDirector> {
 };
 
 $domainMethod(describeNode) {
-  CCNode* node = getNodeAt(params["nodeId"].as_int()); 
+  CCNode* node = getNodeAt(as_optional_of<int>(params["nodeId"]).value_or(0)); 
   if (node) {
     int depth = 1;
     if (!params["depth"].is_null()) {
@@ -262,7 +273,7 @@ $domainMethod(enableDOM) {
   return geode::Ok(matjson::Object{});
 }
 $domainMethod(getAttributes) {
-  CCNode* node = getNodeAt(params["nodeId"].as_int()); 
+  CCNode* node = getNodeAt(as_optional_of<int>(params["nodeId"]).value_or(0)); 
   if (node) {
     matjson::Object attributes;
     auto modify = static_cast<CCNode2*>(node);
@@ -280,7 +291,7 @@ $domainMethod(getAttributes) {
   }
 }
 $domainMethod(getAttribute) {
-  CCNode* node = getNodeAt(params["nodeId"].as_int()); 
+  CCNode* node = getNodeAt(as_optional_of<int>(params["nodeId"]).value_or(0)); 
   if (node) {
     return geode::Ok(matjson::Object{
       {"value", jsonValueOf(node->getUserObject(params["name"].as_string()))}
@@ -292,7 +303,7 @@ $domainMethod(getAttribute) {
   }
 }
 $domainMethod(getBoxModel) {
-  CCNode* node = getNodeAt(params["nodeId"].as_int()); 
+  CCNode* node = getNodeAt(as_optional_of<int>(params["nodeId"]).value_or(0)); 
   if (node) {
     return geode::Ok(matjson::Object{
       {"width", node->CCNode::getContentSize().width},
@@ -373,24 +384,24 @@ $domainMethod(moveTo) {
   int targetId = 0;
   if (true) {
     auto v = params["nodeId"];
-    if (v.is_null()) return errors::invalidParameter("'nodeId' not provided.");
+    if (!v.is_number()) return errors::invalidParameter("Invalid 'nodeId' type.");
     targetId = v.as_int();
   }
   auto destId = 0;
   if (true) {
     auto v = params["targetNodeId"];
-    if (v.is_null()) return errors::invalidParameter("'targetNodeId' not provided.");
+    if (!v.is_number()) return errors::invalidParameter("Invalid 'targetNodeId' type..");
     destId = v.as_int();
   }
   if (
-    !params["insertBeforeNodeId"].is_null()
+    !params.contains("insertBeforeNodeId")
     &&
-    !params["insertAfterNodeId"].is_null()
+    !params.contains("insertAfterNodeId")
   ){
     return errors::invalidParameter("'insertBeforeNodeId' and 'insertAfterNodeId' cannot both be defined.");
   }
-  auto beforeId = as_type_or<int>(params["insertBeforeNodeId"],-1);
-  auto afterId = as_type_or<int>(params["insertAfterNodeId"],-1);
+  auto beforeId = as_optional_of<int>(params["insertBeforeNodeId"]);
+  auto afterId = as_optional_of<int>(params["insertAfterNodeId"]);
 
   // node check
   auto target = getNodeAt(targetId);
@@ -407,14 +418,33 @@ $domainMethod(moveTo) {
       destId
     ));
   }
-  auto insertBefore = params["insertBeforeNodeId"];
-  auto insertAfter = params["insertAfterNodeId"];
-  if (!insertBefore.is_null())
-  dest->insertBefore(target, getNodeAt(insertBefore.as_int()));
-  else if (!insertAfter.is_null())
-  dest->insertAfter(target, getNodeAt(insertAfter.as_int()));
+  if (!beforeId.has_value())
+  dest->insertBefore(target, getNodeAt(beforeId.value()));
+  else if (!afterId.has_value())
+  dest->insertAfter(target, getNodeAt(afterId.value()));
   else dest->addChild(target);
   return geode::Ok(matjson::Object{});
+}
+$domainMethod(removeNode) { 
+  CCNode* node = getNodeAt(as_optional_of<int>(params["nodeId"]).value_or(0)); 
+  if (node) {
+    geode::queueInMainThread([node]{
+      node->removeFromParentAndCleanup(false);
+    });
+  }
+  return geode::Ok(matjson::Object{});
+}
+$domainMethod(querySelector) { 
+  CCNode* node = getNodeAt(as_optional_of<int>(params["nodeId"]).value_or(0)); 
+  if (node) {
+    if (auto ret = node->querySelector(params["selector"].as_string())) {
+      return geode::Ok(matjson::Object{
+        {"node", DOMNode(ret)}
+      });  
+    }
+    return errors::invalidParameter("idk");
+  }
+  return errors::internalError("Node doesn't exist.");
 }
 CCObject* cocosObjOf(matjson::Value& val) {
   if (val.is_null()) return nullptr;
@@ -436,7 +466,7 @@ CCObject* cocosObjOf(matjson::Value& val) {
   return nullptr;
 }
 $domainMethod(setAttribute) {
-  CCNode* node = getNodeAt(params["nodeId"].as_int()); 
+  CCNode* node = getNodeAt(as_optional_of<int>(params["nodeId"]).value_or(0)); 
   if (node) {
     node->setUserObject(
       params["name"].as_string(),
@@ -465,6 +495,8 @@ $execute {
   p->registerFunction("DOM.getDocument", &getDocument);
   p->registerFunction("DOM.getNodeForLocation", &getNodeForLocation, {"nodeId", "x", "y"});
   p->registerFunction("DOM.moveTo", &moveTo, {"nodeId","targetNodeId"});
+  p->registerFunction("DOM.removeNode", &removeNode, {"nodeId"});
+  p->registerFunction("DOM.querySelector", &querySelector, {"nodeId","selector"});
   p->registerFunction("DOM.removeAttribute", &removeAttribute, {"nodeId","name"});
   p->registerFunction("DOM.setAttribute", &setAttribute, {"nodeId","name","value"});
 }

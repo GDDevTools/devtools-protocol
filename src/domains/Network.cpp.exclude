@@ -176,7 +176,7 @@ class $modify(cocos2d::extension::CCHttpClient) {
       matjson::Object headers;
       if (true) {
         auto headersStr = request->getHeaders();
-        for (auto& h : headersStr) {
+        for (std::string& h : headersStr) {
           auto seppos = h.find(": ");
           bool cs = true;
           if (seppos == std::string::npos) {
