@@ -129,20 +129,9 @@ matjson::Value jsonValueOf(CCObject* obj) {
   if (j != nullptr) {
     return j->getValue();
   }
+#ifndef GEODE_IS_MACOS/
   else if (auto idk = geode::cast::typeinfo_cast<CCString*>(obj)) {
     return std::string(idk->getCString());
-  }
-  else if (auto ni = geode::cast::typeinfo_cast<CCInteger*>(obj)) {
-    return ni->getValue();
-  }
-  else if (auto m = geode::cast::typeinfo_cast<CCArray*>(obj)) {
-    matjson::Array arr;
-    arr.reserve(m->count());
-    CCObject* o;
-    CCARRAY_FOREACH(m, o) {
-      arr.push_back(jsonValueOf(o));
-    }
-    return arr;
   }
   else if (auto dict = geode::cast::typeinfo_cast<CCDictionary*>(obj)) {
     matjson::Object d;
@@ -154,6 +143,19 @@ matjson::Value jsonValueOf(CCObject* obj) {
       ));
     }
     return d;
+  }
+#endif
+  else if (auto ni = geode::cast::typeinfo_cast<CCInteger*>(obj)) {
+    return ni->getValue();
+  }
+  else if (auto m = geode::cast::typeinfo_cast<CCArray*>(obj)) {
+    matjson::Array arr;
+    arr.reserve(m->count());
+    CCObject* o;
+    CCARRAY_FOREACH(m, o) {
+      arr.push_back(jsonValueOf(o));
+    }
+    return arr;
   }
   else if (auto n = geode::cast::typeinfo_cast<CCNode*>(obj)) {
     return DOMNode(n);
