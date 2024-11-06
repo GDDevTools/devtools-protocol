@@ -32,10 +32,5 @@ setup_geode_mod(${PROJECT_NAME})
 CPMAddPackage("gh:machinezone/IXWebSocket#c5a02f1")
 target_link_libraries(${PROJECT_NAME} ixwebsocket)
 
-if (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "GNU")
-    target_compile_options(ixwebsocket PRIVATE --target=i686-pc-windows-msvc)
-    target_link_options(ixwebsocket PRIVATE --target=i686-pc-windows-msvc)
-endif()
-
 # idk what this does
 target_include_directories(${PROJECT_NAME} PRIVATE src)
