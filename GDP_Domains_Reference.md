@@ -238,18 +238,30 @@ Moves node into the new container, optionally places it before/after the given a
   </tr>
 </tbody>
 
+</table>
+
+### DOM.`setBoxModel`
+only work on windows  
+sorry guys
+
+<table>
 <thead>
   <tr>
-    <th colspan="2">Return Object</th>
+    <th colspan="2">Parameters</th>
   </tr>
 </thead>
 <tbody>
   <tr>
     <td><code>nodeId</code></td>
-    <td><strong><a href="#domnodeid">NodeID</a></strong><br>Id of the node at given coordinates, only when enabled and requested document.</td>
+    <td><strong><a href="#domnodeid">NodeID</a></strong><br>Identifier of the node.</td>
+  </tr>
+  <tr>
+    <td><code>model</code></td>
+    <td><strong><a href="#domboxmodel">BoxModel</a></strong><br>Box model for the node.</td>
   </tr>
 </tbody>
 </table>
+
 
 ## Types 
 ### DOM.`AttributeType`

@@ -123,7 +123,7 @@ $domainMethod(getWindowBounds) {
 }
 
 $domainMethod(setWindowBounds) {
-#ifndef GEODE_IS_MOBILE
+#ifdef GEODE_IS_WINDOWS
   auto gl = cocos2d::CCDirector::sharedDirector()->getOpenGLView();
   auto winSize = gl->getFrameSize();
   gl->setFrameSize(
