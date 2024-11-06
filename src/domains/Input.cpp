@@ -176,7 +176,7 @@ $domainMethod(dispatchMouseEvent) {
       if (touches.size() == 0) return geode::Ok(matjson::Object{});
       if (type == "mouseReleased") {
         touch = touches[touches.size()-1];
-        touches.pop_back();
+        touches.inner()->removeLastObject();
       }
       else touch = touches[touches.size()-1];
     }
