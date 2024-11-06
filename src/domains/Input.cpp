@@ -174,7 +174,10 @@ $domainMethod(dispatchMouseEvent) {
     } else {
       // TODO: make mouse move actually do something (gd!lazer) by calling ccegl shit
       if (touches.size() == 0) return geode::Ok(matjson::Object{});
-      if (type == "mouseReleased") touch = touches.pop_back();
+      if (type == "mouseReleased") {
+        touch = touches[touches.size()-1];
+        touches.pop_back();
+      }
       else touch = touches[touches.size()-1];
     }
     touch->setTouchInfo(touchId, x, y);
