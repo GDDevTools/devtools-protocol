@@ -17,6 +17,13 @@ This domain exposes DOM read/write operations. Each DOM Node is represented with
 
 ## Methods
 
+### DOM.`click`
+Try sending a click to the node without actually clicking. Only works for `button` nodes.  
+
+First it tries to cast the node to `CCMenuItem` and clicks it. If it isn't then it will send a `DispatchEvent("puppeteer/nodeClicked")` event to the game so nodes implmenting that can handle as it needs.
+
+If you want real click events then you can use [Input.`dispatchMouseEvent`](#inputdispatchmouseevent) instead.
+
 ### DOM.`describeNode`
 Describes node given its id, does not require domain to be enabled. Does not start tracking any objects, can be used for automation.
 
@@ -309,6 +316,10 @@ Type: **object**
   <tr>
     <td><code>parentId</code><br>(optional)</td>
     <td><strong><a href="#domnodeid">NodeId</a></strong><br>The id of the parent node if any.</td>
+  </tr>
+  <tr>
+    <td><code>nodeType</code></td>
+    <td><strong>string</strong><br>Node's type.<br>Other values can be specified by setting the <code>puppeteer/nodeTypeOverride</code> user object, but note that it will be treated the same as the value being <code>node</code>.<br>Builtin values: <code>node, scene, button</code<</td>
   </tr>
   <tr>
     <td><code>childNodeCount</code></td>

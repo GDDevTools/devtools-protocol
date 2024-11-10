@@ -78,6 +78,7 @@ struct CCNode2 : geode::Modify<CCNode2, CCNode> {
 struct DOMNode {
   int nodeId;
   int parentId;
+  std::string type;
   int childNodeCount;
   matjson::Array children;
   matjson::Object attributes;
@@ -86,12 +87,14 @@ struct DOMNode {
   DOMNode(
     int _nodeId,
     int _parentId,
+    std::string _type,
     int _childNodeCount,
     matjson::Array _children,
     matjson::Object _attributes
   ): 
     nodeId(_nodeId), 
     parentId(_parentId), 
+    type(_type),
     childNodeCount(_childNodeCount), 
     children(_children),
     attributes(_attributes)
@@ -107,6 +110,7 @@ struct matjson::Serialize<DOMNode> {
     return DOMNode {
       value["nodeId"].as_int(),
       value["parentId"].as_int(),
+      value["nodeType"].as_string(),
       value["childNodeCount"].as_int(),
       value["children"].as_array(),
       value["attributes"].as_object()
@@ -116,6 +120,7 @@ struct matjson::Serialize<DOMNode> {
     return matjson::Object {
       {"nodeId", node.nodeId},
       {"parentId", node.parentId},
+      {"nodeType", node.type},
       {"childNodeCount", node.childNodeCount},
       {"children", node.children},
       {"attributes", node.attributes},
@@ -129,7 +134,7 @@ matjson::Value jsonValueOf(CCObject* obj) {
   if (j != nullptr) {
     return j->getValue();
   }
-#ifndef GEODE_IS_MACOS/
+#ifndef GEODE_IS_MACOS
   else if (auto idk = geode::cast::typeinfo_cast<CCString*>(obj)) {
     return std::string(idk->getCString());
   }
@@ -169,12 +174,30 @@ int nodeIdOf(CCNode* n) {
 
 DOMNode::DOMNode(CCNode *node, int depth)
   : nodeId(nodeIdOf(node)), parentId(nodeIdOf(node)), childNodeCount(node->getChildrenCount()) {
+#pragma region DOMNode children
   children.reserve(childNodeCount);
   if (depth == 0) {
     for (auto *c : geode::cocos::CCArrayExt<CCNode *>(node->getChildren())) {
       children.push_back(DOMNode(c,depth-1));
     }
   }
+#pragma endregion
+#pragma region DOMNode nodeType
+  // my mod do this
+  if (auto typeOverride = static_cast<CCString*>(node->getUserObject("puppeteer/nodeTypeOverride"))) {
+    type = typeOverride->getCString();
+  }
+  // for now its only this much
+  else if (dynamic_cast<CCMenuItem*>(node)) {
+    type = "button";
+  }
+  else if (dynamic_cast<CCScene*>(node)) {
+    type = "scene";
+  } 
+  else {
+    type = "node";
+  }
+#pragma endregion
 
   /*
   auto modify = static_cast<CCNode2*>(node);
@@ -249,7 +272,24 @@ struct directorhook : geode::Modify<directorhook, CCDirector> {
     return ret;
   }
 };
-
+$domainMethod(click) {
+  CCNode* node = getNodeAt(as_optional_of<int>(params["nodeId"]).value_or(0)); 
+  if (node) {
+    if (auto b = dynamic_cast<CCMenuItem*>(node)) {
+      b->activate();
+    } else if (
+      std::string(static_cast<CCString*>(
+        b->getUserObject("puppeteer/nodeTypeOverride")
+      )->getCString()) == "button"
+    ){
+      geode::DispatchEvent("puppeteer/nodeClicked", node).post();
+    } else {
+      return errors::invalidParameter("Node isn't classified as a button.");
+    }
+    return geode::Ok(matjson::Object{});
+  }
+  return errors::internalError("Node doesn't exist.");
+}
 $domainMethod(describeNode) {
   CCNode* node = getNodeAt(as_optional_of<int>(params["nodeId"]).value_or(0)); 
   if (node) {
@@ -488,6 +528,7 @@ $domainMethod(removeAttribute) {
 
 $execute {
   auto p = Protocol::get();
+  p->registerFunction("DOM.click", &click, {"nodeId"});
   p->registerFunction("DOM.describeNode", &describeNode, {"nodeId"});
   p->registerFunction("DOM.disable", &disableDOM);
   p->registerFunction("DOM.enable", &enableDOM);
