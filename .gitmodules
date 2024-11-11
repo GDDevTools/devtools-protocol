@@ -1,3 +1,0 @@
-[submodule "external/v8"]
-	path = external/v8
-	url = https://github.com/bnoordhuis/v8-cmake
