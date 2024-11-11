@@ -25,6 +25,19 @@ else()
     message(STATUS "Found Geode: $ENV{GEODE_SDK}")
 endif()
 
+message(STATUS "-------- Setting up v8 --------")
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/v8)
+target_link_libraries(${PROJECT_NAME} v8_compiler)
+target_link_libraries(${PROJECT_NAME} v8_initializers)
+# target_link_libraries(${PROJECT_NAME} v8_compiler)
+target_link_libraries(${PROJECT_NAME} v8_libbase)
+target_link_libraries(${PROJECT_NAME} v8_libplatform)
+#target_link_libraries(${PROJECT_NAME} v8_snapshot)
+#target_link_libraries(${PROJECT_NAME} v8_torque_generated)
+#target_link_libraries(${PROJECT_NAME} v8-i18n-support)
+
+message(STATUS "-------- Setting up Geode --------")
+
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
 setup_geode_mod(${PROJECT_NAME})
@@ -34,3 +47,4 @@ target_link_libraries(${PROJECT_NAME} ixwebsocket)
 
 # idk what this does
 target_include_directories(${PROJECT_NAME} PRIVATE src)
+
