@@ -9,3 +9,5 @@ inline void initNewClass() {
   js_getglobal(getState(), "Object");
 	js_getproperty(getState(), -1, "prototype");
 }
+
+#define $jsMethod(name) static void name(js_State* s)

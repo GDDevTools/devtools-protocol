@@ -367,6 +367,7 @@ struct js_Regexp
 struct js_Object
 {
 	enum js_Class type;
+	int object_id; /* GDP Addition: object id*/
 	int extensible;
 	js_Property *properties;
 	int count; /* number of properties, for array sparseness check */
@@ -473,6 +474,7 @@ const char *jsV_numbertostring(js_State *J, char buf[32], double number);
 double jsV_stringtonumber(js_State *J, const char *string);
 
 /* jsproperty.c */
+js_Object *jsV_newobject(js_State *J, enum js_Class type, js_Object *prototype);
 js_Object *jsV_newobject(js_State *J, enum js_Class type, js_Object *prototype);
 js_Property *jsV_getownproperty(js_State *J, js_Object *obj, const char *name);
 js_Property *jsV_getpropertyx(js_State *J, js_Object *obj, const char *name, int *own);

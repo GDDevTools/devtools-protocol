@@ -9,7 +9,7 @@
 class Protocol {
 public:
   using FunctionReturnType = geode::Result<
-    matjson::Object, 
+    matjson::Value, 
     std::tuple<int, std::string>
   >;
   bool running = false;

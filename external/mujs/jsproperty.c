@@ -175,6 +175,10 @@ js_Object *jsV_newobject(js_State *J, enum js_Class type, js_Object *prototype)
 	obj->properties = &sentinel;
 	obj->prototype = prototype;
 	obj->extensible = 1;
+
+	// gdp addition
+	// this was the intention for DOMNode ids btw
+	obj->object_id = &obj;
 	return obj;
 }
 

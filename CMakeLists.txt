@@ -56,6 +56,10 @@ add_library(mujs STATIC
 target_link_libraries(${PROJECT_NAME} mujs)
 
 message(STATUS "-------- Setting up Geode --------")
+
+# i like this -henry
+add_compile_definitions(GEODE_EXPOSE_SECRET_INTERNALS_IN_HEADERS_DO_NOT_DEFINE_PLEASE)
+
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
 setup_geode_mod(${PROJECT_NAME})
