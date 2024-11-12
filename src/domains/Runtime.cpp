@@ -1,8 +1,7 @@
 // ?
 
-// TODO: this is not fucking valid what the fuck
 #include "Geode/DefaultInclude.hpp"
-#include "jsenv/state.h"
+#include "jsenv/state.hpp"
 #include "../WS.hpp"
 
 $domainMethod(evaluate) {

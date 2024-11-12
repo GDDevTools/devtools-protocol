@@ -51,14 +51,16 @@ bool Protocol::init() {
           return;
         }
       }
-      FunctionReturnType ret = i->second.first(params);
-      if (ret.isErr()) {
-        auto err = ret.unwrapErr();
-        c.sendText(errorResponseStr(id, std::get<0>(err), std::get<1>(err)));
+      geode::queueInMainThread([i, &params, &c, id, this]{
+        FunctionReturnType ret = i->second.first(params);
+        if (ret.isErr()) {
+          auto err = ret.unwrapErr();
+          c.sendText(errorResponseStr(id, std::get<0>(err), std::get<1>(err)));
+          return;
+        }
+        c.sendText(successResponseStr(id, ret.unwrap()));
         return;
-      }
-      c.sendText(successResponseStr(id, ret.unwrap()));
-      return;
+      });
     }
   });
   ws->disablePerMessageDeflate();

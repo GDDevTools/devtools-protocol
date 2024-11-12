@@ -556,7 +556,7 @@ void js_newuserdatax(js_State *J, const char *tag, void *data, js_HasProperty ha
 	obj->u.user.data = data;
 	obj->u.user.has = has;
 	obj->u.user.put = put;
-	obj->u.user.delete = delete;
+	obj->u.user.delete_ = delete;
 	obj->u.user.finalize = finalize;
 
 	js_endtry(J);

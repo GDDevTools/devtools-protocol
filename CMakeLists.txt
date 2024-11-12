@@ -24,11 +24,34 @@ else()
     message(STATUS "Found Geode: $ENV{GEODE_SDK}")
 endif()
 message(STATUS "-------- Setting up MuJS --------")
-file(GLOB_RECURSE mujs_files_c external/mujs/*.c)
 file(GLOB_RECURSE mujs_files_h external/mujs/*.h)
-add_library(mujs SHARED
-    ${mujs_files_c}
+add_library(mujs STATIC
     ${mujs_files_h}
+    external/mujs/jsarray.c
+    external/mujs/jsboolean.c
+    external/mujs/jsbuiltin.c
+    external/mujs/jscompile.c
+    external/mujs/jsdate.c
+    external/mujs/jsdtoa.c
+    external/mujs/jserror.c
+    external/mujs/jsfunction.c
+    external/mujs/jsgc.c
+    external/mujs/jsintern.c
+    external/mujs/jslex.c
+    external/mujs/jsmath.c
+    external/mujs/jsnumber.c
+    external/mujs/jsobject.c
+    external/mujs/json.c
+    external/mujs/jsparse.c
+    external/mujs/jsproperty.c
+    external/mujs/jsregexp.c
+    external/mujs/jsrepr.c
+    external/mujs/jsrun.c
+    external/mujs/jsstate.c
+    external/mujs/jsstring.c
+    external/mujs/jsvalue.c
+    external/mujs/regexp.c
+    external/mujs/utf.c
 )
 target_link_libraries(${PROJECT_NAME} mujs)
 

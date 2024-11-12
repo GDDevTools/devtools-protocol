@@ -1,5 +1,6 @@
-#include "state.h"
-//#include "../../../external/mujs/jsi.h"
+#include "state.hpp"
+#include "../../../external/mujs/jsi.h"
+#undef inline // kill yourself
 #include <Geode/DefaultInclude.hpp>
 #include <Geode/loader/Log.hpp>
 
@@ -58,6 +59,7 @@ $execute{
   js_newcconstructor(s, new_Console, new_Console, "Console", 0);
   js_defglobal(s, "Console", JS_DONTENUM);
 
+/*
   js_getglobal(s, "Console");
   if (js_pconstruct(s, 0)) {
     geode::log::error("Error creating Console object.");
@@ -68,4 +70,5 @@ $execute{
     js_pushobject(s, console);
     js_setglobal(s, "console");
   }
+*/
 }

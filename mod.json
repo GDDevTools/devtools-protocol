@@ -1,16 +1,13 @@
 {
-	"geode": "3.9.0",
-	"gd": {
-		"win": "2.206",
-    "mac": "2.206",
-		"android": "2.206"
-	},
-	"id": "henrysck075.puppeteer",
-	"name": "GD DevTools Protocol",
-	"version": "v0.9.7",
-	"developer": "Honoka Kousaka",
-	"description": "fake cocos python bindings' backend",
-  "resources": {
-    "files": ["protocols.json"]
-  }
+    "geode": "3.9.0",
+    "gd": {
+        "win": "2.206",
+        "mac": "2.206",
+        "android": "2.206"
+    },
+    "id": "henrysck075.puppeteer",
+    "name": "GD DevTools Protocol",
+    "version": "v0.9.7",
+    "developer": "Honoka Kousaka",
+    "description": "fake cocos python bindings' backend"
 }

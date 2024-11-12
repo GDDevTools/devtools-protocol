@@ -33,10 +33,12 @@ struct CCNode2 : geode::Modify<CCNode2, CCNode> {
     int depth = 0;
     int nodeId = 0;
   };
+  /*
   void constructor() {
     cocos2d::CCNode();
     m_fields->nodeId = ++highestNodeId;
   }
+  */
   void retain() {
     if (retainCount()==0) s_nodes[m_fields->nodeId] = this;
     CCNode::retain();
@@ -253,7 +255,6 @@ void CCNode2::setUserObject(std::string const &id, CCObject *value) {
     });
   }
 }
-
 
 #include <Geode/modify/CCDirector.hpp>
 struct directorhook : geode::Modify<directorhook, CCDirector> {
