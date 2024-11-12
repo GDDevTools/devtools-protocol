@@ -59,6 +59,7 @@ $execute{
   js_newcconstructor(s, new_Console, new_Console, "Console", 0);
   js_defglobal(s, "Console", JS_DONTENUM);
 
+  js_dostring("var console = new Console()");
 /*
   js_getglobal(s, "Console");
   if (js_pconstruct(s, 0)) {

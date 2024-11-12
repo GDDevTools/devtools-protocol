@@ -45,22 +45,19 @@ bool Protocol::init() {
       }
       auto params = j["params"].as_object();
       for (auto& p : i->second.second) {
-        auto it = params.find(p);
-        if (it!=params.end()) {
+        if (!params.contains(std::string(p))) {
           c.sendText(errorResponseStr(id,-32602,"Required parameter '"+p+"' not present."));
           return;
         }
       }
-      geode::queueInMainThread([i, &params, &c, id, this]{
-        FunctionReturnType ret = i->second.first(params);
-        if (ret.isErr()) {
-          auto err = ret.unwrapErr();
-          c.sendText(errorResponseStr(id, std::get<0>(err), std::get<1>(err)));
-          return;
-        }
-        c.sendText(successResponseStr(id, ret.unwrap()));
+      FunctionReturnType ret = i->second.first(params);
+      if (ret.isErr()) {
+        auto err = ret.unwrapErr();
+        c.sendText(errorResponseStr(id, std::get<0>(err), std::get<1>(err)));
         return;
-      });
+      }
+      c.sendText(successResponseStr(id, ret.unwrap()));
+      return;
     }
   });
   ws->disablePerMessageDeflate();
