@@ -1,19 +1,21 @@
 #include "state.hpp"
 #include <cstddef>
+#include <iostream>
 
-js_State* state = nullptr;
+js_State* mumustate = nullptr;
 js_State* getState() {
-  if (state == nullptr) {
-    state = js_newstate(NULL, NULL, JS_STRICT);
+  if (mumustate == nullptr) {
+    mumustate = js_newstate(NULL, NULL, JS_STRICT);
   }
-  return state;
+  return mumustate;
 }
 
 void nukeState() {
-  delete state;
+  delete mumustate;
 };  
 
 class bob {
+public:
   /// @brief This is only ever be destructed on game close
   ~bob() {
     // shut up geode
