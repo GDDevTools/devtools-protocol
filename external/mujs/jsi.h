@@ -367,7 +367,6 @@ struct js_Regexp
 struct js_Object
 {
 	enum js_Class type;
-	int object_id; /* GDP Addition: object id*/
 	int extensible;
 	js_Property *properties;
 	int count; /* number of properties, for array sparseness check */

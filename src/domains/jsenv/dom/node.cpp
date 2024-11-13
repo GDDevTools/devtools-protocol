@@ -5,6 +5,24 @@
 #include <queue>
 #undef inline
 
+struct idk : geode::Modify<idk, cocos2d::CCNode> {
+  struct Fields {
+    bool retainedByJS = false;
+  };
+  void retain() {
+    if (!m_fields->retainedByJS) 
+      cocos2d::CCNode::retain();
+    m_fields->retainedByJS = false;
+  }
+};
+
+static void finalize_Node(js_State *J, void *data) {
+  auto n = static_cast<idk*>(data);
+  if (n->m_fields->retainedByJS) {
+    n->release();
+  }
+}
+
 $jsMethod(new_Node) {
   cocos2d::CCNode* n;
   // creates a new one
@@ -12,13 +30,14 @@ $jsMethod(new_Node) {
     n = cocos2d::CCNode::create();
     // keep it until this object gets removed
     n->retain();
+    static_cast<idk*>(n)->m_fields->retainedByJS = true;
   } else {
     // make the object a wrapper of existing node
     n = getNodeAt(js_tonumber(s,1));
   }
   js_currentfunction(s);
   js_getproperty(s, -1, "prototype");
-  js_newuserdata(s, "node", n, NULL);
+  js_newuserdata(s, "node", n, finalize_Node);
 }
 
 $jsMethod(Node_appendChild) {
@@ -58,6 +77,13 @@ $jsMethod(Node_contains) {
 $execute {
   initNewClass();
   auto s = getState();
+  {
+    js_newcfunction(s, Node_appendChild, "Node.prototype.appendChild", 1);
+    js_defproperty(s, -2, "log", JS_DONTENUM);
+
+    js_newcfunction(s, Node_contains, "Node.prototype.contains", 1);
+    js_defproperty(s, -2, "debug", JS_DONTENUM);
+  }
   js_newcconstructor(s, new_Node, new_Node, "Node", 1);
   js_defglobal(s, "Node", JS_DONTENUM);
 }
