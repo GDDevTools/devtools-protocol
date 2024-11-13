@@ -1,6 +1,8 @@
 #pragma once
 
-#include "../../../../external/mujs/mujs.h"
+#include "../../../external/mujs/mujs.h"
+#include "../../../../external/mujs/jsi.h"
+
 js_State* getState();
 
 void nukeState();

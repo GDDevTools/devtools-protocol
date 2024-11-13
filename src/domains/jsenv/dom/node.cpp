@@ -1,10 +1,8 @@
 #include "../state.hpp"
-#include "../../../external/mujs/jsi.h"
 #include <Geode/DefaultInclude.hpp>
 #include <Geode/Modify.hpp>
 #include "../../DOM.hpp"
 #include <queue>
-#undef inline
 
 struct idk : geode::Modify<idk, cocos2d::CCNode> {
   struct Fields {
@@ -22,7 +20,7 @@ static void finalize_Node(js_State *J, void *data) {
   if (n->m_fields->retainedByJS) {
     n->release();
   }
-}
+};
 
 $jsMethod(new_Node) {
   cocos2d::CCNode* n;
@@ -39,9 +37,9 @@ $jsMethod(new_Node) {
   js_currentfunction(s);
   js_getproperty(s, -1, "prototype");
   js_newuserdata(s, "node", n, finalize_Node);
-}
+};
 
-$jsMethod(Node_appendChild) {
+static void Node_appendChild(js_State* s) {
   auto n = (cocos2d::CCNode*)js_touserdata(s, 0, "node");
   auto p1 = js_toobject(s,1);
   // ?
@@ -74,6 +72,7 @@ $jsMethod(Node_contains) {
   }
   js_pushboolean(s,false);
 }
+#undef inline
 
 $execute {
   initNewClass();
