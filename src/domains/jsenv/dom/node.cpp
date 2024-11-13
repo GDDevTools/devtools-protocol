@@ -1,6 +1,7 @@
 #include "../state.hpp"
 #include "../../../external/mujs/jsi.h"
 #include <Geode/DefaultInclude.hpp>
+#include <Geode/Modify.hpp>
 #include "../../DOM.hpp"
 #include <queue>
 #undef inline

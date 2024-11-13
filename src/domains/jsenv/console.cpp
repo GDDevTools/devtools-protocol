@@ -3,6 +3,8 @@
 #undef inline // kill yourself
 #include <Geode/DefaultInclude.hpp>
 #include <Geode/loader/Log.hpp>
+#include <Geode/loader/Mod.hpp>
+#include <Geode/loader/ModMetadata.hpp>
 
 geode::Mod* representer;
 
