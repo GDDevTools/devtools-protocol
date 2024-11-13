@@ -54,12 +54,20 @@ matjson::Value jsvalToJsonVal(js_Value* val) {
       }
       wrap = arr;
     }
-    if (val->u.object->type == JS_CFUNCTION) {
+    else if (val->u.object->type == JS_CFUNCTION) {
       auto f = val->u.object->u.f;
       auto func = f.function;
       wrap = matjson::Object{
         {"script", func->script}
       };
+    }
+    else if (val->u.object->type == JS_COBJECT) {
+      matjson::Object obj;
+      auto props = val->u.object->properties;
+      for (int i = 0; i < val->u.object->count; i++) {
+        auto p = props[i];
+        obj[p.name] = jsvalToJsonVal(&p.value);
+      }
     }
     ret = matjson::Object{
       {"type", type},
