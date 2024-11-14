@@ -159,6 +159,7 @@ int touchId = 0;
 geode::cocos::CCArrayExt<cocos2d::CCTouch*> touches;
 $domainMethod(dispatchMouseEvent) {
   if (ignoreInputs) return geode::Ok(matjson::Object{});
+  geode::log::debug("ifhweofjowejiwejofjiewfiewf");
   auto type = params["type"].as_string();
   if (type != "mouseWheel") {
     float x = params["x"].as_double();

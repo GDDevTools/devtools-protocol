@@ -1,3 +1,4 @@
+#include "../../../../external/mujs/jsi.h"
 #include "../state.hpp"
 #include <Geode/DefaultInclude.hpp>
 #include <Geode/Modify.hpp>
@@ -40,15 +41,18 @@ $jsMethod(new_Node) {
 };
 
 static void Node_appendChild(js_State* s) {
+  /*
   auto n = (cocos2d::CCNode*)js_touserdata(s, 0, "node");
-  auto p1 = js_toobject(s,1);
+  js_Object* p1 = js_toobject(s,1);
   // ?
   auto tn = (cocos2d::CCNode*)p1->u.user.data;
   n->addChild(tn);
+  */
   js_pushundefined(s);
 }
 
 $jsMethod(Node_contains) {
+  /*
   auto n = (cocos2d::CCNode*)js_touserdata(s, 0, "node");
   if (js_isnull(s,1)) {js_pushboolean(s,false);return;}
   auto p1 = js_toobject(s,1);
@@ -70,6 +74,7 @@ $jsMethod(Node_contains) {
     }
     q.pop();
   }
+  */
   js_pushboolean(s,false);
 }
 #undef inline

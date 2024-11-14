@@ -14,6 +14,7 @@ bool Protocol::init() {
   ws = new ix::WebSocketServer(1412,"127.0.0.1");
 
   ws->setOnClientMessageCallback([this](std::shared_ptr<ix::ConnectionState> s, ix::WebSocket& c, const ix::WebSocketMessagePtr& msg){
+    
     if (msg->type == ix::WebSocketMessageType::Open) {
       geode::log::info("new connection chat");
     }
