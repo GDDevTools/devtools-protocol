@@ -6,12 +6,15 @@
 #include <matjson.hpp>
 #include "../../external/mujs/jsi.h"
 #include "../../external/mujs/mujs.h"
+#undef inline
 
 struct RemoteObject {
   std::string type;
   std::string clsName;
   matjson::Value value;
   std::string desc;
+
+  //static RemoteObject describe(js_Value* val);
 };
 
 template<>
@@ -75,14 +78,13 @@ matjson::Value jsvalToJsonVal(js_Value* val) {
     });
   }
 
-  return ret;
-}
 $domainMethod(evaluate) {
   auto s = getState();
   js_loadeval(s, "[string]", params["expression"].asString().unwrapOr("").c_str());
 	js_pushglobal(s);
 	js_call(s, 0);
-  return geode::Ok(matjson::makeObject({}));
+  js_pop(s,1);
+  return geode::Ok(matjson::Object{});
 }
 
 $execute {
