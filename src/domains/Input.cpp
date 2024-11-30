@@ -83,7 +83,7 @@ $domainMethod(handleKeyDownEvent) {
       );
     });
   }
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 $domainMethod(handleKeyUpEvent) {
   auto disp = cocos2d::CCDirector::get()->getKeyboardDispatcher();
@@ -107,7 +107,7 @@ $domainMethod(handleKeyUpEvent) {
     );
     });
   }
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 $domainMethod(handleCharEvent) {
   auto disp = cocos2d::CCDirector::get()->getKeyboardDispatcher();
@@ -140,11 +140,11 @@ $domainMethod(handleCharEvent) {
     disp->updateModifierKeys(shift,ctrl,alt,cmd);
   });
 
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 bool ignoreInputs = false;
 $domainMethod(dispatchKeyEvent) {
-  if (ignoreInputs) return geode::Ok(matjson::Object{});
+  if (ignoreInputs) return geode::Ok(matjson::Value::object());
   auto type = params["type"].as_string();
   if (type == "keyDown") return handleKeyDownEvent(params);
   if (type == "keyUp") return handleKeyUpEvent(params);
@@ -158,7 +158,7 @@ const std::string mouseButton[8] = {
 int touchId = 0;
 geode::cocos::CCArrayExt<cocos2d::CCTouch*> touches;
 $domainMethod(dispatchMouseEvent) {
-  if (ignoreInputs) return geode::Ok(matjson::Object{});
+  if (ignoreInputs) return geode::Ok(matjson::Value::object());
   geode::log::debug("ifhweofjowejiwejofjiewfiewf");
   auto type = params["type"].as_string();
   if (type != "mouseWheel") {
@@ -174,7 +174,7 @@ $domainMethod(dispatchMouseEvent) {
       //touch->release(); // risky
     } else {
       // TODO: make mouse move actually do something (gd!lazer) by calling ccegl shit
-      if (touches.size() == 0) return geode::Ok(matjson::Object{});
+      if (touches.size() == 0) return geode::Ok(matjson::Value::object());
       if (type == "mouseReleased") {
         touch = touches[touches.size()-1];
         touches.inner()->removeLastObject();
@@ -206,11 +206,11 @@ $domainMethod(dispatchMouseEvent) {
       cocos2d::CCDirector::get()->getMouseDispatcher()->dispatchScrollMSG(x,y);
     });
   }
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 $domainMethod(setIgnoreInputEvents) {
   ignoreInputs = params["input"].as_bool();
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 $execute {
   auto p = Protocol::get();

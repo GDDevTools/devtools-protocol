@@ -7,26 +7,26 @@ $domainMethod(close) {
   geode::queueInMainThread([]{
     geode::utils::game::exit();
   });
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 };
 };
 $domainMethod(crash) {
   geode::queueInMainThread([]{
     throw std::runtime_error("Manually initiated crash");
   });
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 };
 $domainMethod(restart) {
   geode::queueInMainThread([]{
     geode::utils::game::restart();
   });
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 };
 $domainMethod(getVersion) {
   auto modVer = geode::Mod::get()->getVersion();
   auto loaderVer = geode::Loader::get()->getVersion();
   auto gameVer = geode::Loader::get()->getGameVersion();
-  return geode::Ok(matjson::Object{
+  return geode::Ok(matjson::makeObject({
     {"protocolVersion", matjson::Array{modVer.getMajor(), modVer.getMinor(), modVer.getPatch()}},
     {"loaderVersion", matjson::Array{loaderVer.getMajor(), loaderVer.getMinor(), loaderVer.getPatch()}},
     {"gameVersion", gameVer},
@@ -45,7 +45,7 @@ struct Bounds {
 
 template<>
 struct matjson::Serialize<WindowState> {
-  static WindowState from_json(const matjson::Value& value) {
+  static geode::Result<WindowState> fromJson(const matjson::Value& value) {
     auto s = value.as_string();
     if (s == "normal") return WindowState::normal;
     if (s == "minimized") return WindowState::minimized;
@@ -53,7 +53,7 @@ struct matjson::Serialize<WindowState> {
     if (s == "fullscreen") return WindowState::fullscreen;
     return WindowState::normal;
   }
-  static matjson::Value to_json(const WindowState& e) {
+  static matjson::Value toJson(const WindowState& e) {
     switch (e) {
       case WindowState::normal: return "normal";
       case WindowState::minimized: return "minimized";
@@ -65,7 +65,7 @@ struct matjson::Serialize<WindowState> {
 
 template<>
 struct matjson::Serialize<Bounds> {
-  static Bounds from_json(const matjson::Value& value) {
+  static geode::Result<Bounds> fromJson(const matjson::Value& value) {
     return Bounds{
       .left = value["left"].is_number() ? value["left"].as_int() : 0,
       .top = value["top"].is_number() ? value["top"].as_int() : 0,
@@ -74,7 +74,7 @@ struct matjson::Serialize<Bounds> {
       .windowState = matjson::Serialize<WindowState>::from_json(value["windowState"])
     };
   }
-  static matjson::Value to_json(const Bounds& obj) {
+  static matjson::Value toJson(const Bounds& obj) {
     return matjson::Object{
       {"left", obj.left},
       {"top", obj.top},
@@ -145,7 +145,7 @@ $domainMethod(setWindowBounds) {
   }
 #endif
 
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 
 

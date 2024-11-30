@@ -5,6 +5,7 @@
 #include <Geode/Result.hpp>
 #include <Geode/loader/Dispatch.hpp>
 #include <matjson.hpp>
+using matjsonObjectInitType = std::initializer_list<std::pair<std::string, matjson::Value>>;
 
 class Protocol {
 public:
@@ -40,8 +41,7 @@ public:
   ~Protocol() {close();};
   void close();
 };
-
-void fireEvent(std::string eventName, matjson::Value const &content);
+void fireEvent(std::string eventName, matjson::Value const& content);
 
 #define $domainMethod(method) Protocol::FunctionReturnType method(matjson::Value& params)
 #define $domainAsyncMethod(method) void method(matjson::Value& params, void(Protocol::FunctionReturnType) finish)

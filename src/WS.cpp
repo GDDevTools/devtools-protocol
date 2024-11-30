@@ -19,14 +19,19 @@ bool Protocol::init() {
       geode::log::info("new connection chat");
     }
     else if (msg->type == ix::WebSocketMessageType::Message || !msg->str.empty()) {
-      auto j = matjson::parse(msg->str);
-      if (j["id"].is_null()) {
-        c.sendText(errorResponseStr(-1,-32602,"Requests must have an ID."));
+      auto p = matjson::parse(msg->str);
+      if (p.isErr()) {
+        c.sendText(errorResponseStr(-1,-32602,"Malformed input"));
+        return;
+      }
+      auto j = p.unwrap();
+      if (!j["id"].isNumber()) {
+        c.sendText(errorResponseStr(-1,-32602,"Request ID must be a number."));
         return;
       } 
       int id;
-      auto idOptional = as_optional_of<int>(j["id"]);
-      if (idOptional.has_value()) id = idOptional.value();
+      auto idOptional = j["id"].asInt();
+      if (idOptional.isOk()) id = idOptional.unwrap();
       else {
         c.sendText(errorResponseStr(-1, -32602, "Invalid 'id' type."));
         return;
@@ -40,14 +45,14 @@ bool Protocol::init() {
         usedIds.reserve(usedIdsSize+50);
       }
       usedIds.push_back(id);
-      auto methodName = j["method"].as_string();
+      auto methodName = j["method"].asString().unwrap();
       decltype(functions)::value_type::second_type method;
       auto i = functions.find(methodName);
       if (i==functions.end()) {
         c.sendText(errorResponseStr(id,-32601,"'"+methodName+"' wasn't found."));
         return;
       }
-      auto params = j["params"].as_object();
+      auto params = j["params"];
       for (auto& p : i->second.second) {
         if (!params.contains(std::string(p))) {
           c.sendText(errorResponseStr(id,-32602,"Required parameter '"+p+"' not present."));
@@ -75,19 +80,19 @@ bool Protocol::init() {
 }
 
 std::string Protocol::successResponseStr(int id, matjson::Value const& resp) {
-  return matjson::Value(matjson::Object{
+  return matjson::makeObject({
     {"id", id},
     {"result", resp}
   }).dump(0);
 };
 
 std::string Protocol::errorResponseStr(int id, int code, std::string message) {
-  return matjson::Value(matjson::Object{
+  return matjson::makeObject({
     {"id", id},
-    {"error", matjson::Object{
+    {"error", matjson::makeObject({
       {"code", code},
       {"message", message}
-    }}
+    })}
   }).dump(0);
 };
 
@@ -101,9 +106,9 @@ std::shared_ptr<Protocol> Protocol::get() {
 void Protocol::broadcastEvent(std::string eventName, matjson::Value const& content) {
   if (ws==nullptr) return;
   for (auto& c : ws->getClients()) {
-    c->send(matjson::Value(matjson::Object{
+    c->send(matjson::makeObject({
       {"method", eventName},
-      {"params", content}
+      {"params", matjson::makeObject(content)}
     }).dump(0));
   }
 }
@@ -116,7 +121,7 @@ void Protocol::registerFunction(
   functions.insert_or_assign(funcName, std::make_pair(f,requiredParams));
 };
 
-void fireEvent(std::string eventName, matjson::Value const &content) {
+void fireEvent(std::string eventName, matjson::Value const& content) {
   if (prot) {
     prot->broadcastEvent(eventName, content);
   }

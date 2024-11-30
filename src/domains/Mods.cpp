@@ -10,14 +10,14 @@ $domainMethod(disableMod) {
     auto m = Loader::get()->getLoadedMod(params["mod"].as_string())
   )
     m->disable();
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 $domainMethod(enableMod) {
   if (
     auto m = Loader::get()->getInstalledMod(params["mod"].as_string())
   )
     m->enable();
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 $domainMethod(getSettingsItems) {
   matjson::Object ret;
@@ -28,7 +28,7 @@ $domainMethod(getSettingsItems) {
       ret.insert(p);
     }
   }
-  return geode::Ok(matjson::Object{
+  return geode::Ok(matjson::makeObject({
     {"data", ret}
   });
 }
@@ -44,7 +44,7 @@ $domainMethod(setSettings) {
       if (p.second.is_string()) set(std::string);
 #undef set
     }
-    return geode::Ok(matjson::Object{});
+    return geode::Ok(matjson::Value::object());
   }
   return errors::invalidParameter("Mod not installed.");
 }

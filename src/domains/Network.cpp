@@ -223,18 +223,18 @@ $domainMethod(disableNetwork) {
   NetworkDomainDisabled = true;
   if (wrSendHook) wrSendHook->disable();
   //if (ccDispatchHook) ccDispatchHook->disable();
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 $domainMethod(enableNetwork) {
   NetworkDomainDisabled = false;
   if (wrSendHook) wrSendHook->enable();
   //if (ccDispatchHook) ccDispatchHook->enable();
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 $domainMethod(getRequestPostData) {
   auto i = requestPostData.find(params["requestId"].as_int());
   if (i!=requestPostData.end()) {
-    return geode::Ok(matjson::Object{
+    return geode::Ok(matjson::makeObject({
       {"postData", i->second}
     });
   }
@@ -243,7 +243,7 @@ $domainMethod(getRequestPostData) {
 $domainMethod(getResponseBody) {
   auto i = responseBody.find(params["requestId"].as_int());
   if (i!=responseBody.end()) {
-    return geode::Ok(matjson::Object{
+    return geode::Ok(matjson::makeObject({
       {"body", i->second}
     });
   }
