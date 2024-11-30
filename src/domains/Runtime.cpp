@@ -17,12 +17,12 @@ struct RemoteObject {
 template<>
 struct matjson::Serialize<RemoteObject> {
   static matjson::Value to_json(const RemoteObject& r) {
-    return matjson::Object {
+    return matjson::makeObject( {
       {"type", r.type},
       {"className", r.clsName},
       {"value", r.value},
       {"description", r.desc}
-    };
+    });
   }
 };
 
@@ -46,43 +46,43 @@ matjson::Value jsvalToJsonVal(js_Value* val) {
     matjson::Value wrap;
     std::string type;
     if (val->u.object->type == JS_CARRAY) {
-      matjson::Array arr;
+      auto arr = matjson::Value::array();
       type = "array";
       auto a = val->u.object->u.a;
       for (int i = 0; i < a.length; i++) {
-        arr.push_back(jsvalToJsonVal(&a.array[i]));
+        arr.push(jsvalToJsonVal(&a.array[i]));
       }
       wrap = arr;
     }
     else if (val->u.object->type == JS_CFUNCTION) {
       auto f = val->u.object->u.f;
       auto func = f.function;
-      wrap = matjson::Object{
+      wrap = matjson::makeObject({
         {"script", func->script}
-      };
+      });
     }
     else if (val->u.object->type == JS_COBJECT) {
-      matjson::Object obj;
+      matjson::Value obj;
       auto props = val->u.object->properties;
       for (int i = 0; i < val->u.object->count; i++) {
         auto p = props[i];
         obj[p.name] = jsvalToJsonVal(&p.value);
       }
     }
-    ret = matjson::Object{
+    ret = matjson::makeObject({
       {"type", type},
       {"value", wrap}
-    };
+    });
   }
 
   return ret;
 }
 $domainMethod(evaluate) {
   auto s = getState();
-  js_loadstring(s, "[string]", params["expression"].as_string().c_str());
+  js_loadeval(s, "[string]", params["expression"].asString().unwrapOr("").c_str());
 	js_pushglobal(s);
 	js_call(s, 0);
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::makeObject({}));
 }
 
 $execute {

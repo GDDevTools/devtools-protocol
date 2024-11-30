@@ -2,7 +2,7 @@
 #ifndef __fuck_you__
 #define __fuck_you__
 
-#include "Geode/utils/Result.hpp"
+#include <Geode/Result.hpp>
 #include <Geode/loader/Dispatch.hpp>
 #include <matjson.hpp>
 
@@ -18,7 +18,7 @@ private:
   std::unordered_map<
     std::string, // method name
     std::pair<
-      std::function<FunctionReturnType(matjson::Object&)>, // function
+      std::function<FunctionReturnType(matjson::Value&)>, // function
       std::vector< // required parameters
         std::string // name
       >
@@ -43,8 +43,8 @@ public:
 
 void fireEvent(std::string eventName, matjson::Value const &content);
 
-#define $domainMethod(method) Protocol::FunctionReturnType method(matjson::Object& params)
-#define $domainAsyncMethod(method) void method(matjson::Object& params, void(Protocol::FunctionReturnType) finish)
+#define $domainMethod(method) Protocol::FunctionReturnType method(matjson::Value& params)
+#define $domainAsyncMethod(method) void method(matjson::Value& params, void(Protocol::FunctionReturnType) finish)
 
 namespace errors {
   inline Protocol::FunctionReturnType invalidParameter(std::string msg) {
