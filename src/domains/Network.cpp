@@ -32,16 +32,16 @@ class WebTasksListener : public CCObject {
         removeQueue.push_back(p);
       } else if (task->isFinished()) {
         auto resp = task->getFinishedValue();
-        fireNetworkEvent("responseReceived", matjson::Object{
+        fireNetworkEvent("responseReceived", matjson::makeObject({
           {"requestId", id},
-          {"response", matjson::Object{
+          {"response", matjson::makeObject({
             {"url",url},
             {"status",resp->code()},
             {"headers",resp->headers()},
             {"responseTime", now()}
-          }},
+          })},
           {"timestamp", now()}
-        });
+        }));
         removeQueue.push_back(p);
       }
     }
@@ -59,17 +59,17 @@ geode::utils::web::WebTask send(wrSelf, std::string_view method, std::string_vie
   }
   auto sUrl = std::string(url);
   if (!NetworkDomainDisabled) {
-    fireNetworkEvent("requestWillBeSent",matjson::Object{
+    fireNetworkEvent("requestWillBeSent",matjson::makeObject({
       {"requestId", self->getID()},
       {"initiator", "geode"},
-      {"request", matjson::Object{
+      {"request", matjson::makeObject({
         {"url", sUrl},
         {"method", std::string(method)},
         {"headers", self->getHeaders()},
         {"postData", self->getBody()}
-      }},
+      })},
       {"timestamp", now()}
-    });
+    }));
   }
   auto task = self->send(method,url);
   tasks.push_back(std::make_tuple(self->getID(),sUrl,&task));
@@ -232,20 +232,20 @@ $domainMethod(enableNetwork) {
   return geode::Ok(matjson::Value::object());
 }
 $domainMethod(getRequestPostData) {
-  auto i = requestPostData.find(params["requestId"].as_int());
+  auto i = requestPostData.find(params["requestId"].asInt().unwrap());
   if (i!=requestPostData.end()) {
     return geode::Ok(matjson::makeObject({
       {"postData", i->second}
-    });
+    }));
   }
   return errors::internalError("No request with specified ID or the request does not have a POST data.");
 }
 $domainMethod(getResponseBody) {
-  auto i = responseBody.find(params["requestId"].as_int());
+  auto i = responseBody.find(params["requestId"].asInt().unwrap());
   if (i!=responseBody.end()) {
     return geode::Ok(matjson::makeObject({
       {"body", i->second}
-    });
+    }));
   }
   return errors::internalError("No request with specified ID.");
 }

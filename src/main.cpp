@@ -9,7 +9,7 @@ $domainMethod(getProtInfo) {
     return errors::internalError("?");
   }
   return geode::Ok(
-    r.unwrap().asObject()
+    r.unwrap()
   );
 }
 $execute {

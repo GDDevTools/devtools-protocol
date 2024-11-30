@@ -26,14 +26,14 @@ void vlogImplHook(geode::Severity sev, geode::Mod* mod, fmt::string_view format,
         severityStr = "?????";
         break;
     }
-  fireEvent("Log.entryAdded", matjson::Object{
-    {"entry", matjson::Object{
+  fireEvent("Log.entryAdded", matjson::makeObject({
+    {"entry", matjson::makeObject({
       {"source", mod->getID()},
       {"level", severityStr},
       {"text", fmt::vformat(format, args)},
       {"timestamp", now()}
-    }}
-  });
+    })}
+  }));
 }
 
 geode::Hook* vlogHook;

@@ -108,7 +108,7 @@ void Protocol::broadcastEvent(std::string eventName, matjson::Value const& conte
   for (auto& c : ws->getClients()) {
     c->send(matjson::makeObject({
       {"method", eventName},
-      {"params", matjson::makeObject(content)}
+      {"params", content}
     }).dump(0));
   }
 }

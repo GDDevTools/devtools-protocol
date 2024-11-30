@@ -47,7 +47,7 @@ $execute{
   meta.setName("JavaScript");
   meta.setVersion(geode::VersionInfo{7,7,7});
   meta.setDescription("The representation of the JavaScript console output from GD DevTools Protocol.");
-  meta.setDeveloper(geode::Mod::get()->getDeveloper());
+  meta.setDevelopers(geode::Mod::get()->getDevelopers());
 
   representer = new geode::Mod(meta);
 

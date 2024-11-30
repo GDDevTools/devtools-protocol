@@ -26,32 +26,35 @@ $domainMethod(getVersion) {
   auto modVer = geode::Mod::get()->getVersion();
   auto loaderVer = geode::Loader::get()->getVersion();
   auto gameVer = geode::Loader::get()->getGameVersion();
+  using dude = std::vector<matjson::Value>;
   return geode::Ok(matjson::makeObject({
-    {"protocolVersion", matjson::Array{modVer.getMajor(), modVer.getMinor(), modVer.getPatch()}},
-    {"loaderVersion", matjson::Array{loaderVer.getMajor(), loaderVer.getMinor(), loaderVer.getPatch()}},
+    {"protocolVersion", matjson::Value{dude{modVer.getMajor(), modVer.getMinor(), modVer.getPatch()}}},
+    {"loaderVersion", matjson::Value{dude{loaderVer.getMajor(), loaderVer.getMinor(), loaderVer.getPatch()}}},
     {"gameVersion", gameVer},
-  });
+  }));
 };
 enum class WindowState {
   normal,minimized,maximized,fullscreen
 };
 struct Bounds {
-  int left;
-  int top;
-  int width;
-  int height;
+  intmax_t left;
+  intmax_t top;
+  intmax_t width;
+  intmax_t height;
   WindowState windowState;
 };
 
 template<>
 struct matjson::Serialize<WindowState> {
   static geode::Result<WindowState> fromJson(const matjson::Value& value) {
-    auto s = value.as_string();
-    if (s == "normal") return WindowState::normal;
-    if (s == "minimized") return WindowState::minimized;
-    if (s == "maximized") return WindowState::maximized;
-    if (s == "fullscreen") return WindowState::fullscreen;
-    return WindowState::normal;
+    auto sr = value.asString();
+    if (sr.isErr()) return geode::Err("");
+    auto s = sr.unwrap();
+    WindowState status = WindowState::normal;
+    if (s == "minimized") status = WindowState::minimized;
+    if (s == "maximized") status = WindowState::maximized;
+    if (s == "fullscreen") status = WindowState::fullscreen;
+    return geode::Ok(status);
   }
   static matjson::Value toJson(const WindowState& e) {
     switch (e) {
@@ -66,22 +69,24 @@ struct matjson::Serialize<WindowState> {
 template<>
 struct matjson::Serialize<Bounds> {
   static geode::Result<Bounds> fromJson(const matjson::Value& value) {
-    return Bounds{
-      .left = value["left"].is_number() ? value["left"].as_int() : 0,
-      .top = value["top"].is_number() ? value["top"].as_int() : 0,
-      .width = value["width"].as_int() ? value["width"].as_int() : 0,
-      .height = value["height"].as_int() ? value["height"].as_int() : 0,
-      .windowState = matjson::Serialize<WindowState>::from_json(value["windowState"])
-    };
+    auto ws = matjson::Serialize<WindowState>::fromJson(value["windowState"]);
+    if (ws.isErr()) return geode::Err("");
+    return geode::Ok(Bounds{
+      .left = value["left"].asInt().unwrapOr(0),
+      .top = value["top"].asInt().unwrapOr(0),
+      .width = value["width"].asInt().unwrapOr(0),
+      .height = value["height"].asInt().unwrapOr(0),
+      .windowState = ws.unwrap()
+    });
   }
   static matjson::Value toJson(const Bounds& obj) {
-    return matjson::Object{
+    return matjson::makeObject({
       {"left", obj.left},
       {"top", obj.top},
       {"width", obj.width},
       {"height", obj.height},
       {"windowState", obj.windowState}
-    };
+    });
   }
 };
 
@@ -104,7 +109,7 @@ class $modify(cocos2d::CCEGLView) {
       : getIsFullscreen() ? WindowState::fullscreen : WindowState::normal;
   }
   void toggleFullScreen(bool full, bool borderless) {
-    cocos2d::CCEGLView::toggleFullScreen(full, borderless);
+    cocos2d::CCEGLView::toggleFullScreen(full, borderless,false);
     state = full ? WindowState::fullscreen : WindowState::normal;
   }
 };
@@ -119,7 +124,7 @@ $domainMethod(getWindowBounds) {
     .width = (int)winSize.width,
     .height = (int)winSize.height,
     .windowState = state
-  }}.as_object());
+  }});
 }
 
 $domainMethod(setWindowBounds) {
@@ -127,16 +132,16 @@ $domainMethod(setWindowBounds) {
   auto gl = cocos2d::CCDirector::sharedDirector()->getOpenGLView();
   auto winSize = gl->getFrameSize();
   gl->setFrameSize(
-    params["width"].is_null() ? winSize.width : params["width"].as_int(), 
-    params["height"].is_null() ? winSize.height : params["height"].as_int()
+    params["width"].asInt().unwrapOr(winSize.width), 
+    params["height"].asInt().unwrapOr(winSize.height)
   );
-  auto newState = matjson::Serialize<WindowState>::from_json(params["windowState"]);
+  auto newState = matjson::Serialize<WindowState>::fromJson(params["windowState"]).unwrap();
   if (newState == WindowState::fullscreen) {
-    gl->toggleFullScreen(true,false);
+    gl->toggleFullScreen(true,false,false);
   }
   else {
     if (state == WindowState::fullscreen) {
-      gl->toggleFullScreen(false,false);
+      gl->toggleFullScreen(false,false,false);
     }
     if (newState == WindowState::minimized) {
       gl->iconify();
