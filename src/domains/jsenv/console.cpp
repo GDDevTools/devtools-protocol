@@ -1,5 +1,5 @@
 #include "state.hpp"
-#include "../../../external/mujs/jsi.h"
+#include "../../../external/tinyjs/TinyJS.h"
 #undef inline // kill yourself
 #include <Geode/DefaultInclude.hpp>
 #include <Geode/loader/Log.hpp>
@@ -8,36 +8,28 @@
 
 geode::Mod* representer;
 
-static void Console_log(js_State* s) {
-  if (js_isstring(s, 1)) {
-    std::string j(js_tostring(s,1));
-    geode::log::logImpl(geode::Severity::Info, representer, "{}", j);
+static void pushLog(TinyJS::Variable* msg, geode::Severity severity) {
+  if (msg->isString()) {
+    std::string j = msg->getString();
+    geode::log::logImpl(severity, representer, "{}", j);
   }
-  js_pushundefined(s);
+  msg->getReturnVar()->setUndefined();
 }
 
-static void Console_debug(js_State* s) {
-  if (js_isstring(s, 1)) {
-    std::string j(js_tostring(s,1));
-    geode::log::logImpl(geode::Severity::Debug, representer, "{}", j);
-  }
-  js_pushundefined(s);
+$jsMethod(Console_log) {
+  pushLog(v, geode::Severity::Info);
 }
 
-static void Console_warn(js_State* s) {
-  if (js_isstring(s, 1)) {
-    std::string j(js_tostring(s,1));
-    geode::log::logImpl(geode::Severity::Warning, representer, "{}", j);
-  }
-  js_pushundefined(s);
+$jsMethod(Console_debug) {
+  pushLog(v, geode::Severity::Debug);
 }
 
-static void Console_error(js_State* s) {
-  if (js_isstring(s, 1)) {
-    std::string j(js_tostring(s,1));
-    geode::log::logImpl(geode::Severity::Error, representer, "{}", j);
-  }
-  js_pushundefined(s);
+$jsMethod(Console_warn) {
+  pushLog(v, geode::Severity::Warning);
+}
+
+$jsMethod(Console_error) {
+  pushLog(v, geode::Severity::Error);
 }
 
 
@@ -51,7 +43,6 @@ $execute{
 
   representer = new geode::Mod(meta);
 
-  initNewClass();
   auto s = getState();
   {
     js_newcfunction(s, Console_log, "console.log", 1);

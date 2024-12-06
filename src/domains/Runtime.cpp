@@ -4,8 +4,7 @@
 #include "jsenv/state.hpp"
 #include "../WS.hpp"
 #include <matjson.hpp>
-#include "../../external/mujs/jsi.h"
-#include "../../external/mujs/mujs.h"
+#include "../../external/tinyjs/TinyJS.hpp"
 #undef inline
 
 struct RemoteObject {
@@ -29,44 +28,37 @@ struct matjson::Serialize<RemoteObject> {
   }
 };
 
-matjson::Value jsvalToJsonVal(js_Value* val) {
+matjson::Value jsvalToJsonVal(CScriptVar* val) {
   matjson::Value ret;
-  if (val->t.type == JS_TUNDEFINED) {
+  if (val->isUndefined()) {
     return nullptr;
-  } else if (val->t.type == JS_TNULL) {
+  } else if (val->isNull()) {
     ret = nullptr;
-  } else if (val->t.type == JS_TBOOLEAN) {
-    ret = (bool)val->u.boolean;
-  } else if (val->t.type == JS_TNUMBER) {
-    ret = val->u.number;
-  } else if (val->t.type == JS_TLITSTR) {
-    ret = val->u.litstr;
-  } else if (val->t.type == JS_TMEMSTR) {
-    ret = std::string(val->u.memstr->p);
-  } else if (val->t.type == JS_TSHRSTR) {
-    ret = std::string(val->u.shrstr);
-  } else if (val->t.type == JS_TOBJECT) {
+  } else if (val->isBool()) {
+    ret = val->getBool();
+  } else if (val->isNumber()) {
+    ret = val->getDouble();
+  } else if (val->isString()) {
+    ret = val->getString();
+  }
+  else if (val->isArray()) {
+    auto arr = matjson::Value::array();
+    for (int i = 0; i < val->getArrayLength(); i++) {
+      arr.push(jsvalToJsonVal(val->getArrayIndex(i).getVar()));
+    }
+    ret = arr;
+  } else {
     matjson::Value wrap;
     std::string type;
-    if (val->u.object->type == JS_CARRAY) {
-      auto arr = matjson::Value::array();
-      type = "array";
-      auto a = val->u.object->u.a;
-      for (int i = 0; i < a.length; i++) {
-        arr.push(jsvalToJsonVal(&a.array[i]));
-      }
-      wrap = arr;
-    }
-    else if (val->u.object->type == JS_CFUNCTION) {
+    if (val->isFunction()) {
       auto f = val->u.object->u.f;
       auto func = f.function;
       wrap = matjson::makeObject({
         {"script", func->script}
       });
-    }
-    else if (val->u.object->type == JS_COBJECT) {
+    } else {
       matjson::Value obj;
-      auto props = val->u.object->properties;
+      auto props = val->Childs;
       for (int i = 0; i < val->u.object->count; i++) {
         auto p = props[i];
         obj[p.name] = jsvalToJsonVal(&p.value);
@@ -77,6 +69,7 @@ matjson::Value jsvalToJsonVal(js_Value* val) {
       {"value", wrap}
     });
   }
+}
 
 $domainMethod(evaluate) {
   auto s = getState();

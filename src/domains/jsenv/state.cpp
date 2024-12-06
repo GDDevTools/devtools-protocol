@@ -2,10 +2,10 @@
 #include <cstddef>
 #include <iostream>
 
-js_State* mumustate = nullptr;
-js_State* getState() {
+TinyJS::Interpreter* mumustate = nullptr;
+TinyJS::Interpreter* getState() {
   if (mumustate == nullptr) {
-    mumustate = js_newstate(NULL, NULL, JS_STRICT);
+    mumustate = new TinyJS::Interpreter();
   }
   return mumustate;
 }
