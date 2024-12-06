@@ -18,7 +18,7 @@ struct RemoteObject {
 
 template<>
 struct matjson::Serialize<RemoteObject> {
-  static matjson::Value to_json(const RemoteObject& r) {
+  static matjson::Value toJson(const RemoteObject& r) {
     return matjson::makeObject( {
       {"type", r.type},
       {"className", r.clsName},
@@ -70,14 +70,13 @@ matjson::Value jsvalToJsonVal(CScriptVar* val) {
     });
   }
 }
-
 $domainMethod(evaluate) {
   auto s = getState();
   js_loadeval(s, "[string]", params["expression"].asString().unwrapOr("").c_str());
 	js_pushglobal(s);
 	js_call(s, 0);
   js_pop(s,1);
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 
 $execute {

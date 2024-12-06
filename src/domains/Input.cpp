@@ -61,11 +61,12 @@ inline cocos2d::enumKeyCodes keyEnumForChar(char c) {
   return cocos2d::KEY_Unknown;
 }
 
+// code dupe i know
 $domainMethod(handleKeyDownEvent) {
   auto disp = cocos2d::CCDirector::get()->getKeyboardDispatcher();
   auto modifiersV = params["modifiers"];
-  if (modifiersV.is_number()) {
-    int mod = modifiersV.as_int();
+  if (modifiersV.isNumber()) {
+    int mod = modifiersV.asInt().unwrap();
     disp->updateModifierKeys(
       disp->getShiftKeyPressed() || !bit(mod,8),
       disp->getControlKeyPressed() || !bit(mod,2),
@@ -73,9 +74,9 @@ $domainMethod(handleKeyDownEvent) {
       disp->getCommandKeyPressed() || !bit(mod,4)
     );
   }
-  auto code = as_optional_of<std::string>(params["code"]);
-  if (code.has_value()) {
-    auto j = code.value();
+  auto code = params["code"].asString();
+  if (code.isOk()) {
+    auto j = code.unwrap();
     geode::queueInMainThread([j,disp]{
       disp->dispatchKeyboardMSG(
         keyEnumForChar(std::tolower(j[0])),
@@ -83,13 +84,13 @@ $domainMethod(handleKeyDownEvent) {
       );
     });
   }
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 $domainMethod(handleKeyUpEvent) {
   auto disp = cocos2d::CCDirector::get()->getKeyboardDispatcher();
   auto modifiersV = params["modifiers"];
-  if (modifiersV.is_number()) {
-    int mod = modifiersV.as_int();
+  if (modifiersV.isNumber()) {
+    int mod = modifiersV.asInt().unwrap();
     disp->updateModifierKeys(
       disp->getShiftKeyPressed() && !bit(mod,8),
       disp->getControlKeyPressed() && !bit(mod,2),
@@ -97,9 +98,9 @@ $domainMethod(handleKeyUpEvent) {
       disp->getCommandKeyPressed() && !bit(mod,4)
     );
   }
-  auto code = as_optional_of<std::string>(params["code"]);
-  if (code.has_value()) {
-    auto j = code.value();
+  auto code = params["code"].asString();
+  if (code.isOk()) {
+    auto j = code.unwrap();
     geode::queueInMainThread([j,disp]{
     disp->dispatchKeyboardMSG(
       keyEnumForChar(std::tolower(j[0])),
@@ -107,7 +108,7 @@ $domainMethod(handleKeyUpEvent) {
     );
     });
   }
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 $domainMethod(handleCharEvent) {
   auto disp = cocos2d::CCDirector::get()->getKeyboardDispatcher();
@@ -117,8 +118,8 @@ $domainMethod(handleCharEvent) {
   bool ctrl = disp->getControlKeyPressed();
   bool alt = disp->getAltKeyPressed();
   bool cmd = disp->getCommandKeyPressed();
-  if (modifiersV.is_number()) {
-    int mod = modifiersV.as_int();
+  if (modifiersV.isNumber()) {
+    int mod = modifiersV.asInt().unwrap();
     disp->updateModifierKeys(
       shift || !bit(mod,8),
       ctrl || !bit(mod,2),
@@ -127,10 +128,10 @@ $domainMethod(handleCharEvent) {
     );
   }
 
-  auto code = as_optional_of<std::string>(params["code"]);
+  auto code = params["code"].asString();
   geode::queueInMainThread([code,disp,shift,alt,ctrl,cmd]{
-    if (code.has_value()) {
-      for (char c : code.value()) {
+    if (code.isOk()) {
+      for (char c : code.unwrap()) {
         disp->dispatchKeyboardMSG(
           keyEnumForChar(std::tolower(c)),
           false, false
@@ -140,12 +141,12 @@ $domainMethod(handleCharEvent) {
     disp->updateModifierKeys(shift,ctrl,alt,cmd);
   });
 
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 bool ignoreInputs = false;
 $domainMethod(dispatchKeyEvent) {
-  if (ignoreInputs) return geode::Ok(matjson::Object{});
-  auto type = params["type"].as_string();
+  if (ignoreInputs) return geode::Ok(matjson::Value::object());
+  auto type = params["type"].asString().unwrap();
   if (type == "keyDown") return handleKeyDownEvent(params);
   if (type == "keyUp") return handleKeyUpEvent(params);
   if (type == "char") return handleCharEvent(params);
@@ -158,13 +159,13 @@ const std::string mouseButton[8] = {
 int touchId = 0;
 geode::cocos::CCArrayExt<cocos2d::CCTouch*> touches;
 $domainMethod(dispatchMouseEvent) {
-  if (ignoreInputs) return geode::Ok(matjson::Object{});
+  if (ignoreInputs) return geode::Ok(matjson::Value::object());
   geode::log::debug("ifhweofjowejiwejofjiewfiewf");
-  auto type = params["type"].as_string();
+  auto type = params["type"].asString().unwrap();
   if (type != "mouseWheel") {
-    float x = params["x"].as_double();
-    float y = params["y"].as_double();
-    std::string button = params["button"].as_string();
+    float x = params["x"].asDouble().unwrap();
+    float y = params["y"].asDouble().unwrap();
+    std::string button = params["button"].asString().unwrap();
     int buttonId = std::distance(mouseButton, std::find(mouseButton, mouseButton + 8, button));
 
     cocos2d::CCTouch* touch;
@@ -174,7 +175,7 @@ $domainMethod(dispatchMouseEvent) {
       //touch->release(); // risky
     } else {
       // TODO: make mouse move actually do something (gd!lazer) by calling ccegl shit
-      if (touches.size() == 0) return geode::Ok(matjson::Object{});
+      if (touches.size() == 0) return geode::Ok(matjson::Value::object());
       if (type == "mouseReleased") {
         touch = touches[touches.size()-1];
         touches.inner()->removeLastObject();
@@ -198,19 +199,19 @@ $domainMethod(dispatchMouseEvent) {
     int x = 0,y = 0;
     if (true) {
       auto x2 = params["deltaX"];
-      if (!x2.is_null()) x = x2.as_double();
+      if (!x2.isNumber()) x = x2.asDouble().unwrap();
       auto y2 = params["deltaY"];
-      if (!y2.is_null()) y = y2.as_double();
+      if (!y2.isNumber()) y = y2.asDouble().unwrap();
     }
     geode::queueInMainThread([x,y]{
       cocos2d::CCDirector::get()->getMouseDispatcher()->dispatchScrollMSG(x,y);
     });
   }
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 $domainMethod(setIgnoreInputEvents) {
-  ignoreInputs = params["input"].as_bool();
-  return geode::Ok(matjson::Object{});
+  ignoreInputs = params["input"].asBool().unwrap();
+  return geode::Ok(matjson::Value::object());
 }
 $execute {
   auto p = Protocol::get();

@@ -1,5 +1,5 @@
 #include "../WS.hpp"
-#include "Geode/utils/Result.hpp"
+#include <Geode/Result.hpp>
 #include <Geode/loader/Mod.hpp>
 #include <Geode/loader/Loader.hpp>
 
@@ -7,44 +7,44 @@ using namespace geode;
 
 $domainMethod(disableMod) {
   if (
-    auto m = Loader::get()->getLoadedMod(params["mod"].as_string())
+    auto m = Loader::get()->getLoadedMod(params["mod"].asString().unwrap())
   )
     m->disable();
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 $domainMethod(enableMod) {
   if (
-    auto m = Loader::get()->getInstalledMod(params["mod"].as_string())
+    auto m = Loader::get()->getInstalledMod(params["mod"].asString().unwrap())
   )
     m->enable();
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 $domainMethod(getSettingsItems) {
-  matjson::Object ret;
+  matjson::Value ret;
   if (
-    auto m = Loader::get()->getInstalledMod(params["mod"].as_string())
+    auto m = Loader::get()->getInstalledMod(params["mod"].asString().unwrap())
   ) {
-    for (auto& p : m->getMetadata().getSettingsV3()) {
-      ret.insert(p);
+    for (auto& p : m->getMetadata().getSettings()) {
+      ret.set(p.first,p.second);
     }
   }
-  return geode::Ok(matjson::Object{
+  return geode::Ok(matjson::makeObject({
     {"data", ret}
-  });
+  }));
 }
 $domainMethod(setSettings) {
   if (
-    auto m = Loader::get()->getInstalledMod(params["mod"].as_string())
+    auto m = Loader::get()->getInstalledMod(params["mod"].asString().unwrap())
   ) {
-    for (auto& p : params["settings"].as_object()) {
-#define set(type) m->setSettingValue<type>(p.first, p.second.as<type>())
-      if (p.second.is_bool()) set(bool);
-      if (p.second.is<int>()) set(int64_t);
-      if (p.second.is<double>() || p.second.is<float>()) set(double);
-      if (p.second.is_string()) set(std::string);
+    for (auto& [k,v] : params["settings"]) {
+#define set(type) m->setSettingValue<type>(k, v.as<type>().unwrap())
+      if (v.isBool()) set(bool);
+      else if (v.asInt().isOk()) set(int64_t);
+      else if (v.asDouble().isOk() || v.isNumber()) set(double);
+      else if (v.isString()) set(std::string);
 #undef set
     }
-    return geode::Ok(matjson::Object{});
+    return geode::Ok(matjson::Value::object());
   }
   return errors::invalidParameter("Mod not installed.");
 }

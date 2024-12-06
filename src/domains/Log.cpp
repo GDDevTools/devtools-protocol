@@ -26,14 +26,14 @@ void vlogImplHook(geode::Severity sev, geode::Mod* mod, fmt::string_view format,
         severityStr = "?????";
         break;
     }
-  fireEvent("Log.entryAdded", matjson::Object{
-    {"entry", matjson::Object{
+  fireEvent("Log.entryAdded", matjson::makeObject({
+    {"entry", matjson::makeObject({
       {"source", mod->getID()},
       {"level", severityStr},
       {"text", fmt::vformat(format, args)},
       {"timestamp", now()}
-    }}
-  });
+    })}
+  }));
 }
 
 geode::Hook* vlogHook;
@@ -41,7 +41,7 @@ geode::Hook* vlogHook;
 $domainMethod(disableLog) {
   if (vlogHook) {
     if (vlogHook->disable().isOk())
-      return geode::Ok(matjson::Object{});
+      return geode::Ok(matjson::Value::object());
     return errors::internalError("Cannot disable vlogImpl hook.");
   }
   return errors::internalError("vlogImpl hook not available.");
@@ -49,7 +49,7 @@ $domainMethod(disableLog) {
 $domainMethod(enableLog) {
   if (vlogHook) {
     if (vlogHook->enable().isOk())
-      return geode::Ok(matjson::Object{});
+      return geode::Ok(matjson::Value::object());
     // Err isn't returned in these functions but we'll see
     return errors::internalError("Cannot enable vlogImpl hook.");
   }

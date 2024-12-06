@@ -10,7 +10,7 @@
 
 bool DOMDomainDisabled = true;
 
-inline void fireDOMEvent(std::string eventName, matjson::Object const& content = {}) {
+inline void fireDOMEvent(std::string eventName, matjson::Value const& content = {}) {
   fireEvent("DOM."+eventName, content);
 };
 
@@ -33,7 +33,7 @@ struct CCNode2 : geode::Modify<CCNode2, CCNode> {
     // a copy of the thing from GeodeNodeMetadata
     std::unordered_map<std::string, CCObject*> m_userObjects;
     int depth = 0;
-    int nodeId = 0;
+    intmax_t nodeId = 0;
     bool initFinished = false;
   };
   /*
@@ -79,31 +79,33 @@ struct CCNode2 : geode::Modify<CCNode2, CCNode> {
   // child nodes
   void fireChildCountEvent() {
     if (DOMDomainDisabled) return;
-    fireDOMEvent("childNodeCountUpdated", {
+    fireDOMEvent("childNodeCountUpdated", matjson::makeObject({
       {"nodeId",m_fields->nodeId}, 
       {"childNodeCount",getChildrenCount()}
-    });
+    }));
   }
   void addChild(CCNode *child);
   void removeChild(CCNode *child);
 };
 
 struct DOMNode {
-  int nodeId;
-  int parentId;
+  intmax_t nodeId;
+  intmax_t parentId;
   std::string type;
   int childNodeCount;
-  matjson::Array children;
-  matjson::Object attributes;
+  // array
+  matjson::Value children;
+  // object
+  matjson::Value attributes;
 
   /// for from_json
   DOMNode(
-    int _nodeId,
-    int _parentId,
+    intmax_t _nodeId,
+    intmax_t _parentId,
     std::string _type,
     int _childNodeCount,
-    matjson::Array _children,
-    matjson::Object _attributes
+    decltype(children) _children,
+    matjson::Value _attributes
   ): 
     nodeId(_nodeId), 
     parentId(_parentId), 
@@ -119,25 +121,32 @@ struct DOMNode {
 matjson::Value jsonValueOf(CCObject* obj);
 template<>
 struct matjson::Serialize<DOMNode> {
-  static DOMNode from_json(const matjson::Value& value) {
-    return DOMNode {
-      value["nodeId"].as_int(),
-      value["parentId"].as_int(),
-      value["nodeType"].as_string(),
-      value["childNodeCount"].as_int(),
-      value["children"].as_array(),
-      value["attributes"].as_object()
-    };
+  static geode::Result<DOMNode> fromJson(const matjson::Value& value) {
+    if (
+      !value["nodeId"].isNumber() ||
+      !value["parentId"].isNumber() ||
+      !value["nodeType"].isString() ||
+      !value["childNodeCount"].isNumber() ||
+      !value["children"].isArray()
+    ) return geode::Err("");
+    return geode::Ok(DOMNode {
+      value["nodeId"].asInt().unwrap(),
+      value["parentId"].asInt().unwrap(),
+      value["nodeType"].asString().unwrap(),
+      (int)value["childNodeCount"].asInt().unwrap(),
+      value["children"],
+      value["attributes"]
+    });
   }
-  static matjson::Value to_json(const DOMNode& node) {
-    return matjson::Object {
+  static matjson::Value toJson(const DOMNode& node) {
+    return matjson::makeObject({
       {"nodeId", node.nodeId},
       {"parentId", node.parentId},
       {"nodeType", node.type},
       {"childNodeCount", node.childNodeCount},
       {"children", node.children},
       {"attributes", node.attributes},
-    };
+    });
   }
 };
 
@@ -152,13 +161,13 @@ matjson::Value jsonValueOf(CCObject* obj) {
     return std::string(idk->getCString());
   }
   else if (auto dict = geode::cast::typeinfo_cast<CCDictionary*>(obj)) {
-    matjson::Object d;
+    matjson::Value d;
     CCDictElement* o;
     CCDICT_FOREACH(dict,o) {
-      d.insert(std::make_pair(
+      d.set(
         std::string(o->getStrKey()), 
         jsonValueOf(o->getObject())
-      ));
+      );
     }
     return d;
   }
@@ -167,11 +176,11 @@ matjson::Value jsonValueOf(CCObject* obj) {
     return ni->getValue();
   }
   else if (auto m = geode::cast::typeinfo_cast<CCArray*>(obj)) {
-    matjson::Array arr;
-    arr.reserve(m->count());
+    auto arr = matjson::Value::array();
+    arr.asArray().unwrap().reserve(m->count());
     CCObject* o;
     CCARRAY_FOREACH(m, o) {
-      arr.push_back(jsonValueOf(o));
+      arr.push(jsonValueOf(o));
     }
     return arr;
   }
@@ -188,10 +197,11 @@ int nodeIdOf(CCNode* n) {
 DOMNode::DOMNode(CCNode *node, int depth)
   : nodeId(nodeIdOf(node)), parentId(nodeIdOf(node)), childNodeCount(node->getChildrenCount()) {
 #pragma region DOMNode children
-  children.reserve(childNodeCount);
+  
+  //children.reserve(childNodeCount);
   if (depth == 0) {
     for (auto *c : geode::cocos::CCArrayExt<CCNode *>(node->getChildren())) {
-      children.push_back(DOMNode(c,depth-1));
+      children.push(DOMNode(c,depth-1));
     }
   }
 #pragma endregion
@@ -226,10 +236,10 @@ void CCNode2::removeChild(CCNode *child) {
   CCNode::removeChild(child);
   //if (DOMDomainDisabled) return;
   if (true) return;
-  fireDOMEvent("childNodeRemoved", {
+  fireDOMEvent("childNodeRemoved", matjson::makeObject({
     {"parentNodeId", nodeIdOf(this)}, 
     {"nodeId", nodeIdOf(child)}
-  });
+  }));
 }
 
 void CCNode2::addChild(CCNode *child) {
@@ -237,10 +247,10 @@ void CCNode2::addChild(CCNode *child) {
   CCNode::addChild(child);
   if (true) return;
   //if (DOMDomainDisabled) return;
-  matjson::Object resp{
+  auto resp = matjson::makeObject({
     {"parentNodeId", nodeIdOf(this)},
     {"node", DOMNode(child)}
-  };
+  });
   if (p) {
     resp["previousNodeId"] = nodeIdOf(p);
   }
@@ -252,18 +262,18 @@ void CCNode2::setUserObject(std::string const &id, CCObject *value) {
   if (value) {
     m_fields->m_userObjects[id] = value;
     if (DOMDomainDisabled) return;
-    fireDOMEvent("attributeModified", {
+    fireDOMEvent("attributeModified", matjson::makeObject({
       {"nodeId", nodeIdOf(this)},
       {"name", id},
       {"value", jsonValueOf(value)}
-    });
+    }));
   } else {
     m_fields->m_userObjects.erase(id);
     if (DOMDomainDisabled) return;
-    fireDOMEvent("attributeRemoved", {
+    fireDOMEvent("attributeRemoved", matjson::makeObject({
       {"nodeId", nodeIdOf(this)}, 
       {"name", id}
-    });
+    }));
   }
 }
 
@@ -285,7 +295,7 @@ struct directorhook : geode::Modify<directorhook, CCDirector> {
   }
 };
 $domainMethod(click) {
-  CCNode* node = getNodeAt(as_optional_of<int>(params["nodeId"]).value_or(0)); 
+  CCNode* node = getNodeAt((params["nodeId"]).asInt().unwrapOr(0)); 
   if (node) {
     if (auto b = dynamic_cast<CCMenuItem*>(node)) {
       b->activate();
@@ -298,20 +308,17 @@ $domainMethod(click) {
     } else {
       return errors::invalidParameter("Node isn't classified as a button.");
     }
-    return geode::Ok(matjson::Object{});
+    return geode::Ok(matjson::Value::object());
   }
   return errors::internalError("Node doesn't exist.");
 }
 $domainMethod(describeNode) {
-  CCNode* node = getNodeAt(as_optional_of<int>(params["nodeId"]).value_or(0)); 
+  CCNode* node = getNodeAt(params["nodeId"].asInt().unwrapOr(0)); 
   if (node) {
-    int depth = 1;
-    if (!params["depth"].is_null()) {
-      depth = params["depth"].as_int();
-    }
-    return geode::Ok(matjson::Object{
+    int depth = params["depth"].asInt().unwrapOr(1);
+    return geode::Ok(matjson::makeObject({
       {"node",DOMNode(node,depth)}
-    });
+    }));
   } else {
     return geode::Err(
       std::make_tuple(-32602, "Node doesn't exist.")
@@ -320,24 +327,24 @@ $domainMethod(describeNode) {
 }
 $domainMethod(disableDOM) {
   DOMDomainDisabled = true;
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 $domainMethod(enableDOM) {
   DOMDomainDisabled = false;
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 $domainMethod(getAttributes) {
-  CCNode* node = getNodeAt(as_optional_of<int>(params["nodeId"]).value_or(0)); 
+  CCNode* node = getNodeAt(params["nodeId"].asInt().unwrapOr(0)); 
   if (node) {
-    matjson::Object attributes;
+    matjson::Value attributes;
     auto modify = static_cast<CCNode2*>(node);
     auto fields = modify->m_fields;
     for (auto& pair : fields->m_userObjects) {
       attributes[pair.first] = jsonValueOf(pair.second);
     }
-    return geode::Ok(matjson::Object{
+    return geode::Ok(matjson::makeObject({
       {"attributes",attributes}
-    });
+    }));
   } else {
     return geode::Err(
       std::make_tuple(-32602, "Node doesn't exist.")
@@ -345,11 +352,11 @@ $domainMethod(getAttributes) {
   }
 }
 $domainMethod(getAttribute) {
-  CCNode* node = getNodeAt(as_optional_of<int>(params["nodeId"]).value_or(0)); 
+  CCNode* node = getNodeAt(params["nodeId"].asInt().unwrapOr(0)); 
   if (node) {
-    return geode::Ok(matjson::Object{
-      {"value", jsonValueOf(node->getUserObject(params["name"].as_string()))}
-    });
+    return geode::Ok(matjson::makeObject({
+      {"value", jsonValueOf(node->getUserObject(params["name"].asString().unwrap()))}
+    }));
   } else {
     return geode::Err(
       std::make_tuple(-32602, "Node doesn't exist.")
@@ -357,12 +364,12 @@ $domainMethod(getAttribute) {
   }
 }
 $domainMethod(getBoxModel) {
-  CCNode* node = getNodeAt(as_optional_of<int>(params["nodeId"]).value_or(0)); 
+  CCNode* node = getNodeAt(params["nodeId"].asInt().unwrapOr(0)); 
   if (node) {
-    return geode::Ok(matjson::Object{
+    return geode::Ok(matjson::makeObject({
       {"width", node->CCNode::getContentSize().width},
       {"height", node->CCNode::getContentSize().height}
-    });
+    }));
   } else {
     return geode::Err(
       std::make_tuple(-32602, "Node doesn't exist.")
@@ -373,13 +380,10 @@ $domainMethod(getDocument) {
   CCNode* node = CCDirector::sharedDirector()->getRunningScene(); 
   if (node) {
     DOMDomainDisabled = false;
-    int depth = 1;
-    if (!params["depth"].is_null()) {
-      depth = params["depth"].as_int();
-    }
-    return geode::Ok(matjson::Object{
+    int depth = params["depth"].asInt().unwrapOr(1);
+    return geode::Ok(matjson::makeObject({
       {"root",DOMNode(node,depth)}
-    });
+    }));
   } else {
     return geode::Err(
       std::make_tuple(-32602, "No running scene.")
@@ -388,13 +392,13 @@ $domainMethod(getDocument) {
 }
 $domainMethod(getNodeForLocation) {
   if (DOMDomainDisabled) {
-    return geode::Ok(matjson::Object{});
+    return geode::Ok(matjson::Value::object());
   }
   auto root = CCDirector::sharedDirector()->getRunningScene();
   if (root) {
     CCPoint point{
-      (float)params["x"].as_int(),
-      (float)params["y"].as_int()
+      (float)params["x"].asInt().unwrap(),
+      (float)params["y"].asInt().unwrap()
     };
     int largest = 0;
     CCNode* ret = root;
@@ -402,7 +406,7 @@ $domainMethod(getNodeForLocation) {
     queue.push(root->getChildren());
 
     auto iiv = params["includeInvalidNode"];
-    bool includeInvalid = iiv.is_null() ? true : iiv.as_bool();
+    bool includeInvalid = iiv.asBool().unwrapOr(true);
 
     while (!queue.empty()) {
       auto children = queue.front();
@@ -424,9 +428,9 @@ $domainMethod(getNodeForLocation) {
         if (includeInvalid) queue.push(c->getChildren());
       }
     }
-    return geode::Ok(matjson::Object{
+    return geode::Ok(matjson::makeObject({
       {"nodeId", DOMNode(ret)}
-    });
+    }));
   } else {
     return geode::Err(
       std::make_tuple(-32602, "No running scene.")
@@ -438,14 +442,14 @@ $domainMethod(moveTo) {
   int targetId = 0;
   if (true) {
     auto v = params["nodeId"];
-    if (!v.is_number()) return errors::invalidParameter("Invalid 'nodeId' type.");
-    targetId = v.as_int();
+    if (!v.isNumber()) return errors::invalidParameter("Invalid 'nodeId' type.");
+    targetId = v.asInt().unwrap();
   }
   auto destId = 0;
   if (true) {
     auto v = params["targetNodeId"];
-    if (!v.is_number()) return errors::invalidParameter("Invalid 'targetNodeId' type..");
-    destId = v.as_int();
+    if (!v.isNumber()) return errors::invalidParameter("Invalid 'targetNodeId' type..");
+    destId = v.asInt().unwrap();
   }
   if (
     !params.contains("insertBeforeNodeId")
@@ -454,8 +458,8 @@ $domainMethod(moveTo) {
   ){
     return errors::invalidParameter("'insertBeforeNodeId' and 'insertAfterNodeId' cannot both be defined.");
   }
-  auto beforeId = as_optional_of<int>(params["insertBeforeNodeId"]);
-  auto afterId = as_optional_of<int>(params["insertAfterNodeId"]);
+  auto beforeId = params["insertBeforeNodeId"].asInt();
+  auto afterId = params["insertAfterNodeId"].asInt();
 
   // node check
   auto target = getNodeAt(targetId);
@@ -472,61 +476,61 @@ $domainMethod(moveTo) {
       destId
     ));
   }
-  if (!beforeId.has_value())
-  dest->insertBefore(target, getNodeAt(beforeId.value()));
-  else if (!afterId.has_value())
-  dest->insertAfter(target, getNodeAt(afterId.value()));
+  if (beforeId.isErr())
+  dest->insertBefore(target, getNodeAt(beforeId.unwrap()));
+  else if (afterId.isErr())
+  dest->insertAfter(target, getNodeAt(afterId.unwrap()));
   else dest->addChild(target);
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 $domainMethod(removeNode) { 
-  CCNode* node = getNodeAt(as_optional_of<int>(params["nodeId"]).value_or(0)); 
+  CCNode* node = getNodeAt(params["nodeId"].asInt().unwrapOr(0)); 
   if (node) {
     geode::queueInMainThread([node]{
       node->removeFromParentAndCleanup(false);
     });
   }
-  return geode::Ok(matjson::Object{});
+  return geode::Ok(matjson::Value::object());
 }
 $domainMethod(querySelector) { 
-  CCNode* node = getNodeAt(as_optional_of<int>(params["nodeId"]).value_or(0)); 
+  CCNode* node = getNodeAt(params["nodeId"].asInt().unwrapOr(0)); 
   if (node) {
-    if (auto ret = node->querySelector(params["selector"].as_string())) {
-      return geode::Ok(matjson::Object{
+    if (auto ret = node->querySelector(params["selector"].asString().unwrap())) {
+      return geode::Ok(matjson::makeObject({
         {"node", DOMNode(ret)}
-      });  
+      }));  
     }
     return errors::invalidParameter("idk");
   }
   return errors::internalError("Node doesn't exist.");
 }
 CCObject* cocosObjOf(matjson::Value& val) {
-  if (val.is_null()) return nullptr;
-  else if (val.is_array()) {
+  if (val.isNull()) return nullptr;
+  else if (val.isArray()) {
     CCArray* arr = CCArray::create();
-    for (auto& i : val.as_array()) {
+    for (auto& i : val.asArray().unwrap()) {
       arr->addObject(cocosObjOf(i));
     }
     return arr;
   }
-  else if (val.is_bool()) return CCBool::create(val.as_bool());
-  else if (val.is_number()) return CCDouble::create(val.as_double());
-  else if (val.is_object()) {
+  else if (val.isBool()) return CCBool::create(val.asBool().unwrap());
+  else if (val.isNumber()) return CCDouble::create(val.asDouble().unwrap());
+  else{
     CCDictionary* dict = CCDictionary::create();
-    for (auto& p : val.as_object()) {
-      dict->setObject(cocosObjOf(p.second), p.first);
+    for (auto& [k,v] : val) {
+      dict->setObject(cocosObjOf(v), k);
     }
+    return dict;
   }
-  return nullptr;
 }
 $domainMethod(setAttribute) {
-  CCNode* node = getNodeAt(as_optional_of<int>(params["nodeId"]).value_or(0)); 
+  CCNode* node = getNodeAt(params["nodeId"].asInt().unwrapOr(0)); 
   if (node) {
     node->setUserObject(
-      params["name"].as_string(),
+      params["name"].asString().unwrap(),
       cocosObjOf(params["value"])
     );
-    return geode::Ok(matjson::Object{});
+    return geode::Ok(matjson::Value::object());
   } else {
     return geode::Err(
       std::make_tuple(-32602, "Node doesn't exist.")
