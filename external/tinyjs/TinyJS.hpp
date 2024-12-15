@@ -363,7 +363,7 @@ private:
 
 class CScriptTokenDataFnc : public fixed_size_object<CScriptTokenDataFnc>, public CScriptTokenData {
 public:
-	CScriptTokenDataFnc() : line(0),isGenerator(false) {}
+	CScriptTokenDataFnc();
 	std::string file;
 	int line;
 	std::string name;
@@ -422,7 +422,7 @@ typedef std::vector<CScriptTokenDataForwardsPtr> FORWARDER_VECTOR_t;
 
 class CScriptTokenDataLoop : public fixed_size_object<CScriptTokenDataLoop>, public CScriptTokenData {
 public:
-	CScriptTokenDataLoop() { type=FOR; }
+	CScriptTokenDataLoop();
 	enum {FOR_EACH=0, FOR_IN, FOR_OF, FOR, WHILE, DO} type; // do not change the order
 	STRING_VECTOR_t labels;
 	TOKEN_VECT init;
@@ -657,12 +657,18 @@ typedef	SCRIPTVAR_CHILDS_t::iterator SCRIPTVAR_CHILDS_it;
 typedef	SCRIPTVAR_CHILDS_t::const_iterator SCRIPTVAR_CHILDS_cit;
 
 class CScriptVar : public fixed_size_object<CScriptVar> {
+  std::function<void(CScriptVar*)> destructor;
+  void* data;
 protected:
 	CScriptVar(CTinyJS *Context, const CScriptVarPtr &Prototype); ///< Create
 	CScriptVar(const CScriptVar &Copy); ///< Copy protected -> use clone for public
 private:
 	CScriptVar & operator=(const CScriptVar &Copy) MEMBER_DELETE; ///< private -> no assignment-Copy
 public:
+  void setDestructor(decltype(destructor) dtor) {destructor = dtor;}
+  void setUserData(void* d) {data = d;}
+  void* getUserData() {return data;}
+
 	virtual ~CScriptVar();
 	virtual CScriptVarPtr clone()=0;
 
@@ -806,7 +812,6 @@ public:
 	SCRIPTVAR_CHILDS_t Childs;
 
 	/// For memory management/garbage collection
-private:
 	CScriptVar *ref(); ///< Add reference to this variable
 	void unref(); ///< Remove a reference, and delete this variable if required
 public:

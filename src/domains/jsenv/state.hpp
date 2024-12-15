@@ -3,10 +3,10 @@
 
 #include "../../../external/tinyjs/TinyJS.hpp"
 
-TinyJS::Interpreter* getState();
+CTinyJS* getState();
 
 void nukeState();
 #endif
 
 
-#define $jsMethod(name) static void name(TinyJS::Variable* v, void* userdata)
+#define $jsMethod(name) static void name(CFunctionsScopePtr const& v, void* userdata)

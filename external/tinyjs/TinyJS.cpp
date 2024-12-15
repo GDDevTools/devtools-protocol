@@ -553,6 +553,11 @@ void CScriptLex::getNextToken() {
 	/* This isn't quite right yet */
 }
 
+///
+///
+///
+
+CScriptTokenDataFnc::CScriptTokenDataFnc() : line(0),isGenerator(false) {}
 
 //////////////////////////////////////////////////////////////////////////
 // CScriptTokenDataForwards
@@ -599,6 +604,8 @@ std::string CScriptTokenDataForwards::addLets( STRING_VECTOR_t &Lets )
 //////////////////////////////////////////////////////////////////////////
 // CScriptTokenDataLoop
 //////////////////////////////////////////////////////////////////////////
+
+CScriptTokenDataLoop::CScriptTokenDataLoop() { type=FOR; }
 
 std::string CScriptTokenDataLoop::getParsableString(const string &IndentString/*=""*/, const string &Indent/*=""*/ ) {
 	static const char *heads[] = {"for each(", "for(", "for(", "for(", "while(", "do "};
@@ -1089,8 +1096,8 @@ void CScriptTokenizer::tokenizeCode(CScriptLex &Lexer) {
 		tokenScopeStack.clear();
 		ScriptTokenState state;
 		pushForwarder(state);
-		if(l->tk == '§') { // special-Token at Start means the code begins not at Statement-Level
-			l->match('§');
+		if(l->tk == 0x00a7) { // special-Token at Start means the code begins not at Statement-Level
+			l->match(0x00a7);
 			tokenizeLiteral(state, 0);
 		} else do {
 			tokenizeStatement(state, 0);
@@ -2224,6 +2231,7 @@ CScriptVar::CScriptVar(const CScriptVar &Copy) {
 	for(it = Copy.Childs.begin(); it!= Copy.Childs.end(); ++it) {
 		addChild((*it)->getName(), (*it)->getVarPtr(), (*it)->getFlags());
 	}
+  setUserData(Copy.data);
 
 #if DEBUG_MEMORY
 	mark_allocated(this);
@@ -3792,7 +3800,7 @@ CScriptVarPtr CScriptVarRegExp::exec( const string &Input, bool Test /*= false*/
 			retVar->addChild("input", newScriptVar(Input));
 			retVar->addChild("index", newScriptVar(match.position()));
 			for(smatch::size_type idx=0; idx<match.size(); idx++)
-				retVar->addChild(int2string(idx), newScriptVar(match[idx].str()));
+				retVar->addChild(int2string((int)idx), newScriptVar(match[idx].str()));
 			return retVar;
 		}
 	}
@@ -4583,7 +4591,7 @@ CScriptVarFunctionNativePtr CTinyJS::addNative(const string &funcDesc, CScriptVa
 		lex.match(LEX_ID);
 	}
 
-	auto_ptr<CScriptTokenDataFnc> pFunctionData(new CScriptTokenDataFnc);
+	unique_ptr<CScriptTokenDataFnc> pFunctionData(new CScriptTokenDataFnc);
 	pFunctionData->name = funcName;
 	lex.match('(');
 	while (lex.tk!=')') {
@@ -6326,10 +6334,10 @@ void CTinyJS::native_Generator_prototype_next(const CFunctionsScopePtr &c, void 
 	CScriptVarGeneratorPtr Generator(c->getArgument("this"));
 	if(!Generator) {
 		static const char *fnc[] = {"next","send","close","throw"};
-		c->throwError(TypeError, string(fnc[(int)data])+" method called on incompatible Object");
+		c->throwError(TypeError, string(fnc[(intptr_t)data])+" method called on incompatible Object");
 	}
-	if((int)data >=2)
-		Generator->native_throw(c, (void*)(((int)data)-2));
+	if((intptr_t)data >=2)
+		Generator->native_throw(c, (void*)(((intptr_t)data)-2));
 	else
 		Generator->native_send(c, data);
 }

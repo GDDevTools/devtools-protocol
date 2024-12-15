@@ -12,9 +12,12 @@ project(Puppeteer VERSION 1.0.0)
 
 file(GLOB_RECURSE src src/*.cpp)
 file(GLOB_RECURSE incl src/*.hpp)
+file(GLOB_RECURSE incl2 src/*.h)
 add_library(${PROJECT_NAME} SHARED
     ${src}
     ${incl}
+    ${incl2}
+
     # Add any extra C++ source files here
 )
 
@@ -28,13 +31,6 @@ endif()
 add_compile_definitions(GEODE_EXPOSE_SECRET_INTERNALS_IN_HEADERS_DO_NOT_DEFINE_PLEASE)
 
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
-
-file(GLOB_RECURSE mujs_files_h external/mujs/*.h)
-add_library(mujs STATIC
-    ${mujs_files_h}
-    external/mujs/one.c
-)
-target_link_libraries(${PROJECT_NAME} mujs)
 
 setup_geode_mod(${PROJECT_NAME})
 

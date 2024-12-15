@@ -1,4 +1,4 @@
-#include "../../../../external/mujs/jsi.h"
+#include "../../../../external/tinyjs/TinyJS.hpp"
 #include "../state.hpp"
 #include <Geode/DefaultInclude.hpp>
 #include <Geode/Modify.hpp>
@@ -16,8 +16,8 @@ struct idk : geode::Modify<idk, cocos2d::CCNode> {
   }
 };
 
-static void finalize_Node(js_State *J, void *data) {
-  auto n = static_cast<idk*>(data);
+static void finalize_Node(CScriptVar* v) {
+  auto n = static_cast<idk*>(v->getUserData());
   if (n->m_fields->retainedByJS) {
     n->release();
   }
@@ -26,21 +26,22 @@ static void finalize_Node(js_State *J, void *data) {
 $jsMethod(new_Node) {
   cocos2d::CCNode* n;
   // creates a new one
-  if (!js_isnumber(s, 1)) {
+  if (!v->isNumber()) {
     n = cocos2d::CCNode::create();
     // keep it until this object gets removed
     n->retain();
     static_cast<idk*>(n)->m_fields->retainedByJS = true;
   } else {
     // make the object a wrapper of existing node
-    n = getNodeAt(js_tonumber(s,1));
+    n = getNodeAt(v->toNumber().toInt32());
   }
-  js_currentfunction(s);
-  js_getproperty(s, -1, "prototype");
-  js_newuserdata(s, "node", n, finalize_Node);
+  auto obj = newScriptVar(getState(), Object);
+  obj->setUserData(n);
 };
 
-static void Node_appendChild(js_State* s) {
+$jsMethod(Node_appendChild) {
+  auto n = static_cast<idk*>(v->getArgument(0)->getUserData());
+  n->m_fields->retainedByJS = false;
   /*
   auto n = (cocos2d::CCNode*)js_touserdata(s, 0, "node");
   js_Object* p1 = js_toobject(s,1);
@@ -48,7 +49,6 @@ static void Node_appendChild(js_State* s) {
   auto tn = (cocos2d::CCNode*)p1->u.user.data;
   n->addChild(tn);
   */
-  js_pushundefined(s);
 }
 
 $jsMethod(Node_contains) {
