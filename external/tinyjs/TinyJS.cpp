@@ -1515,7 +1515,7 @@ void CScriptTokenizer::tokenizeFunction(ScriptTokenState &State, int Flags, bool
 		if(!Statement) tk = LEX_T_FUNCTION_OPERATOR;
 	}
 	if(tk == LEX_R_FUNCTION) // only forward functions 
-		forward = !noLetDef && State.Forwarders.front() == State.Forwarders.back();
+		forward = !noLetDef && State.Forwarders.front().operator==(State.Forwarders.back());
 
 	CScriptToken FncToken(tk);
 	CScriptTokenDataFnc &FncData = FncToken.Fnc();
@@ -2963,7 +2963,7 @@ string CScriptVarNull::getVarType() { return "null"; }
 //////////////////////////////////////////////////////////////////////////
 
 CScriptVarString::CScriptVarString(CTinyJS *Context, const string &Data) : CScriptVarPrimitive(Context, Context->stringPrototype), data(Data) {
-	addChild("length", newScriptVar(data.size()), SCRIPTVARLINK_CONSTANT);
+	addChild("length", newScriptVar((long)data.size()), SCRIPTVARLINK_CONSTANT);
 /*
 	CScriptVarLinkPtr acc = addChild("length", newScriptVar(Accessor), 0);
 	CScriptVarFunctionPtr getter(::newScriptVar(Context, this, &CScriptVarString::native_Length, 0));
@@ -2984,7 +2984,7 @@ string CScriptVarString::getVarType() { return "string"; }
 
 CScriptVarPtr CScriptVarString::toObject() { 
 	CScriptVarPtr ret = newScriptVar(CScriptVarPrimitivePtr(this), context->stringPrototype); 
-	ret->addChild("length", newScriptVar(data.size()), SCRIPTVARLINK_CONSTANT);
+	ret->addChild("length", newScriptVar((long)data.size()), SCRIPTVARLINK_CONSTANT);
 	return ret;
 }
 
@@ -3798,7 +3798,7 @@ CScriptVarPtr CScriptVarRegExp::exec( const string &Input, bool Test /*= false*/
 
 			CScriptVarArrayPtr retVar = newScriptVar(Array);
 			retVar->addChild("input", newScriptVar(Input));
-			retVar->addChild("index", newScriptVar(match.position()));
+			retVar->addChild("index", newScriptVar((long)match.position()));
 			for(smatch::size_type idx=0; idx<match.size(); idx++)
 				retVar->addChild(int2string((int)idx), newScriptVar(match[idx].str()));
 			return retVar;
@@ -6518,8 +6518,8 @@ void CTinyJS::native_parseFloat(const CFunctionsScopePtr &c, void *) {
 
 
 void CTinyJS::native_JSON_parse(const CFunctionsScopePtr &c, void *data) {
-	string Code = "§" + c->getArgument("text")->toString();
-	// "§" is a spezal-token - it's for the tokenizer and means the code begins not in Statement-level
+	string Code = "ï¿½" + c->getArgument("text")->toString();
+	// "ï¿½" is a spezal-token - it's for the tokenizer and means the code begins not in Statement-level
 	CScriptVarLinkWorkPtr returnVar;
 	CScriptTokenizer *oldTokenizer = t; t=0;
 	try {

@@ -13,12 +13,18 @@ project(Puppeteer VERSION 1.0.0)
 file(GLOB_RECURSE src src/*.cpp)
 file(GLOB_RECURSE incl src/*.hpp)
 file(GLOB_RECURSE incl2 src/*.h)
+
+file(GLOB_RECURSE extsrc external/*.cpp)
+file(GLOB_RECURSE extincl external/*.hpp)
+file(GLOB_RECURSE extincl2 external/*.h)
 add_library(${PROJECT_NAME} SHARED
     ${src}
     ${incl}
     ${incl2}
 
-    # Add any extra C++ source files here
+    ${extsrc}
+    ${extincl}
+    ${extincl2}
 )
 
 if (NOT DEFINED ENV{GEODE_SDK})
@@ -27,8 +33,8 @@ else()
     message(STATUS "Found Geode: $ENV{GEODE_SDK}")
 endif()
 
-# i like this -henry
-add_compile_definitions(GEODE_EXPOSE_SECRET_INTERNALS_IN_HEADERS_DO_NOT_DEFINE_PLEASE)
+# nvm -henry
+# add_compile_definitions(GEODE_EXPOSE_SECRET_INTERNALS_IN_HEADERS_DO_NOT_DEFINE_PLEASE)
 
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 

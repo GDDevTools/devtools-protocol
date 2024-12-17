@@ -23,11 +23,21 @@ static void pushLog(CFunctionsScopePtr const& msg, geode::Severity severity) {
     for (int i = 0; i < argsLen; i++) {
       j += msg->getArgument(i)->toString() + " ";
     }
+  } else {
+    j = msg->getArgument(0)->toString();
   }
   pushLogStr(j, severity);
   msg->setReturnVar({newScriptVarUndefined(getState())});
 }
+$jsMethod(Console_assert) {
+  if (!v->getArgument(0)->toBoolean()) {
+    auto j = v->findChild(TINYJS_ARGUMENTS_VAR)->getVarPtr();
+    auto l = j->findChild(int2string(0));
+    j->removeLink(l);
 
+    pushLog(v, geode::Severity::Error);
+  }
+}
 $jsMethod(Console_log) {
   pushLog(v, geode::Severity::Info);
 }
@@ -149,7 +159,11 @@ static void Console_timeLog_impl(CFunctionsScopePtr const& v, bool end) {
   else label = arg->toString();
 
   pushLogStr(
-    label+": "+std::to_string(timers[label].count())+"ms"
+    label+": "+std::to_string((
+      timers[label] - std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()
+      )
+    ).count())+"ms"
       +(end?" - timer ended":""), 
     geode::Severity::Info
   );
@@ -170,18 +184,20 @@ $jsMethod(Console_timeEnd) {
 }
 
 $execute{
+  /*
   geode::ModMetadata meta("henrysck075.puppeteer.js");
 
   meta.setName("JavaScript");
   meta.setVersion(geode::VersionInfo{7,7,7});
   meta.setDescription("The representation of the JavaScript console output from GD DevTools Protocol.");
   meta.setDevelopers(geode::Mod::get()->getDevelopers());
-
-  representer = new geode::Mod(meta);
+*/
+  representer = geode::Mod::get();
 
   auto s = getState();
   {
     auto console = s->getRoot()->addChild("console", newScriptVar(s, Object))->getVarPtr();
+    console->addChild("assert", newScriptVar(s, Console_assert, 0, "console.assert"));
     console->addChild("log", newScriptVar(s, Console_log, 0, "console.log"));
     console->addChild("info", newScriptVar(s, Console_log, 0, "console.info"));
     console->addChild("debug", newScriptVar(s, Console_debug, 0, "console.debug"));
