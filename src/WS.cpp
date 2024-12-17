@@ -3,6 +3,7 @@
 //#include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocketServer.h>
 #include <matjson.hpp>
+#include "Geode/ui/Notification.hpp"
 #include "stuff.hpp"
 
 std::shared_ptr<Protocol> prot = nullptr;
@@ -73,7 +74,10 @@ bool Protocol::init() {
   ws->disablePong();
   ws->start();
   auto r = ws->listen();
-  if (!r.first) {throw std::runtime_error(r.second);};
+  if (!r.first) {
+    geode::Notification::create("Cannot open WebSocket server: "+r.second, geode::NotificationIcon::Error)->show();
+    return false;
+  };
   geode::log::debug("we are living, loving and lying with this one");
   running = true;
   return true;

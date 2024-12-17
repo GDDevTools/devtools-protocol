@@ -10,3 +10,5 @@ void nukeState();
 
 
 #define $jsMethod(name) static void name(CFunctionsScopePtr const& v, void* userdata)
+
+void nothing(CFunctionsScopePtr const &v, void *userdata);

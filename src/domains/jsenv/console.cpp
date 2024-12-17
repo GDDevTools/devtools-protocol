@@ -5,6 +5,7 @@
 #include <Geode/loader/Log.hpp>
 #include <Geode/loader/Mod.hpp>
 #include <Geode/loader/ModMetadata.hpp>
+#include <chrono>
 #include <iomanip>
 #include <numeric>
 #include <sstream>
@@ -16,10 +17,14 @@ static void pushLogStr(std::string const& msg, geode::Severity severity) {
   geode::log::logImpl(severity, representer, "{}", msg);
 }
 static void pushLog(CFunctionsScopePtr const& msg, geode::Severity severity) {
-  if (msg->isString()) {
-    std::string j = msg->getString();
-    pushLogStr(j, severity);
+  std::string j;
+  if (!msg->getArgument(0)->isString()) {
+    int argsLen = msg->getArgumentsLength();
+    for (int i = 0; i < argsLen; i++) {
+      j += msg->getArgument(i)->toString() + " ";
+    }
   }
+  pushLogStr(j, severity);
   msg->setReturnVar({newScriptVarUndefined(getState())});
 }
 
@@ -124,6 +129,45 @@ $jsMethod(Console_table) {
   pushLogStr(out.str(), geode::Severity::Info);
 }
 
+static std::map<std::string, std::chrono::milliseconds> timers;
+
+$jsMethod(Console_time) {
+  auto arg = v->getArgument(0);
+  std::string label;
+  if (arg->isUndefined()) label = "default";
+  else label = arg->toString();
+
+  timers[label] = std::chrono::duration_cast<std::chrono::milliseconds>(
+    std::chrono::system_clock::now().time_since_epoch()
+  );
+  v->setReturnVar(newScriptVarUndefined(getState()));
+}
+static void Console_timeLog_impl(CFunctionsScopePtr const& v, bool end) {
+  auto arg = v->getArgument(0);
+  std::string label;
+  if (arg->isUndefined()) label = "default";
+  else label = arg->toString();
+
+  pushLogStr(
+    label+": "+std::to_string(timers[label].count())+"ms"
+      +(end?" - timer ended":""), 
+    geode::Severity::Info
+  );
+
+  v->setReturnVar(newScriptVarUndefined(getState()));
+}
+$jsMethod(Console_timeLog) {
+  Console_timeLog_impl(v, false);
+}
+$jsMethod(Console_timeEnd) {
+  auto arg = v->getArgument(0);
+  std::string label;
+  if (arg->isUndefined()) label = "default";
+  else label = arg->toString();
+
+  Console_timeLog_impl(v, true);
+  timers.erase(label);
+}
 
 $execute{
   geode::ModMetadata meta("henrysck075.puppeteer.js");
@@ -149,5 +193,9 @@ $execute{
     console->addChild("groupEnd", newScriptVar(s, Console_groupEnd, 0, "console.groupEnd"));
 
     console->addChild("table", newScriptVar(s, Console_table, 0, "console.table"));
+
+    console->addChild("time", newScriptVar(s, Console_time, 0, "console.time"));
+    console->addChild("timeLog", newScriptVar(s, Console_timeLog, 0, "console.timeLog"));
+    console->addChild("timeEnd", newScriptVar(s, Console_timeEnd, 0, "console.timeEnd"));
   }
 }

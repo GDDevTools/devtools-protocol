@@ -25,3 +25,7 @@ public:
 };
 
 static bob not_bob;
+
+void nothing(CFunctionsScopePtr const &v, void *userdata) {
+  v->setReturnVar(newScriptVarUndefined(mumustate));
+}
