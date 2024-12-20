@@ -36,10 +36,20 @@ static void returnNode(CFunctionsScopePtr const& v, cocos2d::CCNode* n) {
 //////
 /// Properties
 //////
+#pragma region Properties
 
 $jsMethod(Node_childList_g) {
   auto arr = newScriptVar(getState(), Array);
-
+  int idx = 0;
+  for (auto* c : geode::cocos::CCArrayExt<cocos2d::CCNode*>(
+                  static_cast<cocos2d::CCNode*>(v->getArgument("this")->getUserData())
+                  ->getChildren()
+                )
+  ) {
+    arr->setArrayIndex(idx,createNodeObjFrom(c));
+    idx++;
+  }
+  v->setReturnVar(arr);
 }
 
 $jsMethod(Node_isConnected_g) {
@@ -53,7 +63,18 @@ $jsMethod(Node_isConnected_g) {
     )
   );
 }
+$jsMethod(Node_isSameNode) {
+  v->setReturnVar(
+    newScriptVarBool(
+      getState(),
 
+      // check if these 2 variables points to the same address
+      v->getArgument("this")->getUserData()
+      ==
+      v->getArgument("node")->getUserData()
+    )
+  );
+}
 
 $jsMethod(Node_firstChild_g) {
   auto node = static_cast<cocos2d::CCNode*>(v->getArgument("this")->getUserData());
@@ -128,11 +149,12 @@ ret:
   v->setReturnVar(newScriptVarUndefined(getState()));
   return;
 }
+#pragma endregion
 
 //////
 /// Functions
 //////
-
+#pragma region Functions
 $jsMethod(new_Node) {
   cocos2d::CCNode* n;
   // creates a new one
@@ -143,14 +165,52 @@ $jsMethod(new_Node) {
   auto obj = newScriptVar(getState(), Object);
   obj->setUserData(n);
 };
+#define $getNodeOfVariable2(n, var) \
+  cocos2d::CCNode* n = nullptr; \
+  { \
+    auto vava = var; \
+    n = vava->isObject() && vava->getUserData() != nullptr  \
+      ? static_cast<cocos2d::CCNode*>(vava->getUserData())  \
+      : nullptr; \
+    if (!n) { \
+      v->throwError(ReferenceError, "Not a valid Node object."); \
+      return; \
+    } \
+  } 
+#define $getNodeOfVariable(var) $getNodeOfVariable2(n, var)
 
 $jsMethod(Node_appendChild) {
-  auto n = static_cast<idk*>(v->getArgument("node")->getUserData());
+  $getNodeOfVariable(v->getArgument("node"));
   static_cast<idk*>(v->getArgument("this")->getUserData())->addChild(n);
   v->setReturnVar(newScriptVarUndefined(getState()));
 }
+$jsMethod(Node_removeChild) {
+  $getNodeOfVariable(v->getArgument("node"));
+  static_cast<idk*>(v->getArgument("this")->getUserData())->removeChild(n);
+  v->setReturnVar(newScriptVarUndefined(getState()));
+}
+$jsMethod(Node_replaceChild) {
+  $getNodeOfVariable2(oldNode, v->getArgument("oldChild"));
+  $getNodeOfVariable2(newNode, v->getArgument("newChild"));
+  auto thisNode = static_cast<cocos2d::CCNode*>(v->getArgument("this")->getUserData());
+  auto children = thisNode->getChildren();
+  int insertIndex = -1;
+  if (children) {
+    insertIndex = children->count()-1;
+    if (children->containsObject(oldNode)) {
+      insertIndex = children->indexOfObject(oldNode);
+      children->removeObjectAtIndex(insertIndex);
+    }
+  }
+  if (insertIndex == -1) {
+    thisNode->addChild(newNode);
+  } else {
+    children->insertObject(newNode,insertIndex);
+  }
+  v->setReturnVar(newScriptVarUndefined(getState()));
+}
 $jsMethod(Node_insertBefore) {
-  auto n = static_cast<idk*>(v->getArgument("node")->getUserData());
+  $getNodeOfVariable(v->getArgument("node"));
   auto rnv = v->getArgument("refNode");
   if (rnv->isNull())
     static_cast<idk*>(v->getArgument("this")->getUserData())->addChild(n);
@@ -222,8 +282,7 @@ $jsMethod(Node_hasChildNodes) {
     )
   );
 }
-#undef inline
-
+#pragma endregion
 
 extern "C" void registerDOMNodeObject() {
   auto s = getState();
@@ -231,6 +290,7 @@ extern "C" void registerDOMNodeObject() {
   auto proto = node->findChild(TINYJS_PROTOTYPE_CLASS)->getVarPtr();
   proto->addChild(TINYJS_CONSTRUCTOR_VAR, node);
   {
+    proto->addChild("childList", newScriptVarAccessor(s, Node_childList_g,0,&nothing,0));
     proto->addChild("firstChild", newScriptVarAccessor(s, Node_firstChild_g,0,&nothing,0));
     proto->addChild("isConnected", newScriptVarAccessor(s, Node_isConnected_g,0,&nothing,0));
     proto->addChild("lastChild", newScriptVarAccessor(s, Node_lastChild_g,0,&nothing,0));
@@ -243,5 +303,10 @@ extern "C" void registerDOMNodeObject() {
     s->addNative("function Node.prototype.getRootNode(node)", Node_getRootNode);
     s->addNative("function Node.prototype.hasChildNodes(node)", Node_hasChildNodes);
     s->addNative("function Node.prototype.insertBefore(node, refNode)", Node_insertBefore);
+    s->addNative("function Node.prototype.isSameNode(node)", Node_isSameNode);
+    s->addNative("function Node.prototype.removeChild(node)", Node_removeChild);
+    s->addNative("function Node.prototype.replaceChild(newChild, oldChild)", Node_replaceChild);
   }
+  auto var = s->addNative("function Node.__constructor__()", new_Node, 0, SCRIPTVARLINK_CONSTANT);
+  var->getFunctionData()->name = "Node";
 }

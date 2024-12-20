@@ -6156,7 +6156,6 @@ void CTinyJS::native_Object_keys(const CFunctionsScopePtr &c, void *data) {
 
 	uint32_t idx=0;
 	for(STRING_SET_it it=keys.begin(); it!=keys.end(); ++it)
-    if (obj->findChild(*it)->getVarPtr()->isEnumerable())
   		returnVar->setArrayIndex(idx++, newScriptVar(*it));
 }
 
