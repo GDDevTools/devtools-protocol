@@ -61,7 +61,7 @@ using namespace std;
 #define F_SGN(a)            ((a)>0 ? 1 : ((a)<0 ? -1 : 0 ))
 #define F_RNG(a,min,max)    ((a)<(min) ? min : ((a)>(max) ? max : a ))
  
-#ifndef _MSC_VER
+#ifdef the_impostor
 namespace
 {
 	double asinh( const double &value ) {

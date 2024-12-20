@@ -23,15 +23,24 @@ static void finalize_Node(CScriptVar* v) {
   }
 };
 
-static void returnNode(CFunctionsScopePtr const& v, cocos2d::CCNode* n) {
+static CScriptVarLinkPtr createNodeObjFrom(cocos2d::CCNode* n) {
   auto nodeobj = getState()->evaluateComplex("new Node()");
   static_cast<cocos2d::CCNode*>(nodeobj->getVarPtr()->getUserData())->release();
   nodeobj->getVarPtr()->setUserData(n);
-  v->setUserData(nodeobj->getVarPtr().getVar());
+  return nodeobj;
+}
+
+static void returnNode(CFunctionsScopePtr const& v, cocos2d::CCNode* n) {
+  v->setUserData(createNodeObjFrom(n)->getVarPtr().getVar());
 }
 //////
 /// Properties
 //////
+
+$jsMethod(Node_childList_g) {
+  auto arr = newScriptVar(getState(), Array);
+
+}
 
 $jsMethod(Node_isConnected_g) {
   v->setReturnVar(
@@ -215,7 +224,8 @@ $jsMethod(Node_hasChildNodes) {
 }
 #undef inline
 
-$execute {
+
+extern "C" void registerDOMNodeObject() {
   auto s = getState();
   auto node = s->addNative("function Node()", new_Node,0,SCRIPTVARLINK_CONSTANT);
   auto proto = node->findChild(TINYJS_PROTOTYPE_CLASS)->getVarPtr();

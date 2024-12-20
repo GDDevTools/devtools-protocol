@@ -2216,6 +2216,7 @@ private:
 	void native_Object_setObjectSecure(const CFunctionsScopePtr &c, void *data);
 	void native_Object_isSecureObject(const CFunctionsScopePtr &c, void *data);
 	void native_Object_keys(const CFunctionsScopePtr &c, void *data);
+	void native_Object_values(const CFunctionsScopePtr &c, void *data);
 	void native_Object_getOwnPropertyDescriptor(const CFunctionsScopePtr &c, void *data);
 	void native_Object_defineProperty(const CFunctionsScopePtr &c, void *data);
 	void native_Object_defineProperties(const CFunctionsScopePtr &c, void *data);

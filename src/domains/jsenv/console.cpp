@@ -7,9 +7,19 @@
 #include <Geode/loader/ModMetadata.hpp>
 #include <chrono>
 #include <iomanip>
+#include <matjson.hpp>
 #include <numeric>
 #include <sstream>
 #include <string>
+#include "../../WS.hpp"
+
+inline void fireConsoleEvent(
+  std::string type
+) {
+  fireEvent("Runtime.consoleAPICalled", matjson::makeObject({
+    {"type", type}
+  }));
+};
 
 geode::Mod* representer;
 
@@ -37,25 +47,45 @@ $jsMethod(Console_assert) {
 
     pushLog(v, geode::Severity::Error);
   }
+  fireConsoleEvent("assert");
 }
+
+static std::map<std::string, int64_t> counts;
+$jsMethod(Console_count) {
+  auto arg = v->getArgument(0);
+  std::string label;
+  if (arg->isUndefined()) label = "default";
+  else label = arg->toString();
+
+  counts[label]+=1;
+  pushLogStr(label+": "+std::to_string(counts[label]), geode::Severity::Info);
+  fireConsoleEvent("count");
+}
+
 $jsMethod(Console_log) {
   pushLog(v, geode::Severity::Info);
+  fireConsoleEvent("log");
 }
 $jsMethod(Console_debug) {
   pushLog(v, geode::Severity::Debug);
+  fireConsoleEvent("debug");
 }
 $jsMethod(Console_warn) {
   pushLog(v, geode::Severity::Warning);
+  fireConsoleEvent("warn");
 }
 $jsMethod(Console_error) {
   pushLog(v, geode::Severity::Error);
+  fireConsoleEvent("error");
 }
 
 $jsMethod(Console_group) {
   geode::log::pushNest(representer);
+  fireConsoleEvent("startGroup");
 }
 $jsMethod(Console_groupEnd) {
   geode::log::popNest(representer);
+  fireConsoleEvent("endGroup");
 }
 
 #include <cstdlib>

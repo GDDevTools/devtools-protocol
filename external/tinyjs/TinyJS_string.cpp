@@ -76,7 +76,7 @@ static void scStringCharCodeAt(const CFunctionsScopePtr &c, void *) {
 static void scStringConcat(const CFunctionsScopePtr &c, void *userdata) {
 	int length = c->getArgumentsLength();
 	string str = this2string(c);
-	for(int i=(int)userdata; i<length; i++)
+	for(int i=(intptr_t)userdata; i<length; i++)
 		str.append(c->getArgument(i)->toString());
 	c->setReturnVar(c->newScriptVar(str));
 }
@@ -322,8 +322,8 @@ static void scStringSearch(const CFunctionsScopePtr &c, void *userdata) {
 
 static void scStringSlice(const CFunctionsScopePtr &c, void *userdata) {
 	string str = this2string(c);
-	int length = c->getArgumentsLength()-((int)userdata & 1);
-	bool slice = ((int)userdata & 2) == 0;
+	int length = c->getArgumentsLength()-((intptr_t)userdata & 1);
+	bool slice = ((intptr_t)userdata & 2) == 0;
 	int start = c->getArgument("start")->toNumber().toInt32();
 	int end = (int)str.size();
 	if(slice && start<0) start = str.size()+start;
@@ -410,7 +410,7 @@ static void scStringSplit(const CFunctionsScopePtr &c, void *) {
 
 static void scStringSubstr(const CFunctionsScopePtr &c, void *userdata) {
 	string str = this2string(c);
-	int length = c->getArgumentsLength()-(int)userdata;
+	int length = c->getArgumentsLength()-(intptr_t)userdata;
 	int start = c->getArgument("start")->toNumber().toInt32();
 	if(start<0 || start>=(int)str.size()) 
 		c->setReturnVar(c->newScriptVar(""));
@@ -437,11 +437,11 @@ static void scStringTrim(const CFunctionsScopePtr &c, void *userdata) {
 	string str = this2string(c);
 	string::size_type start = 0;
 	string::size_type end = string::npos;
-	if((((int)userdata) & 2) == 0) {
+	if((((intptr_t)userdata) & 2) == 0) {
 		start = str.find_first_not_of(" \t\r\n");
 		if(start == string::npos) start = 0;
 	}
-	if((((int)userdata) & 1) == 0) {
+	if((((intptr_t)userdata) & 1) == 0) {
 		end = str.find_last_not_of(" \t\r\n");
 		if(end != string::npos) end = 1+end-start;
 	}

@@ -4272,6 +4272,7 @@ CTinyJS::CTinyJS() {
 	addNative("function Object.freeze(obj)", this, &CTinyJS::native_Object_setObjectSecure, (void*)2); 
 	addNative("function Object.isFrozen(obj)", this, &CTinyJS::native_Object_isSecureObject, (void*)2); 
 	addNative("function Object.keys(obj)", this, &CTinyJS::native_Object_keys); 
+	addNative("function Object.values(obj)", this, &CTinyJS::native_Object_values); 
 	addNative("function Object.getOwnPropertyNames(obj)", this, &CTinyJS::native_Object_keys, (void*)1); 
 	addNative("function Object.getOwnPropertyDescriptor(obj,name)", this, &CTinyJS::native_Object_getOwnPropertyDescriptor); 
 	addNative("function Object.defineProperty(obj,name,attributes)", this, &CTinyJS::native_Object_defineProperty); 
@@ -6131,6 +6132,19 @@ void CTinyJS::native_Object_isSecureObject(const CFunctionsScopePtr &c, void *da
 	c->setReturnVar(constScriptVar(ret));
 }
 
+void CTinyJS::native_Object_values(const CFunctionsScopePtr &c, void *data) {
+	CScriptVarPtr obj = c->getArgument(0);
+	if(!obj->isObject()) c->throwError(TypeError, "argument is not an object");
+	CScriptVarPtr returnVar = c->newScriptVar(Array);
+	c->setReturnVar(returnVar);
+
+	STRING_SET_t keys;
+	obj->keys(keys, data==0);
+
+	uint32_t idx=0;
+	for(STRING_SET_it it=keys.begin(); it!=keys.end(); ++it)
+		returnVar->setArrayIndex(idx++, obj->findChild(*it));
+}
 void CTinyJS::native_Object_keys(const CFunctionsScopePtr &c, void *data) {
 	CScriptVarPtr obj = c->getArgument(0);
 	if(!obj->isObject()) c->throwError(TypeError, "argument is not an object");
@@ -6142,7 +6156,8 @@ void CTinyJS::native_Object_keys(const CFunctionsScopePtr &c, void *data) {
 
 	uint32_t idx=0;
 	for(STRING_SET_it it=keys.begin(); it!=keys.end(); ++it)
-		returnVar->setArrayIndex(idx++, newScriptVar(*it));
+    if (obj->findChild(*it)->getVarPtr()->isEnumerable())
+  		returnVar->setArrayIndex(idx++, newScriptVar(*it));
 }
 
 void CTinyJS::native_Object_getOwnPropertyDescriptor(const CFunctionsScopePtr &c, void *data) {

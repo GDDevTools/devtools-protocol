@@ -157,9 +157,9 @@ public:
 		if(Wait) {
 			pthread_join(thread, &retvar);
 		}
-		return (int)retvar;
+		return (intptr_t)retvar;
 	}
-	int retValue() { return (int)retvar; }
+	int retValue() { return (intptr_t)retvar; }
 	bool isActiv() { return activ; }
 	bool isRunning() { return running; }
 	bool isStarted() { return started; }
