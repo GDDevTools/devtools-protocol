@@ -21,7 +21,7 @@ This .md file is generated from protocols.json so it's guaranteed to match with 
 import json
 from typing import Required, TypedDict, NotRequired
 
-file = json.load(open("protocols.json"))
+file = json.load(open("resources/protocols.json"))
 
 class ObjectArrayType(TypedDict, total=False):
     id: Required[str]
@@ -38,10 +38,11 @@ _ObjectProps = TypedDict("_ObjectProps", {
 class ObjectProps(_ObjectProps, ObjectArrayType, total=False):
     items: list[ObjectArrayType]
 
-class Command(TypedDict, total=False):
+class Event(TypedDict, total=False):
     name: Required[str]
     description: Required[str]
     params: list[ObjectProps]
+class Command(Event, total=False):
     returnValue: list[ObjectProps]
 
 class Domain(TypedDict,total=False):
@@ -49,7 +50,7 @@ class Domain(TypedDict,total=False):
     description: str
     types: list[dict]
     commands: list[Command]
-    events: list[dict]
+    events: list[Event]
 
 primitiveTypes = ['integer', 'number', 'boolean', 'string', 'object',
                   'any', 'array', 'binary']
@@ -67,48 +68,60 @@ def genPropTable(p: ObjectProps):
     <td><strong>{t if primitive else f'<a href="#{d.lower() if "." not in t else ""}{t.lower()}">{t}</a>'}</strong>{"<br>"+p['description'] if "description" in p else ""}{f"<br>Allowed Values: <code>{', '.join(p.get("enums",[]))}</code>" if t == "string" else ""}</td>
   </tr>"""
 
+def genPropsTable(d: str, cmd: Event):
+    doc=f"""### {d}.`{cmd['name']}`
+{cmd.get("description","")}
+
+"""
+    params = cmd.get("params")
+    ret = cmd.get("returnValue")
+    if (params != None or ret != None):
+        doc+="<table>"
+        if (params!=None):
+            doc+="""
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>"""
+            for p in params:
+                doc+=genPropTable(p)
+            doc+="\n</tbody>\n"
+        if (ret!=None):
+            doc+="""
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>"""
+            for r in ret:
+                doc+=genPropTable(r)
+            doc+="\n</tbody>\n"
+        doc+="</table>\n\n"
+    return doc
+
+
 domains: list[Domain] = file["domains"]
 for i in domains:
     d = i['domain']
     doc = f"""# `{d}` Domain
 {i.get('description','')}
 
-## Methods
 """
-
-    for cmd in i.get("commands",[]):
-        doc+=f"""### {d}.`{cmd['name']}`
-{cmd.get("description","")}
-
-"""
-        params = cmd.get("params")
-        ret = cmd.get("returnValue")
-        if (params != None or ret != None):
-            doc+="<table>"
-            if (params!=None):
-                doc+="""
-<thead>
-  <tr>
-    <th colspan="2">Parameters</th>
-  </tr>
-</thead>
-<tbody>"""
-                for p in params:
-                    doc+=genPropTable(p)
-                doc+="\n</tbody>\n"
-            if (ret!=None):
-                doc+="""
-<thead>
-  <tr>
-    <th colspan="2">Return Values</th>
-  </tr>
-</thead>
-<tbody>"""
-                for r in ret:
-                    doc+=genPropTable(r)
-                doc+="\n</tbody>\n"
-            doc+="</table>\n\n"
-
-    head+=doc+"\n"
+    
+    commands = i.get("commands",[])
+    if len(commands) != 0:
+        doc+="## Methods\n"
+        for cmd in commands:
+            doc+=genPropsTable(d, cmd)
+        head+=doc+"\n"
+    events = i.get("events",[])
+    if len(events) != 0:
+        doc+="## Events\n"
+        for evt in events:
+            doc+=genPropsTable(d, evt)
+        head+=doc+"\n"
 
 open("o.md","w").write(head)

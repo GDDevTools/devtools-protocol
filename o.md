@@ -27,9 +27,9 @@ If you want real click events then you can use [Input.`dispatchMouseEvent`](#inp
 
 <table>
 <thead>
-  <tr>
-    <th colspan="2">Parameters</th>
-  </tr>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
 </thead>
 <tbody>
   <tr>
@@ -44,9 +44,9 @@ Describes node given its id, does not require domain to be enabled. Does not sta
 
 <table>
 <thead>
-  <tr>
-    <th colspan="2">Parameters</th>
-  </tr>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
 </thead>
 <tbody>
   <tr>
@@ -60,14 +60,60 @@ Describes node given its id, does not require domain to be enabled. Does not sta
 </tbody>
 
 <thead>
-  <tr>
-    <th colspan="2">Return Values</th>
-  </tr>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
 </thead>
 <tbody>
   <tr>
     <td><code>node</code></td>
     <td><strong><a href="#domnode">Node</a></strong><br>Node description.</td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.`disable`
+Disables DOM agent.
+
+### DOM.`enable`
+Enables DOM agent.
+
+
+# `Log` Domain
+Get events whenever a log is pushed
+
+## Methods
+### Log.`disable`
+Disables the domain.
+
+### Log.`enable`
+Enables the domain.
+
+
+# `Log` Domain
+Get events whenever a log is pushed
+
+## Methods
+### Log.`disable`
+Disables the domain.
+
+### Log.`enable`
+Enables the domain.
+
+## Events
+### Log.`entryAdded`
+Issued when new message was logged.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>entry</code></td>
+    <td><strong><a href="#loglogentry">LogEntry</a></strong><br>The log entry.</td>
   </tr>
 </tbody>
 </table>
@@ -83,9 +129,9 @@ It won't actually be disabled until you [restart](#game-domain) the game.
 
 <table>
 <thead>
-  <tr>
-    <th colspan="2">Parameters</th>
-  </tr>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
 </thead>
 <tbody>
   <tr>
@@ -101,9 +147,9 @@ It won't actually be rnabled until you [restart](#game-domain) the game.
 
 <table>
 <thead>
-  <tr>
-    <th colspan="2">Parameters</th>
-  </tr>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
 </thead>
 <tbody>
   <tr>
@@ -118,9 +164,9 @@ Get non-custom(?) settings values
 
 <table>
 <thead>
-  <tr>
-    <th colspan="2">Parameters</th>
-  </tr>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
 </thead>
 <tbody>
   <tr>
@@ -134,9 +180,9 @@ Get non-custom(?) settings values
 </tbody>
 
 <thead>
-  <tr>
-    <th colspan="2">Return Values</th>
-  </tr>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
 </thead>
 <tbody>
   <tr>
@@ -151,9 +197,9 @@ Set non-custom(?) settings values
 
 <table>
 <thead>
-  <tr>
-    <th colspan="2">Parameters</th>
-  </tr>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
 </thead>
 <tbody>
   <tr>

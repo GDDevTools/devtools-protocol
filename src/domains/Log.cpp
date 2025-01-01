@@ -11,21 +11,21 @@ void vlogImplHook(geode::Severity sev, geode::Mod* mod, fmt::string_view format,
   std::string severityStr;
   switch (sev) {
     case geode::Severity::Debug:
-        severityStr = "verbose";
-        break;
+      severityStr = "verbose";
+      break;
     case geode::Severity::Info:
-        severityStr = "info";
-        break;
+      severityStr = "info";
+      break;
     case geode::Severity::Warning:
-        severityStr = "warning";
-        break;
+      severityStr = "warning";
+      break;
     case geode::Severity::Error:
-        severityStr = "error";
-        break;
+      severityStr = "error";
+      break;
     default:
-        severityStr = "?????";
-        break;
-    }
+      severityStr = "?????";
+      break;
+  }
   fireEvent("Log.entryAdded", matjson::makeObject({
     {"entry", matjson::makeObject({
       {"source", mod->getID()},

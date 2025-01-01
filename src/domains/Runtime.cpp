@@ -5,7 +5,7 @@
 #include "../WS.hpp"
 #include <matjson.hpp>
 #include <optional>
-#include "../../external/tinyjs/TinyJS.hpp"
+#include <henrysck075.javascript/external/tinyjs/TinyJS.hpp>
 #undef inline
 
 struct Preview {

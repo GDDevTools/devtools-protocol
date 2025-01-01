@@ -9,5 +9,12 @@
     "name": "GD DevTools Protocol",
     "version": "v0.9.7",
     "developer": "Honoka Kousaka",
-    "description": "fake cocos python bindings' backend"
+    "description": "fake cocos python bindings' backend",
+    "dependencies": [
+        {
+            "id": "henrysck075.javascript",
+            "importance": "required",
+            "version": "v0.2.2"
+        }
+    ]
 }

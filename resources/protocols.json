@@ -49,6 +49,33 @@
       ]
     },
     {
+      "domain": "Log",
+      "description": "Get events whenever a log is pushed",
+      "commands": [
+        {
+          "name": "disable",
+          "description": "Disables the domain."
+        },
+        {
+          "name": "enable",
+          "description": "Enables the domain."
+        }
+      ],
+      "events": [
+        {
+          "name": "entryAdded",
+          "description": "Issued when new message was logged.",
+          "params": [
+            {
+              "id": "entry",
+              "description": "The log entry.",
+              "$ref": "LogEntry"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "domain": "Mods",
       "description": "Manages a mod.",
       "commands": [
