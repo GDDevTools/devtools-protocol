@@ -29,4 +29,4 @@ resources/protocols.json
 I haven't tested it yet but I think if IXWebSocket supports it then yeah you can
 
 ## Can I have a catgirl?
-[no](https://www.pixiv.net/artworks/117988462)
+[no](https://www.pixiv.net/artworks/100528610)

@@ -90,6 +90,7 @@ domain Levels
   # Enables the Levels agent.
   command enable
 
+  # Get a local level.
   command getLocalLevel
     parameters
       # The level ID, can be seen in the game using Editor Level ID API (installed as required)
@@ -97,6 +98,7 @@ domain Levels
     returns
       Level level
 
+  # Get an online level.
   command getOnlineLevel
     parameters
       # The level ID.
@@ -104,6 +106,7 @@ domain Levels
     returns
       Level level
 
+  # Get some online level.
   command getOnlineLevels
     parameters
       # The page to retrieve the list from. Leave empty to fetch all of them

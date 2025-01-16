@@ -16,5 +16,16 @@
             "version": "v1.1.0",
             "importance": "required"
         }
-    ]
+    ],
+    "settings": {
+        "autostart": {
+            "type": "bool",
+            "default": true
+        }
+    },
+    "resources": {
+        "files": [
+            "protocol_definitions/protocols.json"
+        ]
+    }
 }

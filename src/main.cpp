@@ -12,7 +12,7 @@ $domainMethod(getProtInfo) {
     r.unwrap()
   );
 }
-$execute {
+void start() {
   for (auto* hook : geode::Mod::get()->getHooks()) {
     // hook as late as possible
     // so any mod willing not to call / delay original
@@ -20,4 +20,9 @@ $execute {
     hook->setPriority(INT_MAX);
   }
   Protocol::get()->init();
+}
+
+
+$execute {
+  if (geode::Mod::get()->getSettingValue<bool>("autostart")) start();
 }
