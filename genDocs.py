@@ -24,7 +24,7 @@ from typing import Required, TypedDict, NotRequired
 file = json.load(open("resources/protocols.json"))
 
 class ObjectArrayType(TypedDict, total=False):
-    id: Required[str]
+    name: Required[str]
     description: str
     optional: bool 
 
@@ -40,15 +40,19 @@ class ObjectProps(_ObjectProps, ObjectArrayType, total=False):
 
 class Event(TypedDict, total=False):
     name: Required[str]
-    description: Required[str]
-    params: list[ObjectProps]
+    description: str
+    parameters: list[ObjectProps]
 class Command(Event, total=False):
     returnValue: list[ObjectProps]
+class Type(_ObjectProps, total=False):
+    id: Required[str]
+    description: str
+    properties: list[ObjectProps]
 
 class Domain(TypedDict,total=False):
     domain: Required[str]
     description: str
-    types: list[dict]
+    types: list[Type]
     commands: list[Command]
     events: list[Event]
 
@@ -64,20 +68,39 @@ def genPropTable(p: ObjectProps):
         primitive = False
     return f"""
   <tr>
-    <td><code>{p['id']}</code>{"<br>(optional)" if p.get('optional', False) else ""}</td>
+    <td><code>{p['name']}</code>{"<br>(optional)" if p.get('optional', False) else ""}</td>
     <td><strong>{t if primitive else f'<a href="#{d.lower() if "." not in t else ""}{t.lower()}">{t}</a>'}</strong>{"<br>"+p['description'] if "description" in p else ""}{f"<br>Allowed Values: <code>{', '.join(p.get("enums",[]))}</code>" if t == "string" else ""}</td>
   </tr>"""
 
+def genTypeDocTable(d: str, cmd: Type):
+    doc=f"""### {d}.`{cmd['id']}`
+{cmd.get("description","")}
+
+"""
+    properties = cmd.get("properties")
+    if (properties != None):
+        doc+="<table>"
+        doc+="""
+<thead>
+<tr>
+<th colspan="2">Properties</th>
+</tr>
+</thead>
+<tbody>"""
+        for p in properties:
+            doc+=genPropTable(p)
+        doc+="\n</tbody>\n</thead>\n\n"
+    return doc
 def genPropsTable(d: str, cmd: Event):
     doc=f"""### {d}.`{cmd['name']}`
 {cmd.get("description","")}
 
 """
-    params = cmd.get("params")
+    parameters = cmd.get("parameters")
     ret = cmd.get("returnValue")
-    if (params != None or ret != None):
+    if (parameters != None or ret != None):
         doc+="<table>"
-        if (params!=None):
+        if (parameters!=None):
             doc+="""
 <thead>
 <tr>
@@ -85,7 +108,7 @@ def genPropsTable(d: str, cmd: Event):
 </tr>
 </thead>
 <tbody>"""
-            for p in params:
+            for p in parameters:
                 doc+=genPropTable(p)
             doc+="\n</tbody>\n"
         if (ret!=None):
@@ -116,12 +139,16 @@ for i in domains:
         doc+="## Methods\n"
         for cmd in commands:
             doc+=genPropsTable(d, cmd)
-        head+=doc+"\n"
     events = i.get("events",[])
     if len(events) != 0:
         doc+="## Events\n"
         for evt in events:
             doc+=genPropsTable(d, evt)
-        head+=doc+"\n"
+    types = i.get("types",[])
+    if len(types) != 0:
+        doc+="## Types\n"
+        for t in types:
+            doc+=genTypeDocTable(d, t)
+    head+=doc+"\n"
 
 open("o.md","w").write(head)

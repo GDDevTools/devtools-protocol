@@ -141,6 +141,110 @@
       ]
     },
     {
+      "domain": "Levels",
+      "description": "Manages the levels list.",
+      "commands": [
+        {
+          "name": "disable",
+          "description": "Disables the Levels agent."
+        },
+        {
+          "name": "enable",
+          "description": "Enables the Levels agent."
+        },
+        {
+          "name": "getLocalLevel",
+          "parameters": [
+            {
+              "name": "id",
+              "description": "The level ID, can be seen in the game using Editor Level ID API (installed as required)",
+              "type": "integer"
+            }
+          ],
+          "returns": [
+            {
+              "name": "level",
+              "$ref": "Level"
+            }
+          ]
+        },
+        {
+          "name": "getOnlineLevel",
+          "parameters": [
+            {
+              "name": "id",
+              "description": "The level ID.",
+              "type": "integer"
+            }
+          ],
+          "returns": [
+            {
+              "name": "level",
+              "$ref": "Level"
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "name": "levelCreated",
+          "parameters": [
+            {
+              "name": "id",
+              "type": "integer"
+            }
+          ]
+        },
+        {
+          "name": "levelDeleted",
+          "parameters": [
+            {
+              "name": "level",
+              "$ref": "Level"
+            }
+          ]
+        }
+      ],
+      "types": [
+        {
+          "id": "Level",
+          "description": "yo level",
+          "type": "object",
+          "properties": [
+            {
+              "name": "type",
+              "description": "The level type. This indicate which getLevel function to use.",
+              "type": "string",
+              "enum": [
+                "main",
+                "local",
+                "online"
+              ]
+            },
+            {
+              "name": "id",
+              "description": "The level ID.",
+              "type": "integer"
+            },
+            {
+              "name": "downloads",
+              "description": "Downloads count",
+              "type": "integer"
+            },
+            {
+              "name": "author",
+              "description": "The creator of the level.",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "domain": "Mods",
       "description": "Manages a mod.",
       "commands": [

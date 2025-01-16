@@ -83,6 +83,58 @@ domain Log
     parameters
       LogEntry entry
 
+# Manages the levels list.
+domain Levels
+  # Disables the Levels agent.
+  command disable
+  # Enables the Levels agent.
+  command enable
+
+  command getLocalLevel
+    parameters
+      # The level ID, can be seen in the game using Editor Level ID API (installed as required)
+      integer id
+    returns
+      Level level
+
+  command getOnlineLevel
+    parameters
+      # The level ID.
+      integer id
+    returns
+      Level level
+
+  command getOnlineLevels
+    parameters
+      # The page to retrieve the list from. Leave empty to fetch all of them
+      optional integer page
+    returns
+      array of Level
+
+  event levelCreated
+    parameters
+      integer id
+
+  event levelDeleted
+    parameters
+      Level level
+
+  # yo level
+  type Level extends object
+    properties
+      # The level type. This indicate which getLevel function to use.
+      enum type
+        main
+        local
+        online
+      # The level ID.
+      integer id
+      # Downloads count
+      integer downloads
+      # The creator of the level.
+      string author
+      string name
+
 # Manages a mod.
 domain Mods
   # Disables a specific mod.  
