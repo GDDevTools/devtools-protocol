@@ -1,12 +1,10 @@
 GD DevTools Protocol Domains Reference (INCOMPLETE)
 ---
 
-Except from some derivations (such as `Browser` domain renamed to `Game`), this api is similar to the [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/) so if you're familiar with it then there shouldn't be any issues working with this :D
+Except from some changes (such as `Browser` domain renamed to `Game`), this api is similar to the [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/) so if you're familiar with it then there shouldn't be any issues working with this :D
 
 This .md file is generated from protocols.json so it's guaranteed to match with the protocols list returned.
 
-> **Note** that this reference ==only documents what's currently available in the mod itself==, so don't expect every features of CDP available (especially on the early releases of the mod)
-> 
 > **Note 2** most of this docs will sound similar to the docs from the aforementioned protocol and it's intended. Don't ask anything about that.
 
 
@@ -96,6 +94,7 @@ Box model.
   </tr>
 </tbody>
 </thead>
+</table>
 
 ### DOM.`Node`
 DOM interaction is implemented in terms of mirror objects that represent the actual DOM nodes.
@@ -136,6 +135,7 @@ fire DOM events for nodes known to the client.</td>
   </tr>
 </tbody>
 </thead>
+</table>
 
 
 # `Log` Domain
@@ -177,8 +177,50 @@ Disables the Levels agent.
 ### Levels.`enable`
 Enables the Levels agent.
 
-### Levels.`getLocalLevel`
+### Levels.`getLocalList`
+Get a local list.
 
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>id</code></td>
+    <td><strong>integer</strong><br>The list ID, can be seen in the game using Editor List ID API (installed as required).</td>
+  </tr>
+  <tr>
+    <td><code>includeLevels</code><br>(optional)</td>
+    <td><strong><a href="#levelsbool">bool</a></strong><br>Bundle the levels with the response. Defaults to false.</td>
+  </tr>
+</tbody>
+</table>
+
+### Levels.`getSavedList`
+Get a saved online list.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>id</code></td>
+    <td><strong>integer</strong><br>The list ID.</td>
+  </tr>
+  <tr>
+    <td><code>includeLevels</code><br>(optional)</td>
+    <td><strong><a href="#levelsbool">bool</a></strong><br>Bundle the levels with the response. Defaults to false.</td>
+  </tr>
+</tbody>
+</table>
+
+### Levels.`getLocalLevel`
+Get a local level.
 
 <table>
 <thead>
@@ -194,8 +236,8 @@ Enables the Levels agent.
 </tbody>
 </table>
 
-### Levels.`getOnlineLevel`
-
+### Levels.`getSavedLevel`
+Get a saved online level.
 
 <table>
 <thead>
@@ -211,9 +253,8 @@ Enables the Levels agent.
 </tbody>
 </table>
 
-## Events
-### Levels.`levelCreated`
-
+### Levels.`getSavedLevels`
+Get some online level.
 
 <table>
 <thead>
@@ -223,14 +264,66 @@ Enables the Levels agent.
 </thead>
 <tbody>
   <tr>
-    <td><code>id</code></td>
-    <td><strong>integer</strong></td>
+    <td><code>page</code><br>(optional)</td>
+    <td><strong>integer</strong><br>The page to retrieve the list from. Leave empty to fetch all of them</td>
+  </tr>
+</tbody>
+</table>
+
+## Events
+### Levels.`listCreated`
+Fired when a new list was created
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>list</code></td>
+    <td><strong><a href="#levelslevellist">LevelList</a></strong></td>
+  </tr>
+</tbody>
+</table>
+
+### Levels.`listDeleted`
+Fired when a list was deleted
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>list</code></td>
+    <td><strong><a href="#levelslevellist">LevelList</a></strong></td>
+  </tr>
+</tbody>
+</table>
+
+### Levels.`levelCreated`
+Fired when a new level was created
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>level</code></td>
+    <td><strong><a href="#levelslevel">Level</a></strong></td>
   </tr>
 </tbody>
 </table>
 
 ### Levels.`levelDeleted`
-
+Fired when a level was deleted
 
 <table>
 <thead>
@@ -247,6 +340,44 @@ Enables the Levels agent.
 </table>
 
 ## Types
+### Levels.`LevelList`
+yo list
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Properties</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>type</code></td>
+    <td><strong>string</strong><br>The list type. This indicate which getList function to use.<br>Allowed Values: <code></code></td>
+  </tr>
+  <tr>
+    <td><code>id</code></td>
+    <td><strong>integer</strong><br>The list ID.</td>
+  </tr>
+  <tr>
+    <td><code>downloads</code><br>(optional)</td>
+    <td><strong>integer</strong><br>Downloads count</td>
+  </tr>
+  <tr>
+    <td><code>author</code></td>
+    <td><strong>string</strong><br>The creator of the list.<br>Allowed Values: <code></code></td>
+  </tr>
+  <tr>
+    <td><code>name</code></td>
+    <td><strong>string</strong><br>Allowed Values: <code></code></td>
+  </tr>
+  <tr>
+    <td><code>levels</code></td>
+    <td><strong>array</strong><br>list of levels, empty if includeLevels is false</td>
+  </tr>
+</tbody>
+</thead>
+</table>
+
 ### Levels.`Level`
 yo level
 
@@ -266,7 +397,7 @@ yo level
     <td><strong>integer</strong><br>The level ID.</td>
   </tr>
   <tr>
-    <td><code>downloads</code></td>
+    <td><code>downloads</code><br>(optional)</td>
     <td><strong>integer</strong><br>Downloads count</td>
   </tr>
   <tr>
@@ -279,6 +410,7 @@ yo level
   </tr>
 </tbody>
 </thead>
+</table>
 
 
 # `Mods` Domain

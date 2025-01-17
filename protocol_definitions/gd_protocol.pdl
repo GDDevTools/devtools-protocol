@@ -90,6 +90,26 @@ domain Levels
   # Enables the Levels agent.
   command enable
 
+  # Get a local list.
+  command getLocalList
+    parameters
+      # The list ID, can be seen in the game using Editor List ID API (installed as required).
+      integer id
+      # Bundle the levels with the response. Defaults to false.
+      optional bool includeLevels
+    returns
+      LevelList list
+
+  # Get a saved online list.
+  command getSavedList
+    parameters
+      # The list ID.
+      integer id
+      # Bundle the levels with the response. Defaults to false.
+      optional bool includeLevels
+    returns
+      LevelList list
+
   # Get a local level.
   command getLocalLevel
     parameters
@@ -98,8 +118,8 @@ domain Levels
     returns
       Level level
 
-  # Get an online level.
-  command getOnlineLevel
+  # Get a saved online level.
+  command getSavedLevel
     parameters
       # The level ID.
       integer id
@@ -107,33 +127,62 @@ domain Levels
       Level level
 
   # Get some online level.
-  command getOnlineLevels
+  command getSavedLevels
     parameters
       # The page to retrieve the list from. Leave empty to fetch all of them
       optional integer page
     returns
       array of Level
 
+
+  # Fired when a new list was created
+  event listCreated
+    parameters
+      LevelList list
+
+  # Fired when a list was deleted
+  event listDeleted
+    parameters
+      LevelList list
+
+  # Fired when a new level was created
   event levelCreated
     parameters
-      integer id
+      Level level
 
+  # Fired when a level was deleted
   event levelDeleted
     parameters
       Level level
+
+  # yo list
+  type LevelList extends object
+    properties
+      # The list type. This indicate which getList function to use.
+      enum type
+        local
+        online
+      # The list ID.
+      integer id
+      # Downloads count
+      optional integer downloads
+      # The creator of the list.
+      string author
+      string name
+      # list of levels, empty if includeLevels is false
+      array of Level levels
 
   # yo level
   type Level extends object
     properties
       # The level type. This indicate which getLevel function to use.
       enum type
-        main
         local
         online
       # The level ID.
       integer id
       # Downloads count
-      integer downloads
+      optional integer downloads
       # The creator of the level.
       string author
       string name

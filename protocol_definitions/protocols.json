@@ -153,7 +153,54 @@
           "description": "Enables the Levels agent."
         },
         {
+          "name": "getLocalList",
+          "description": "Get a local list.",
+          "parameters": [
+            {
+              "name": "id",
+              "description": "The list ID, can be seen in the game using Editor List ID API (installed as required).",
+              "type": "integer"
+            },
+            {
+              "name": "includeLevels",
+              "description": "Bundle the levels with the response. Defaults to false.",
+              "optional": true,
+              "$ref": "bool"
+            }
+          ],
+          "returns": [
+            {
+              "name": "list",
+              "$ref": "LevelList"
+            }
+          ]
+        },
+        {
+          "name": "getSavedList",
+          "description": "Get a saved online list.",
+          "parameters": [
+            {
+              "name": "id",
+              "description": "The list ID.",
+              "type": "integer"
+            },
+            {
+              "name": "includeLevels",
+              "description": "Bundle the levels with the response. Defaults to false.",
+              "optional": true,
+              "$ref": "bool"
+            }
+          ],
+          "returns": [
+            {
+              "name": "list",
+              "$ref": "LevelList"
+            }
+          ]
+        },
+        {
           "name": "getLocalLevel",
+          "description": "Get a local level.",
           "parameters": [
             {
               "name": "id",
@@ -169,7 +216,8 @@
           ]
         },
         {
-          "name": "getOnlineLevel",
+          "name": "getSavedLevel",
+          "description": "Get a saved online level.",
           "parameters": [
             {
               "name": "id",
@@ -183,20 +231,60 @@
               "$ref": "Level"
             }
           ]
+        },
+        {
+          "name": "getSavedLevels",
+          "description": "Get some online level.",
+          "parameters": [
+            {
+              "name": "page",
+              "description": "The page to retrieve the list from. Leave empty to fetch all of them",
+              "optional": true,
+              "type": "integer"
+            }
+          ],
+          "returns": [
+            {
+              "name": "of",
+              "type": "array"
+            }
+          ]
         }
       ],
       "events": [
         {
-          "name": "levelCreated",
+          "name": "listCreated",
+          "description": "Fired when a new list was created",
           "parameters": [
             {
-              "name": "id",
-              "type": "integer"
+              "name": "list",
+              "$ref": "LevelList"
+            }
+          ]
+        },
+        {
+          "name": "listDeleted",
+          "description": "Fired when a list was deleted",
+          "parameters": [
+            {
+              "name": "list",
+              "$ref": "LevelList"
+            }
+          ]
+        },
+        {
+          "name": "levelCreated",
+          "description": "Fired when a new level was created",
+          "parameters": [
+            {
+              "name": "level",
+              "$ref": "Level"
             }
           ]
         },
         {
           "name": "levelDeleted",
+          "description": "Fired when a level was deleted",
           "parameters": [
             {
               "name": "level",
@@ -207,6 +295,50 @@
       ],
       "types": [
         {
+          "id": "LevelList",
+          "description": "yo list",
+          "type": "object",
+          "properties": [
+            {
+              "name": "type",
+              "description": "The list type. This indicate which getList function to use.",
+              "type": "string",
+              "enum": [
+                "local",
+                "online"
+              ]
+            },
+            {
+              "name": "id",
+              "description": "The list ID.",
+              "type": "integer"
+            },
+            {
+              "name": "downloads",
+              "description": "Downloads count",
+              "optional": true,
+              "type": "integer"
+            },
+            {
+              "name": "author",
+              "description": "The creator of the list.",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "levels",
+              "description": "list of levels, empty if includeLevels is false",
+              "type": "array",
+              "items": {
+                "$ref": "Level"
+              }
+            }
+          ]
+        },
+        {
           "id": "Level",
           "description": "yo level",
           "type": "object",
@@ -216,7 +348,6 @@
               "description": "The level type. This indicate which getLevel function to use.",
               "type": "string",
               "enum": [
-                "main",
                 "local",
                 "online"
               ]
@@ -229,6 +360,7 @@
             {
               "name": "downloads",
               "description": "Downloads count",
+              "optional": true,
               "type": "integer"
             },
             {

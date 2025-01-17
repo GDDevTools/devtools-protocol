@@ -3,11 +3,7 @@
 #include "WS.hpp"
 
 $domainMethod(getProtInfo) {
-  std::string c = cocos2d::CCFileUtils::get()->fullPathForFilename("protocols.json"_spr,true);
-  auto r = geode::utils::file::readJson(std::filesystem::path(c));
-  if (r.isErr()) {
-    return errors::internalError("?");
-  }
+  std::string c = geode::utils::file::readFile(geode::Mod::get()->getResourcesPath() / "protocols.json");
   return geode::Ok(
     r.unwrap()
   );

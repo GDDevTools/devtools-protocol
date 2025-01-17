@@ -12,4 +12,15 @@ inline int now() {
   ).count();
 }
 
+template<typename otter, typename T>
+std::vector<T> map_(std::vector<otter>& input, std::function<T(otter&)> p) {
+  std::vector<T> the;
+  the.reserve(input.size());
+  for (auto& i : input) {
+    the.push_back(p(i));
+  }
+  return the;
+}
+
+
 GEODE_NOINLINE uintptr_t getModule(const char* module);

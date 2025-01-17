@@ -43,7 +43,7 @@ public:
 };
 void fireEvent(std::string eventName, matjson::Value const& content);
 
-#define $domainMethod(method) Protocol::FunctionReturnType method(matjson::Value& params)
+#define $domainMethod(method) static Protocol::FunctionReturnType method(matjson::Value& params)
 #define $domainAsyncMethod(method) void method(matjson::Value& params, void(Protocol::FunctionReturnType) finish)
 
 namespace errors {

@@ -7,8 +7,6 @@ Except from some changes (such as `Browser` domain renamed to `Game`), this api 
 
 This .md file is generated from protocols.json so it's guaranteed to match with the protocols list returned.
 
-> **Note** that this reference ==only documents what's currently available in the mod itself==, so don't expect every features of CDP available (especially on the early releases of the mod)
-> 
 > **Note 2** most of this docs will sound similar to the docs from the aforementioned protocol and it's intended. Don't ask anything about that.
 
 
@@ -151,4 +149,4 @@ for i in domains:
             doc+=genTypeDocTable(d, t)
     head+=doc+"\n"
 
-open("o.md","w").write(head)
+open("GDP_Domains_Reference.md","w").write(head)
