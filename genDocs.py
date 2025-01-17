@@ -3,7 +3,7 @@ from __future__ import annotations
 head = """GD DevTools Protocol Domains Reference (INCOMPLETE)
 ---
 
-Except from some derivations (such as `Browser` domain renamed to `Game`), this api is similar to the [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/) so if you're familiar with it then there shouldn't be any issues working with this :D
+Except from some changes (such as `Browser` domain renamed to `Game`), this api is similar to the [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/) so if you're familiar with it then there shouldn't be any issues working with this :D
 
 This .md file is generated from protocols.json so it's guaranteed to match with the protocols list returned.
 
@@ -21,7 +21,7 @@ This .md file is generated from protocols.json so it's guaranteed to match with 
 import json
 from typing import Required, TypedDict, NotRequired
 
-file = json.load(open("resources/protocols.json"))
+file = json.load(open("protocol_definitions/protocols.json"))
 
 class ObjectArrayType(TypedDict, total=False):
     name: Required[str]
@@ -89,7 +89,7 @@ def genTypeDocTable(d: str, cmd: Type):
 <tbody>"""
         for p in properties:
             doc+=genPropTable(p)
-        doc+="\n</tbody>\n</thead>\n\n"
+        doc+="\n</tbody>\n</thead>\n</table>\n\n"
     return doc
 def genPropsTable(d: str, cmd: Event):
     doc=f"""### {d}.`{cmd['name']}`
