@@ -13,7 +13,7 @@ inline int now() {
 }
 
 template<typename otter, typename T>
-std::vector<T> map_(std::vector<otter>& input, std::function<T(otter&)> p) {
+std::vector<T> map_(const std::vector<otter>& input, std::function<T(const otter&)> p) {
   std::vector<T> the;
   the.reserve(input.size());
   for (auto& i : input) {
@@ -21,6 +21,9 @@ std::vector<T> map_(std::vector<otter>& input, std::function<T(otter&)> p) {
   }
   return the;
 }
-
+template<matjson::CanDeserialize T>
+std::vector<T> deserializeJsonArray(const std::vector<matjson::Value>& inp) {
+  return map_<matjson::Value, T>(inp, [](const matjson::Value& e){return matjson::Serialize<T>::fromJson(e).unwrap();});
+}
 
 GEODE_NOINLINE uintptr_t getModule(const char* module);

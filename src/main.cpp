@@ -3,10 +3,8 @@
 #include "WS.hpp"
 
 $domainMethod(getProtInfo) {
-  std::string c = geode::utils::file::readFile(geode::Mod::get()->getResourcesPath() / "protocols.json");
-  return geode::Ok(
-    r.unwrap()
-  );
+  std::string c = geode::utils::file::readString(geode::Mod::get()->getResourcesDir() / "protocols.json").unwrap();
+  return geode::Ok(c);
 }
 void start() {
   for (auto* hook : geode::Mod::get()->getHooks()) {

@@ -4,7 +4,7 @@
 #include "../WS.hpp"
 #include <matjson.hpp>
 #include <optional>
-#include <henrysck075.javascript/src/jsenv/state.hpp>
+#include "jsenv/state.hpp"
 #undef inline
 
 struct Preview {

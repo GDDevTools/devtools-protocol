@@ -165,7 +165,7 @@
               "name": "includeLevels",
               "description": "Bundle the levels with the response. Defaults to false.",
               "optional": true,
-              "$ref": "bool"
+              "type": "boolean"
             }
           ],
           "returns": [
@@ -188,7 +188,7 @@
               "name": "includeLevels",
               "description": "Bundle the levels with the response. Defaults to false.",
               "optional": true,
-              "$ref": "bool"
+              "type": "boolean"
             }
           ],
           "returns": [
@@ -245,8 +245,11 @@
           ],
           "returns": [
             {
-              "name": "of",
-              "type": "array"
+              "name": "levels",
+              "type": "array",
+              "items": {
+                "$ref": "Level"
+              }
             }
           ]
         }

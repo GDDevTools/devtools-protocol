@@ -96,7 +96,7 @@ domain Levels
       # The list ID, can be seen in the game using Editor List ID API (installed as required).
       integer id
       # Bundle the levels with the response. Defaults to false.
-      optional bool includeLevels
+      optional boolean includeLevels
     returns
       LevelList list
 
@@ -106,7 +106,7 @@ domain Levels
       # The list ID.
       integer id
       # Bundle the levels with the response. Defaults to false.
-      optional bool includeLevels
+      optional boolean includeLevels
     returns
       LevelList list
 
@@ -132,7 +132,7 @@ domain Levels
       # The page to retrieve the list from. Leave empty to fetch all of them
       optional integer page
     returns
-      array of Level
+      array of Level levels
 
 
   # Fired when a new list was created
