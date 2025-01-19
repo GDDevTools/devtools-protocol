@@ -73,7 +73,7 @@
       "commands": [
         {
           "name": "click",
-          "description": "Try sending a click to the node without actually clicking.\nOnly works for `button` nodes.\n\nFirst it tries to cast the node to `CCMenuItem` and clicks it.\nIf it isn't a `CCMenuItem` then it will send a `DispatchEvent(\\\"puppeteer/nodeClicked\\\")` event\nto the game so nodes implmenting that can handle as it needs.\n\nIf you want real click events then you can use [Input.`dispatchMouseEvent`](#inputdispatchmouseevent) instead.",
+          "description": "Try sending a click to the node without actually clicking.\nOnly works for `button` nodes.\n\nFirst it tries to cast the node to `CCMenuItem` and clicks it.\nIf it isn't a `CCMenuItem` then it will send a `DispatchEvent(\"puppeteer/nodeClicked\")` event\nto the game so nodes implmenting that can handle as it needs.\n\nIf you want real click events then you can use [Input.dispatchMouseEvent](method:Input.dispatchMouseEvent) instead.",
           "parameters": [
             {
               "name": "nodeId",
@@ -385,7 +385,7 @@
       "commands": [
         {
           "name": "disableMod",
-          "description": "Disables a specific mod.\nIt won't actually be disabled until you [restart](#game-domain) the game.",
+          "description": "Disables a specific mod.\nIt won't actually be disabled until you [restart](domain:Game) the game.",
           "parameters": [
             {
               "name": "mod",
@@ -396,7 +396,7 @@
         },
         {
           "name": "enableMod",
-          "description": "Enables a specific mod.\nIt won't actually be enabled until you [restart](#game-domain) the game.",
+          "description": "Enables a specific mod.\nIt won't actually be enabled until you [restart](domain:Game) the game.",
           "parameters": [
             {
               "name": "mod",

@@ -25,31 +25,6 @@ public:
   }
 };
 
-
-class DomainContentPopup : public geode::Popup<Domain&> {
-  Domain m_domainInfo;
-
-  cocos2d::CCSize paddedLayerSize;
-  geode::ScrollLayer *createScrollLayer();
-
-protected:
-  bool setup(Domain& info) override;
-
-public:
-  static DomainContentPopup* create(Domain& info) {
-    auto ret = new DomainContentPopup();
-    auto ws = cocos2d::CCDirector::get()->getWinSize();
-    if (ret->initAnchored(ws.width/5*4, ws.height/7*6, info)) {
-      ret->autorelease();
-      return ret;
-    }
-
-    delete ret;
-    return nullptr;
-  }
-};
-
-
 class PlaygroundPopup : public geode::Popup<> {
   geode::ScrollLayer* m_domainList;
   geode::ScrollLayer* m_jList;

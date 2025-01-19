@@ -69,6 +69,7 @@ protected:
   bool init(std::string title, std::string description = "") {
     auto bubu = cocos2d::CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
     bubu->setFlipX(true);
+    bubu->setID("arrow");
     auto bub = CCMenuItemSpriteExtra::create(bubu, this, menu_selector(NavigationCell::mf));
     bub->setPosition(bubu->getContentSize()/2);
     m_trailingNode = cocos2d::CCMenu::create();
@@ -122,6 +123,64 @@ class MethodCell : public NavigationCell {
 public:
   static MethodCell* create(Method& info) {
     auto j = new MethodCell();
+    if (j && j->init(info)) {
+      j->autorelease();
+    } else {
+      delete j;
+      j = nullptr;
+    }
+    return j;
+  }
+};
+
+class EventCell : public NavigationCell {
+  Event eventInfo;
+  bool init(Event& event) {
+    NavigationCell::init(event.name);
+    eventInfo = event;
+    static_cast<cocos2d::CCSprite*>(
+      m_trailingNode->getChildByIDRecursive("arrow")
+    )->setDisplayFrame(
+      cocos2d::CCSpriteFrameCache::get()->spriteFrameByName("GJ_arrow_03_001.png")
+    );
+
+    setContentSize({150,30}); // height must be 30 or else
+    return true;
+  }
+  void onNavigateClick() override {};
+
+public:
+  static EventCell* create(Event& info) {
+    auto j = new EventCell();
+    if (j && j->init(info)) {
+      j->autorelease();
+    } else {
+      delete j;
+      j = nullptr;
+    }
+    return j;
+  }
+};
+
+class TypeCell : public NavigationCell {
+  Type_ typeInfo;
+  bool init(Type_& type) {
+    NavigationCell::init(type.id);
+    typeInfo = type;
+    static_cast<cocos2d::CCSprite*>(
+      m_trailingNode->getChildByIDRecursive("arrow")
+    )->setDisplayFrame(
+      cocos2d::CCSpriteFrameCache::get()->spriteFrameByName("GJ_arrow_02_001.png")
+    );
+
+    setContentSize({150,30}); // height must be 30 or else
+    return true;
+  }
+  void onNavigateClick() override {};
+
+public:
+  static TypeCell* create(Type_& info) {
+    auto j = new TypeCell();
     if (j && j->init(info)) {
       j->autorelease();
     } else {

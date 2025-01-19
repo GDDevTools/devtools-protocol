@@ -1,5 +1,6 @@
 #include "popups.hpp"
 #include "Geode/utils/cocos.hpp"
+#include "mdtextarea2.hpp"
 
 bool CollapsibleContentLayer::init(std::string title, float width) {
   if (!initWithColor({0,0,0,0}, width, 20)) return false;
@@ -35,14 +36,10 @@ void CollapsibleContentLayer::onCollapse(cocos2d::CCObject*) {
   updateLayout();
   if (m_pParent!=nullptr) {
     m_pParent->updateLayout();
-    if (auto s = geode::cast::typeinfo_cast<geode::ScrollLayer*>(m_pParent->getParent())) {
-      s->moveToTop();
-    }
   }
 };
 void CollapsibleContentLayer::addCell(stupidcell* cell) {
   if (!m_titleCell->isCollapsed()) addChild(cell);
-  cell->setVisible(true);
   m_content.push_back(cell);
 };
 void CollapsibleContentLayer::removeCell(stupidcell* cell) {
@@ -130,15 +127,27 @@ void PlaygroundPopup::setupMethodInfoList(Method& methodInfo) {
   methodText->ignoreAnchorPointForPosition(false);
   methodText->setAnchorPoint({0,0});
   methodText->setPositionX(domainText->getScaledContentWidth());
+  auto execMenu = CCMenu::create();
+  auto btn = CCMenuItemSpriteExtra::create(
+    ButtonSprite::create("Execute"), this, nullptr
+  );
+  execMenu->addChild(btn);
+  btn->setPosition(btn->getContentSize()/2);
+  execMenu->setPosition({paddedLayerSize.width, 0});
+  execMenu->setContentSize(btn->getContentSize());
+  execMenu->setAnchorPoint({1,0});
+  execMenu->ignoreAnchorPointForPosition(false);
+  execMenu->setScale(0.7);
 
   auto greenStuff = CCNode::create();
   greenStuff->setContentSize(domainText->getContentSize());
   greenStuff->addChild(domainText);
   greenStuff->addChild(methodText);
+  greenStuff->addChild(execMenu);
   m_idkList->m_contentLayer->addChild(greenStuff);
 
   // description
-  auto descArea = geode::MDTextArea::create(methodInfo.description, {paddedLayerSize.width, 77});
+  auto descArea = MDDocsTextArea::create(methodInfo.description, {paddedLayerSize.width, 77});
   m_idkList->m_contentLayer->addChild(descArea);
 
   static_cast<geode::ColumnLayout*>(m_idkList->m_contentLayer->getLayout())
@@ -146,8 +155,8 @@ void PlaygroundPopup::setupMethodInfoList(Method& methodInfo) {
   ->setCrossAxisLineAlignment(geode::AxisAlignment::Start)
   ->setGap(8);
   m_idkList->m_contentLayer->updateLayout();
+  m_idkList->moveToTop();
 };
-
 void PlaygroundPopup::setupDomainContentList(Domain& domainInfo) {
   if (currentDomain == domainInfo) {
     geode::log::debug("Skipping construction");
@@ -156,29 +165,65 @@ void PlaygroundPopup::setupDomainContentList(Domain& domainInfo) {
   m_jList->m_contentLayer->removeAllChildren();
   
   // description
-  auto descArea = geode::MDTextArea::create(domainInfo.description, {paddedLayerSize.width, 77});
+  auto descArea = MDDocsTextArea::create(domainInfo.description, {paddedLayerSize.width, 77});
   m_jList->m_contentLayer->addChild(descArea);
   descArea->getScrollLayer()->setMouseEnabled(false);
 
   currentDomain = domainInfo;
   bool flipper_zero = false;
+  do {
+    if (domainInfo.methods.size() == 0) break;
+    auto methodsList = CollapsibleContentLayer::create("Methods", paddedLayerSize.width);
 
-  auto methodsList = CollapsibleContentLayer::create("Methods", paddedLayerSize.width);
+    for (auto &method : domainInfo.methods) {
+      auto c = MethodCell::create(method);
+      c->setContentSize({paddedLayerSize.width, 30});
+      methodsList->addCell(c);
 
-  for (auto &method : domainInfo.methods) {
-    auto c = MethodCell::create(method);
-    c->setContentSize({paddedLayerSize.width, 30});
-    methodsList->addCell(c);
+      c->setBGOpacity(flipper_zero ? 60 : 20);
 
-    c->setBGOpacity(flipper_zero ? 60 : 20);
+      flipper_zero = !flipper_zero;
+    }
 
-    flipper_zero = !flipper_zero;
-  }
+    m_jList->m_contentLayer->addChild(methodsList);
+    methodsList->updateLayout();
+  } while (0);
+  do {
+    if (domainInfo.types.size() == 0) break;
+    auto typesList = CollapsibleContentLayer::create("Types", paddedLayerSize.width);
 
-  m_jList->m_contentLayer->addChild(methodsList);
-  methodsList->updateLayout();
+    for (auto &type : domainInfo.types) {
+      auto c = TypeCell::create(type);
+      c->setContentSize({paddedLayerSize.width, 30});
+      typesList->addCell(c);
 
+      c->setBGOpacity(flipper_zero ? 60 : 20);
+
+      flipper_zero = !flipper_zero;
+    }
+
+    m_jList->m_contentLayer->addChild(typesList);
+    typesList->updateLayout();
+  } while (0);
+  do {
+    if (domainInfo.events.size() == 0) break;
+    auto eventsList = CollapsibleContentLayer::create("Events", paddedLayerSize.width);
+
+    for (auto &event : domainInfo.events) {
+      auto c = EventCell::create(event);
+      c->setContentSize({paddedLayerSize.width, 30});
+      eventsList->addCell(c);
+
+      c->setBGOpacity(flipper_zero ? 60 : 20);
+
+      flipper_zero = !flipper_zero;
+    }
+
+    m_jList->m_contentLayer->addChild(eventsList);
+    eventsList->updateLayout();
+  } while (0);
   m_jList->m_contentLayer->updateLayout();
+  m_jList->moveToTop();
 }
 geode::ScrollLayer *PlaygroundPopup::createScrollLayer() {
   auto brub = geode::ScrollLayer::create(paddedLayerSize);
@@ -195,6 +240,7 @@ geode::ScrollLayer *PlaygroundPopup::createScrollLayer() {
   brub->setAnchorPoint({0.5, 0.5});
   brub->setPosition(m_mainLayer->getContentSize() / 2);
   brub->ignoreAnchorPointForPosition(false);
+  brub->enableScrollWheel();
 
   return brub;
 }
