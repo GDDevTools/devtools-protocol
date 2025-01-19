@@ -33,7 +33,12 @@ void CollapsibleContentLayer::onCollapse(cocos2d::CCObject*) {
     }
   }
   updateLayout();
-  if (m_pParent!=nullptr) m_pParent->updateLayout();
+  if (m_pParent!=nullptr) {
+    m_pParent->updateLayout();
+    if (auto s = geode::cast::typeinfo_cast<geode::ScrollLayer*>(m_pParent->getParent())) {
+      s->moveToTop();
+    }
+  }
 };
 void CollapsibleContentLayer::addCell(stupidcell* cell) {
   if (!m_titleCell->isCollapsed()) addChild(cell);
@@ -51,10 +56,6 @@ bool PlaygroundPopup::setup() {
   paddedLayerSize = layerSize - cocos2d::CCPoint{48, 60};
 
   m_domainList = createScrollLayer();
-
-  m_domainList->setAnchorPoint({0.5, 0.5});
-  m_domainList->setPosition(layerSize / 2);
-  m_domainList->ignoreAnchorPointForPosition(false);
 
   m_mainLayer->addChild(m_domainList);
 
@@ -75,36 +76,91 @@ bool PlaygroundPopup::setup() {
   m_domainList->m_contentLayer->updateLayout();
 
   m_jList = createScrollLayer();
-
-  m_jList->setAnchorPoint({0.5, 0.5});
-  m_jList->setPosition(layerSize / 2);
-  m_jList->ignoreAnchorPointForPosition(false);
-
-  m_mainLayer->addChild(m_jList);
   m_jList->setVisible(false);
-
+  m_mainLayer->addChild(m_jList);
+  
+  m_idkList = createScrollLayer();
+  m_idkList->setVisible(false);
+  m_mainLayer->addChild(m_idkList);
 
   m_backToDomainButton = CCMenuItemSpriteExtra::create(
     CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png"), this,
     menu_selector(PlaygroundPopup::navigateToDomainsList)
   );
+  m_backToDomainContentsButton = CCMenuItemSpriteExtra::create(
+    CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png"), this,
+    menu_selector(PlaygroundPopup::navigateBackToDomainContents)
+  );
 
   auto j = m_backToDomainButton->getContentSize();
+
   m_backMenu = cocos2d::CCMenu::create();
   m_backMenu->setContentSize(j);
+  
   m_backMenu->addChild(m_backToDomainButton);
   m_backToDomainButton->setPosition(j/2);
   m_backToDomainButton->setVisible(false);
+  m_backMenu->addChild(m_backToDomainContentsButton);
+  m_backToDomainContentsButton->setPosition(j/2);
+  m_backToDomainContentsButton->setVisible(false);
 
+  m_backMenu->setPosition({(layerSize.width-paddedLayerSize.width)/2,m_title->getPositionY()});
+  m_backMenu->setScale(0.57);
+  m_backMenu->ignoreAnchorPointForPosition(false);
+  m_backMenu->setAnchorPoint({0,0.5});
+  m_mainLayer->addChild(m_backMenu);
   return true;
 }
+
+void PlaygroundPopup::setupMethodInfoList(Method& methodInfo) {
+  if (currentMethod == methodInfo) {
+    geode::log::debug("Skipping construction");
+    return;
+  }
+  m_idkList->m_contentLayer->removeAllChildren();
+  currentMethod = methodInfo;
+
+  // title
+  auto domainText = cocos2d::CCLabelBMFont::create((currentDomain.domain+".").c_str(), "bigFont.fnt");
+  domainText->ignoreAnchorPointForPosition(false);
+  domainText->setAnchorPoint({0,0});
+  domainText->setColor({ 121, 121, 121 });
+  domainText->setScale(0.5);
+  auto methodText = cocos2d::CCLabelBMFont::create(methodInfo.name.c_str(), "bigFont.fnt");
+  methodText->ignoreAnchorPointForPosition(false);
+  methodText->setAnchorPoint({0,0});
+  methodText->setPositionX(domainText->getScaledContentWidth());
+
+  auto greenStuff = CCNode::create();
+  greenStuff->setContentSize(domainText->getContentSize());
+  greenStuff->addChild(domainText);
+  greenStuff->addChild(methodText);
+  m_idkList->m_contentLayer->addChild(greenStuff);
+
+  // description
+  auto descArea = geode::MDTextArea::create(methodInfo.description, {paddedLayerSize.width, 77});
+  m_idkList->m_contentLayer->addChild(descArea);
+
+  static_cast<geode::ColumnLayout*>(m_idkList->m_contentLayer->getLayout())
+  ->setCrossAxisAlignment(geode::AxisAlignment::Start)
+  ->setCrossAxisLineAlignment(geode::AxisAlignment::Start)
+  ->setGap(8);
+  m_idkList->m_contentLayer->updateLayout();
+};
+
 void PlaygroundPopup::setupDomainContentList(Domain& domainInfo) {
-  if (m_jList->getUserData() != nullptr && *static_cast<Domain*>(m_jList->getUserData()) == domainInfo) {
+  if (currentDomain == domainInfo) {
     geode::log::debug("Skipping construction");
     return;
   }
   m_jList->m_contentLayer->removeAllChildren();
-  m_jList->setUserData(&domainInfo);
+  
+  // description
+  auto descArea = geode::MDTextArea::create(domainInfo.description, {paddedLayerSize.width, 77});
+  m_jList->m_contentLayer->addChild(descArea);
+  descArea->getScrollLayer()->setMouseEnabled(false);
+
+  currentDomain = domainInfo;
   bool flipper_zero = false;
 
   auto methodsList = CollapsibleContentLayer::create("Methods", paddedLayerSize.width);
@@ -121,7 +177,6 @@ void PlaygroundPopup::setupDomainContentList(Domain& domainInfo) {
 
   m_jList->m_contentLayer->addChild(methodsList);
   methodsList->updateLayout();
-  methodsList->setPosition(methodsList->getPosition());
 
   m_jList->m_contentLayer->updateLayout();
 }
@@ -137,6 +192,9 @@ geode::ScrollLayer *PlaygroundPopup::createScrollLayer() {
           ->setAxisAlignment(geode::AxisAlignment::End)
           ->setGap(0));
   brub->moveToTop();
+  brub->setAnchorPoint({0.5, 0.5});
+  brub->setPosition(m_mainLayer->getContentSize() / 2);
+  brub->ignoreAnchorPointForPosition(false);
 
   return brub;
 }
@@ -144,10 +202,27 @@ void PlaygroundPopup::navigateToDomainContents(Domain& info) {
   setupDomainContentList(info);
   m_domainList->setVisible(false);
   m_jList->setVisible(true);
-  setTitle("Playground: "+info.domain+" method");
+  m_backToDomainButton->setVisible(true);
+  setTitle("Playground: "+info.domain+" domain");
+};
+void PlaygroundPopup::navigateBackToDomainContents(cocos2d::CCObject *) {
+  m_idkList->setVisible(false);
+  m_jList->setVisible(true);
+  m_backToDomainContentsButton->setVisible(false);
+  m_backToDomainButton->setVisible(true);
+  setTitle("Playground: "+currentDomain.domain+" domain");
 };
 void PlaygroundPopup::navigateToDomainsList(cocos2d::CCObject *) {
   m_domainList->setVisible(true);
   m_jList->setVisible(false);
+  m_backToDomainButton->setVisible(false);
   setTitle("Playground");
+};
+void PlaygroundPopup::navigateToMethodInfo(Method& method) {
+  setupMethodInfoList(method);
+  m_idkList->setVisible(true);
+  m_jList->setVisible(false);
+  m_backToDomainButton->setVisible(false);
+  m_backToDomainContentsButton->setVisible(true);
+  setTitle(currentDomain.domain+"."+method.name+" method");
 };

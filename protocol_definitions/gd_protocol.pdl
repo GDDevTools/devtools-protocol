@@ -45,10 +45,10 @@ domain DOM
   # Only works for `button` nodes.
   # 
   # First it tries to cast the node to `CCMenuItem` and clicks it. 
-  # If it isn't a `CCMenuItem` then it will send a `DispatchEvent(\"puppeteer/nodeClicked\")` event 
+  # If it isn't a `CCMenuItem` then it will send a `DispatchEvent("puppeteer/nodeClicked")` event 
   # to the game so nodes implmenting that can handle as it needs.
   # 
-  # If you want real click events then you can use [Input.`dispatchMouseEvent`](#inputdispatchmouseevent) instead.
+  # If you want real click events then you can use [Input.dispatchMouseEvent](method:Input.dispatchMouseEvent) instead.
   command click
     parameters
       # The node id. Must be a button node
@@ -190,14 +190,14 @@ domain Levels
 # Manages a mod.
 domain Mods
   # Disables a specific mod.  
-  # It won't actually be disabled until you [restart](#game-domain) the game.
+  # It won't actually be disabled until you [restart](domain:Game) the game.
   command disableMod
     parameters
       # The mod ID
       string mod
 
   # Enables a specific mod.  
-  # It won't actually be enabled until you [restart](#game-domain) the game.
+  # It won't actually be enabled until you [restart](domain:Game) the game.
   command enableMod
     parameters
       # The mod ID

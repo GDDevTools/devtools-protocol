@@ -31,8 +31,8 @@ public:
 /// The second wheel has benn reimplemented
 class stupidcell : public cocos2d::CCNode {
   cocos2d::CCLayerColor* m_ab;
-  cocos2d::CCMenu* button;
 protected:
+  cocos2d::CCNode* m_trailingNode;
   bool init(std::string title, std::string description = "") {
     m_ab = cocos2d::CCLayerColor::create({0,0,0,0});
     addChild(m_ab);
@@ -44,25 +44,14 @@ protected:
     t->setAnchorPoint({0,0.5});
     t->setScale(0.5);
 
-    auto bubu = cocos2d::CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
-    bubu->setFlipX(true);
-    auto bub = CCMenuItemSpriteExtra::create(bubu, this, menu_selector(stupidcell::mf));
-    bub->setPosition(bubu->getContentSize()/2);
-    button = cocos2d::CCMenu::create();
-    button->addChild(bub);
-    addChild(button);
-    button->setPositionX(16);
-    button->setPositionY(15);
-    button->setContentSize(bub->getContentSize());
-    button->ignoreAnchorPointForPosition(false);
-    button->setAnchorPoint({0,0.5});
-    button->setScale(0.5);
+    addChild(m_trailingNode);
+    m_trailingNode->setPositionX(16);
+    m_trailingNode->setPositionY(15);
+    m_trailingNode->ignoreAnchorPointForPosition(false);
+    m_trailingNode->setAnchorPoint({0,0.5});
+    m_trailingNode->setScale(0.5);
 
     return true;
-  }
-  virtual void onNavigateClick() {}
-  void mf(cocos2d::CCObject*) {
-    onNavigateClick();
   }
 public:
   void setBGOpacity(GLubyte idk) {
@@ -71,15 +60,34 @@ public:
   void setContentSize(cocos2d::CCSize const& size) override {
     cocos2d::CCNode::setContentSize(size);
     m_ab->setContentSize(size);
-    button->setPositionX(size.width - 16*2);
+    m_trailingNode->setPositionX(size.width - 16*2);
   }
-  
 };
 
-class DomainCell : public stupidcell {
+class NavigationCell : public stupidcell {
+protected:
+  bool init(std::string title, std::string description = "") {
+    auto bubu = cocos2d::CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
+    bubu->setFlipX(true);
+    auto bub = CCMenuItemSpriteExtra::create(bubu, this, menu_selector(NavigationCell::mf));
+    bub->setPosition(bubu->getContentSize()/2);
+    m_trailingNode = cocos2d::CCMenu::create();
+    m_trailingNode->setContentSize(bub->getContentSize());
+    m_trailingNode->addChild(bub);
+
+    return stupidcell::init(title, description);
+  }
+  
+  virtual void onNavigateClick() {}
+  void mf(cocos2d::CCObject*) {
+    onNavigateClick();
+  }
+};
+
+class DomainCell : public NavigationCell {
   Domain domainInfo;
   bool init(Domain& domain) {
-    stupidcell::init(domain.domain);
+    NavigationCell::init(domain.domain);
     domainInfo = domain;
     
     setContentSize({150,30}); // height must be 30 or else
@@ -100,10 +108,10 @@ public:
   }
 };
 
-class MethodCell : public stupidcell {
+class MethodCell : public NavigationCell {
   Method methodInfo;
   bool init(Method& method) {
-    stupidcell::init(method.name);
+    NavigationCell::init(method.name);
     methodInfo = method;
 
     setContentSize({150,30}); // height must be 30 or else

@@ -27,3 +27,13 @@ std::vector<T> deserializeJsonArray(const std::vector<matjson::Value>& inp) {
 }
 
 GEODE_NOINLINE uintptr_t getModule(const char* module);
+
+template<typename T>
+inline T* getParentOfType(cocos2d::CCNode* n) {
+  cocos2d::CCNode* p = n->getParent();
+  while (p!=nullptr) {
+    if (auto tcp = geode::cast::typeinfo_cast<T*>(p)) return tcp;
+    p = p->getParent();
+  }
+  return nullptr;
+}

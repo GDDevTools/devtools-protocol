@@ -28,6 +28,7 @@ bool TitleCell::init(std::string title) {
       CCMenuItemToggler::create(collapseSprBG, uncollapseSprBG, this,
                                 menu_selector(TitleCell::oniowgoiweogi));
   m_collapseToggle->m_notClickable = true;
+  m_collapseToggle->toggle(true);
 
   m_buttonMenu->addChildAtPosition(m_collapseToggle, geode::Anchor::Center);
 
@@ -49,6 +50,6 @@ void TitleCell::oniowgoiweogi(cocos2d::CCObject *) {
   static_cast<CollapsibleContentLayer*>(m_pParent)->onCollapse(nullptr);
 }
 
-#include <Geode/ui/GeodeUI.hpp>
-#include "goose.hpp"
-void MethodCell::onNavigateClick() {};
+void MethodCell::onNavigateClick() {
+  cocos2d::CCDirector::get()->getRunningScene()->getChildByType<PlaygroundPopup>(0)->navigateToMethodInfo(methodInfo);
+};
