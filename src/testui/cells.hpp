@@ -1,5 +1,6 @@
 #pragma once
 #include "Geode/cocos/cocoa/CCObject.h"
+#include "Geode/cocos/label_nodes/CCLabelBMFont.h"
 #include "protocols_json_struct.hpp"
 
 class TitleCell : public cocos2d::CCNode {
@@ -32,41 +33,29 @@ public:
 class stupidcell : public cocos2d::CCNode {
   cocos2d::CCLayerColor* m_ab;
 protected:
+  cocos2d::CCLabelBMFont* m_title;
+  cocos2d::CCLabelBMFont* m_description = nullptr;
   cocos2d::CCNode* m_trailingNode;
-  bool init(std::string title, std::string description = "") {
-    m_ab = cocos2d::CCLayerColor::create({0,0,0,0});
-    addChild(m_ab);
+  virtual bool init(std::string title, std::string description = "");
 
-    auto t = cocos2d::CCLabelBMFont::create(title.c_str(), "bigFont.fnt");
-    addChild(t);
-    t->setPositionX(16);
-    t->setPositionY(15);
-    t->setAnchorPoint({0,0.5});
-    t->setScale(0.5);
-
-    addChild(m_trailingNode);
-    m_trailingNode->setPositionX(16);
-    m_trailingNode->setPositionY(15);
-    m_trailingNode->ignoreAnchorPointForPosition(false);
-    m_trailingNode->setAnchorPoint({0,0.5});
-    m_trailingNode->setScale(0.5);
-
-    return true;
-  }
 public:
   void setBGOpacity(GLubyte idk) {
     m_ab->setOpacity(idk);
   }
   void setContentSize(cocos2d::CCSize const& size) override {
     cocos2d::CCNode::setContentSize(size);
+    float centerY = getContentSize().height/2;
+    m_title->setPosition({16, centerY + (m_description == nullptr ? 0.f : 6.f)});
+    m_description->setPosition({16, centerY-6});
     m_ab->setContentSize(size);
-    m_trailingNode->setPositionX(size.width - 16*2);
+    m_trailingNode->setPosition({size.width - 16*2, centerY});
   }
 };
 
+#pragma region Navigation
 class NavigationCell : public stupidcell {
 protected:
-  bool init(std::string title, std::string description = "") {
+  bool init(std::string title, std::string description = "") override {
     auto bubu = cocos2d::CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
     bubu->setFlipX(true);
     bubu->setID("arrow");
@@ -88,7 +77,7 @@ protected:
 class DomainCell : public NavigationCell {
   Domain domainInfo;
   bool init(Domain& domain) {
-    NavigationCell::init(domain.domain);
+    NavigationCell::init(domain.domain, domain.description);
     domainInfo = domain;
     
     setContentSize({150,30}); // height must be 30 or else
@@ -112,7 +101,7 @@ public:
 class MethodCell : public NavigationCell {
   Method methodInfo;
   bool init(Method& method) {
-    NavigationCell::init(method.name);
+    NavigationCell::init(method.name, method.description);
     methodInfo = method;
 
     setContentSize({150,30}); // height must be 30 or else
@@ -136,7 +125,7 @@ public:
 class EventCell : public NavigationCell {
   Event eventInfo;
   bool init(Event& event) {
-    NavigationCell::init(event.name);
+    NavigationCell::init(event.name, event.description);
     eventInfo = event;
     static_cast<cocos2d::CCSprite*>(
       m_trailingNode->getChildByIDRecursive("arrow")
@@ -165,7 +154,7 @@ public:
 class TypeCell : public NavigationCell {
   Type_ typeInfo;
   bool init(Type_& type) {
-    NavigationCell::init(type.id);
+    NavigationCell::init(type.id, type.description);
     typeInfo = type;
     static_cast<cocos2d::CCSprite*>(
       m_trailingNode->getChildByIDRecursive("arrow")
@@ -190,3 +179,4 @@ public:
     return j;
   }
 };
+#pragma endregion

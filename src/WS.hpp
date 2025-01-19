@@ -15,7 +15,15 @@ public:
   >;
   bool running = false;
 private:
-  std::vector<int> usedIds;
+  friend class PlaygroundPopup;
+  std::map<
+    std::string, // client id
+    std::pair<
+      int, // last id
+      std::vector<int> // unused id
+    >
+  > idsForClient;
+
   std::unordered_map<
     std::string, // method name
     std::pair<

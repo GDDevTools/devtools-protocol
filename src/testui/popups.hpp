@@ -8,6 +8,7 @@ class CollapsibleContentLayer : public geode::GenericContentLayer {
   void onCollapse(cocos2d::CCObject*);
   TitleCell* m_titleCell;
   friend class TitleCell;
+  friend class PlaygroundPopup;
 public:
   void addCell(stupidcell* cell);
   void removeCell(stupidcell* cell);
@@ -45,6 +46,8 @@ class PlaygroundPopup : public geode::Popup<> {
 
   Domain currentDomain;
   Method currentMethod;
+
+  void onExecute(cocos2d::CCObject*);
 protected:
   bool setup() override;
 

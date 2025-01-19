@@ -37,15 +37,23 @@ bool Protocol::init() {
         c.sendText(errorResponseStr(-1, -32602, "Invalid 'id' type."));
         return;
       }
-      if (std::find(usedIds.begin(), usedIds.end(), id) != usedIds.end()) {
+      auto& currentIdInfo = idsForClient[s.getId()];
+      int lastId = currentIdInfo.first;
+      auto& unusedIds = currentIdInfo.second;
+      auto mmm = std::find(unusedIds.begin(), unusedIds.end(), id);
+      if (mmm == unusedIds.end() && id <= lastId) {
         c.sendText(errorResponseStr(id, -32602, "ID already used."));
         return;
       }
-      int usedIdsSize = usedIds.size();
-      if (usedIdsSize%50==0) {
-        usedIds.reserve(usedIdsSize+50);
+      if (mmm != unusedIds.end()) {
+        unusedIds.erase(mmm);
+      } else {
+        for (int i = lastId; i < id; i++) {
+          unusedIds.push_back(i);
+        }
       }
-      usedIds.push_back(id);
+      currentIdInfo.first = id;
+      
       auto methodName = j["method"].asString().unwrap();
       decltype(functions)::value_type::second_type method;
       auto i = functions.find(methodName);

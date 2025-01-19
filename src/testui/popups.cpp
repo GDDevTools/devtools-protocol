@@ -109,54 +109,6 @@ bool PlaygroundPopup::setup() {
   return true;
 }
 
-void PlaygroundPopup::setupMethodInfoList(Method& methodInfo) {
-  if (currentMethod == methodInfo) {
-    geode::log::debug("Skipping construction");
-    return;
-  }
-  m_idkList->m_contentLayer->removeAllChildren();
-  currentMethod = methodInfo;
-
-  // title
-  auto domainText = cocos2d::CCLabelBMFont::create((currentDomain.domain+".").c_str(), "bigFont.fnt");
-  domainText->ignoreAnchorPointForPosition(false);
-  domainText->setAnchorPoint({0,0});
-  domainText->setColor({ 121, 121, 121 });
-  domainText->setScale(0.5);
-  auto methodText = cocos2d::CCLabelBMFont::create(methodInfo.name.c_str(), "bigFont.fnt");
-  methodText->ignoreAnchorPointForPosition(false);
-  methodText->setAnchorPoint({0,0});
-  methodText->setPositionX(domainText->getScaledContentWidth());
-  auto execMenu = CCMenu::create();
-  auto btn = CCMenuItemSpriteExtra::create(
-    ButtonSprite::create("Execute"), this, nullptr
-  );
-  execMenu->addChild(btn);
-  btn->setPosition(btn->getContentSize()/2);
-  execMenu->setPosition({paddedLayerSize.width, 0});
-  execMenu->setContentSize(btn->getContentSize());
-  execMenu->setAnchorPoint({1,0});
-  execMenu->ignoreAnchorPointForPosition(false);
-  execMenu->setScale(0.7);
-
-  auto greenStuff = CCNode::create();
-  greenStuff->setContentSize(domainText->getContentSize());
-  greenStuff->addChild(domainText);
-  greenStuff->addChild(methodText);
-  greenStuff->addChild(execMenu);
-  m_idkList->m_contentLayer->addChild(greenStuff);
-
-  // description
-  auto descArea = MDDocsTextArea::create(methodInfo.description, {paddedLayerSize.width, 77});
-  m_idkList->m_contentLayer->addChild(descArea);
-
-  static_cast<geode::ColumnLayout*>(m_idkList->m_contentLayer->getLayout())
-  ->setCrossAxisAlignment(geode::AxisAlignment::Start)
-  ->setCrossAxisLineAlignment(geode::AxisAlignment::Start)
-  ->setGap(8);
-  m_idkList->m_contentLayer->updateLayout();
-  m_idkList->moveToTop();
-};
 void PlaygroundPopup::setupDomainContentList(Domain& domainInfo) {
   if (currentDomain == domainInfo) {
     geode::log::debug("Skipping construction");
@@ -173,7 +125,9 @@ void PlaygroundPopup::setupDomainContentList(Domain& domainInfo) {
   bool flipper_zero = false;
   do {
     if (domainInfo.methods.size() == 0) break;
-    auto methodsList = CollapsibleContentLayer::create("Methods", paddedLayerSize.width);
+    auto methodsList = CollapsibleContentLayer::create(
+      "Methods", paddedLayerSize.width
+    );
 
     for (auto &method : domainInfo.methods) {
       auto c = MethodCell::create(method);
@@ -190,7 +144,9 @@ void PlaygroundPopup::setupDomainContentList(Domain& domainInfo) {
   } while (0);
   do {
     if (domainInfo.types.size() == 0) break;
-    auto typesList = CollapsibleContentLayer::create("Types", paddedLayerSize.width);
+    auto typesList = CollapsibleContentLayer::create(
+      "Types", paddedLayerSize.width
+    );
 
     for (auto &type : domainInfo.types) {
       auto c = TypeCell::create(type);
@@ -207,7 +163,9 @@ void PlaygroundPopup::setupDomainContentList(Domain& domainInfo) {
   } while (0);
   do {
     if (domainInfo.events.size() == 0) break;
-    auto eventsList = CollapsibleContentLayer::create("Events", paddedLayerSize.width);
+    auto eventsList = CollapsibleContentLayer::create(
+      "Events", paddedLayerSize.width
+    );
 
     for (auto &event : domainInfo.events) {
       auto c = EventCell::create(event);
