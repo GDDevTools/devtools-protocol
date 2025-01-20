@@ -47,7 +47,7 @@ public:
     m_title->setPosition({16, centerY + (m_description == nullptr ? 0.f : 6.f)});
     m_description->setPosition({16, centerY-6});
     m_ab->setContentSize(size);
-    m_trailingNode->setPosition({size.width - 16*2, centerY});
+    m_trailingNode->setPosition({size.width - 16, centerY});
   }
 };
 

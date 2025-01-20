@@ -35,10 +35,10 @@ bool stupidcell::init(std::string title, std::string description) {
   }
 
   addChild(m_trailingNode);
-  m_trailingNode->setPositionX(16);
+  m_trailingNode->setPositionX(0);
   m_trailingNode->setPositionY(15);
   m_trailingNode->ignoreAnchorPointForPosition(false);
-  m_trailingNode->setAnchorPoint({0, 0.5});
+  m_trailingNode->setAnchorPoint({1, 0.5});
   m_trailingNode->setScale(0.5);
 
   return true;

@@ -66,7 +66,7 @@ void PlaygroundPopup::setupMethodInfoList(Method& methodInfo) {
   methodText->setScale(0.8);
   auto execMenu = CCMenu::create();
   auto btn = CCMenuItemSpriteExtra::create(
-    ButtonSprite::create("Execute"), this, nullptr
+    ButtonSprite::create("Execute"), this, menu_selector(PlaygroundPopup::onExecute)
   );
   execMenu->addChild(btn);
   btn->setPosition(btn->getContentSize()/2);
