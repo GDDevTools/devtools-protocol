@@ -130,10 +130,12 @@ std::shared_ptr<Protocol> Protocol::get() {
 void Protocol::broadcastEvent(std::string eventName, matjson::Value const& content) {
   if (ws==nullptr) return;
   for (auto& c : ws->getClients()) {
-    c->send(matjson::makeObject({
+    auto o = matjson::makeObject({
       {"method", eventName},
       {"params", content}
-    }).dump(0));
+    });
+    c->send(o.dump(0));
+    ProtocolEvent(o).post();
   }
 }
 

@@ -98,3 +98,6 @@ void TitleCell::oniowgoiweogi(cocos2d::CCObject *) {
 void MethodCell::onNavigateClick() {
   cocos2d::CCDirector::get()->getRunningScene()->getChildByType<PlaygroundPopup>(0)->navigateToMethodInfo(methodInfo);
 };
+void EventCell::onNavigateClick() {
+  cocos2d::CCDirector::get()->getRunningScene()->getChildByType<PlaygroundPopup>(0)->navigateToDomainContents(eventInfo);
+};

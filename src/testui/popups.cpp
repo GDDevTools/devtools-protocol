@@ -76,9 +76,9 @@ bool PlaygroundPopup::setup() {
   m_jList->setVisible(false);
   m_mainLayer->addChild(m_jList);
   
-  m_idkList = createScrollLayer();
-  m_idkList->setVisible(false);
-  m_mainLayer->addChild(m_idkList);
+  m_infoList = createScrollLayer();
+  m_infoList->setVisible(false);
+  m_mainLayer->addChild(m_infoList);
 
   m_backToDomainButton = CCMenuItemSpriteExtra::create(
     CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png"), this,
@@ -210,7 +210,7 @@ void PlaygroundPopup::navigateToDomainContents(Domain& info) {
   setTitle("Playground: "+info.domain+" domain");
 };
 void PlaygroundPopup::navigateBackToDomainContents(cocos2d::CCObject *) {
-  m_idkList->setVisible(false);
+  m_infoList->setVisible(false);
   m_jList->setVisible(true);
   m_backToDomainContentsButton->setVisible(false);
   m_backToDomainButton->setVisible(true);
@@ -224,9 +224,17 @@ void PlaygroundPopup::navigateToDomainsList(cocos2d::CCObject *) {
 };
 void PlaygroundPopup::navigateToMethodInfo(Method& method) {
   setupMethodInfoList(method);
-  m_idkList->setVisible(true);
+  m_infoList->setVisible(true);
   m_jList->setVisible(false);
   m_backToDomainButton->setVisible(false);
   m_backToDomainContentsButton->setVisible(true);
   setTitle(currentDomain.domain+"."+method.name+" method");
 };
+void PlaygroundPopup::navigateToEventInfo(Event& event) {
+  setupEventInfoList(event);
+  m_infoList->setVisible(true);
+  m_jList->setVisible(false);
+  m_backToDomainButton->setVisible(false);
+  m_backToDomainContentsButton->setVisible(true);
+  setTitle(currentDomain.domain+"."+event.name+" event");
+}

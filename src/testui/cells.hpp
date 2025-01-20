@@ -135,7 +135,7 @@ class EventCell : public NavigationCell {
     setContentSize({150,30}); // height must be 30 or else
     return true;
   }
-  void onNavigateClick() override {};
+  void onNavigateClick() override;
 
 public:
   static EventCell* create(Event& info) {

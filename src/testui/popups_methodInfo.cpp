@@ -14,7 +14,7 @@ OptionCell* createOptionCell(Parameter& p, float width) {
 
 void PlaygroundPopup::onExecute(cocos2d::CCObject*) {
   auto paramsPage = static_cast<CollapsibleContentLayer*>(
-    m_idkList->m_contentLayer->getChildByID("params")
+    m_infoList->m_contentLayer->getChildByID("params")
   );
   auto p = matjson::Value::object();
   for (auto* c : paramsPage->m_content) {
@@ -34,12 +34,13 @@ void PlaygroundPopup::onExecute(cocos2d::CCObject*) {
 };
 void PlaygroundPopup::onExecuteFinish(const matjson::Value& output) {
   auto outputArea = static_cast<geode::SimpleTextArea*>(
-    m_idkList->m_contentLayer->getChildByID("output")
+    m_infoList->m_contentLayer->getChildByID("output")
   );
   if (outputArea == nullptr) {
     outputArea = geode::SimpleTextArea::create(output.dump());
     outputArea->setID("output");
-    m_idkList->m_contentLayer->addChild(outputArea);
+    m_infoList->m_contentLayer->addChild(outputArea);
+    m_infoList->m_contentLayer->updateLayout();
   } else {
     outputArea->setText(output.dump());
   }
@@ -50,7 +51,7 @@ void PlaygroundPopup::setupMethodInfoList(Method& methodInfo) {
     geode::log::debug("Skipping construction");
     return;
   }
-  m_idkList->m_contentLayer->removeAllChildren();
+  m_infoList->m_contentLayer->removeAllChildren();
   currentMethod = methodInfo;
 
   // title
@@ -81,11 +82,11 @@ void PlaygroundPopup::setupMethodInfoList(Method& methodInfo) {
   greenStuff->addChild(domainText);
   greenStuff->addChild(methodText);
   greenStuff->addChild(execMenu);
-  m_idkList->m_contentLayer->addChild(greenStuff);
+  m_infoList->m_contentLayer->addChild(greenStuff);
 
   // description
   auto descArea = MDDocsTextArea::create(methodInfo.description, {paddedLayerSize.width, 77});
-  m_idkList->m_contentLayer->addChild(descArea);
+  m_infoList->m_contentLayer->addChild(descArea);
 
   do {
     bool fl = false;
@@ -98,12 +99,12 @@ void PlaygroundPopup::setupMethodInfoList(Method& methodInfo) {
       parametersPage->addCell(c);
     }
     parametersPage->updateLayout();
-    m_idkList->m_contentLayer->addChild(parametersPage);
+    m_infoList->m_contentLayer->addChild(parametersPage);
   } while (0);
-  static_cast<geode::ColumnLayout*>(m_idkList->m_contentLayer->getLayout())
+  static_cast<geode::ColumnLayout*>(m_infoList->m_contentLayer->getLayout())
   ->setCrossAxisAlignment(geode::AxisAlignment::Start)
   ->setCrossAxisLineAlignment(geode::AxisAlignment::Start)
   ->setGap(8);
-  m_idkList->m_contentLayer->updateLayout();
-  m_idkList->moveToTop();
+  m_infoList->m_contentLayer->updateLayout();
+  m_infoList->moveToTop();
 };

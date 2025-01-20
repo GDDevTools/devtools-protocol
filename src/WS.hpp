@@ -9,6 +9,11 @@
 #include "future.hpp"
 using matjsonObjectInitType = std::initializer_list<std::pair<std::string, matjson::Value>>;
 
+struct ProtocolEvent : public geode::Event {
+  const matjson::Value& eventData;
+  ProtocolEvent(decltype(eventData) data) : eventData(data) {};
+};
+
 class Protocol {
 public:
   using FunctionReturnType = geode::Result<

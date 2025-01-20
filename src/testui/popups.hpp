@@ -29,13 +29,14 @@ public:
 class PlaygroundPopup : public geode::Popup<> {
   geode::ScrollLayer* m_domainList;
   geode::ScrollLayer* m_jList;
-  geode::ScrollLayer* m_idkList;
+  geode::ScrollLayer* m_infoList;
 
   cocos2d::CCSize paddedLayerSize;
   geode::ScrollLayer *createScrollLayer();
 
   void setupDomainContentList(Domain& domainInfo);
   void setupMethodInfoList(Method& methodInfo);
+  void setupEventInfoList(Event& eventInfo);
   
   CCMenuItemSpriteExtra* m_backToDomainButton;
   CCMenuItemSpriteExtra* m_backToDomainContentsButton;
@@ -46,6 +47,7 @@ class PlaygroundPopup : public geode::Popup<> {
 
   Domain currentDomain;
   Method currentMethod;
+  Event currentEvent;
 
   void onExecute(cocos2d::CCObject*);
   void onExecuteFinish(const matjson::Value& output);
@@ -68,5 +70,6 @@ public:
     return nullptr;
   }
   void navigateToDomainContents(Domain& info);
+  void navigateToEventInfo(Event& info);
   void navigateToMethodInfo(Method& info);
 };

@@ -10,6 +10,9 @@
     "version": "v0.9.7",
     "developer": "Honoka Kousaka",
     "description": "fake cocos python bindings' backend",
+    "links": {
+        "source":"https://github.com/HenrySck075/gd-devtools-protocol"
+    },
     "dependencies": [
         {
             "id": "cvolton.level-id-api",
@@ -26,6 +29,12 @@
     "resources": {
         "files": [
             "protocol_definitions/protocols.json"
-        ]
+        ],
+        "fonts": {
+            "consola": {
+                "path": "resources/consola.ttf",
+                "size": 56
+            }
+        }
     }
 }
