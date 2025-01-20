@@ -1,9 +1,10 @@
 #include <Geode/utils/cocos.hpp>
 #include "../WS.hpp"
 #include <matjson.hpp>
-#include <Geode/Modify.hpp>
+#include <Geode/Geode.hpp>
 #include <queue>
 
+using namespace cocos2d;
 #include "DOM.hpp"
 
 bool DOMDomainDisabled = true;
