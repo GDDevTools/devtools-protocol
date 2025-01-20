@@ -37,7 +37,7 @@ bool Protocol::init() {
         c.sendText(errorResponseStr(-1, -32602, "Invalid 'id' type."));
         return;
       }
-      auto& currentIdInfo = idsForClient[s.getId()];
+      auto& currentIdInfo = idsForClient[s->getId()];
       int lastId = currentIdInfo.first;
       auto& unusedIds = currentIdInfo.second;
       auto mmm = std::find(unusedIds.begin(), unusedIds.end(), id);
@@ -68,14 +68,26 @@ bool Protocol::init() {
           return;
         }
       }
-      FunctionReturnType ret = i->second.first(params);
-      if (ret.isErr()) {
-        auto err = ret.unwrapErr();
+      //FunctionReturnType ret = i->second.first(params);
+      auto baaa = [this, id, &c](FunctionReturnType* ret) {
+      if (ret->isErr()) {
+        auto err = ret->unwrapErr();
         c.sendText(errorResponseStr(id, std::get<0>(err), std::get<1>(err)));
         return;
       }
-      c.sendText(successResponseStr(id, ret.unwrap()));
+      c.sendText(successResponseStr(id, ret->unwrap()));
       return;
+      };
+
+      auto func = i->second.first;
+      if (std::holds_alternative<ProtocolSyncFunction>(func)) {
+        auto mm = std::get<ProtocolSyncFunction>(func)(params);
+        baaa(&mm);
+      } else {
+        std::get<ProtocolAsyncFunction>(func)(params).addListener([baaa](FunctionReturnType* v){
+          baaa(v);
+        });
+      }
     }
   });
   ws->disablePerMessageDeflate();
@@ -127,11 +139,15 @@ void Protocol::broadcastEvent(std::string eventName, matjson::Value const& conte
 
 void Protocol::registerFunction(
   std::string funcName, 
-  decltype(Protocol::functions)::value_type::second_type::first_type f,
+  ProtocolFunction f,
   decltype(Protocol::functions)::value_type::second_type::second_type requiredParams
 ) { 
-  functions.insert_or_assign(funcName, std::make_pair(f,requiredParams));
+  functions.insert_or_assign(
+    funcName, 
+    std::make_pair(f, requiredParams)
+  );
 };
+
 
 void fireEvent(std::string eventName, matjson::Value const& content) {
   if (prot) {

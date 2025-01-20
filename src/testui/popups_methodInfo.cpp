@@ -1,20 +1,48 @@
+#include "WS.hpp"
 #include "popups.hpp"
 #include "mdtextarea2.hpp"
 #include "options_cells.hpp"
 
-OptionCell* createOptionCell(Parameter& param, float width) {
+OptionCell* createOptionCell(Parameter& p, float width) {
   OptionCell* c = nullptr;
-  if (param.type == "boolean") c = BoolOptionCell::create(p);
-  if (param.type == "integer") c = IntOptionCell::create(p);
-  if (param.type == "number") c = FloatOptionCell::create(p);
+  if (p.type == "boolean") c = BoolOptionCell::create(p);
+  if (p.type == "integer") c = IntOptionCell::create(p);
+  if (p.type == "number") c = FloatOptionCell::create(p);
   c->setContentSize({width, 35});
   return c;
 };
 
 void PlaygroundPopup::onExecute(cocos2d::CCObject*) {
   auto paramsPage = static_cast<CollapsibleContentLayer*>(
-    m_idkList->m_contentLayer->getChildByID("params");
+    m_idkList->m_contentLayer->getChildByID("params")
   );
+  auto p = matjson::Value::object();
+  for (auto* c : paramsPage->m_content) {
+    auto e = static_cast<OptionCell*>(c)->createOption();
+    p.set(e.first, e.second);
+  }
+  auto protocol = Protocol::get();
+  auto func = protocol->functions[currentDomain.domain+"."+currentMethod.name].first;
+  if (std::holds_alternative<Protocol::ProtocolSyncFunction>(func)) {
+    auto j = std::get<Protocol::ProtocolSyncFunction>(func)(p);
+    onExecuteFinish(j.unwrapOr("errored lol"));
+  } else {
+    std::get<Protocol::ProtocolAsyncFunction>(func)(p).addListener([this,p](auto* v){
+      onExecuteFinish(v->unwrapOr("errored lol"));
+    });
+  }
+};
+void PlaygroundPopup::onExecuteFinish(const matjson::Value& output) {
+  auto outputArea = static_cast<geode::SimpleTextArea*>(
+    m_idkList->m_contentLayer->getChildByID("output")
+  );
+  if (outputArea == nullptr) {
+    outputArea = geode::SimpleTextArea::create(output.dump());
+    outputArea->setID("output");
+    m_idkList->m_contentLayer->addChild(outputArea);
+  } else {
+    outputArea->setText(output.dump());
+  }
 };
 
 void PlaygroundPopup::setupMethodInfoList(Method& methodInfo) {
@@ -62,7 +90,7 @@ void PlaygroundPopup::setupMethodInfoList(Method& methodInfo) {
   do {
     bool fl = false;
     if (methodInfo.parameters.size() == 0) break;
-    auto parametersPage = CollapsibleContentLayer::create("Parameters", paddedLayerSize.width);
+    CollapsibleContentLayer* parametersPage = CollapsibleContentLayer::create("Parameters", paddedLayerSize.width);
     parametersPage->setID("params");
     for (auto& p : methodInfo.parameters) {
       auto c = createOptionCell(p,paddedLayerSize.width);

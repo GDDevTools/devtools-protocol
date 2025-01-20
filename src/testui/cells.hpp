@@ -1,6 +1,5 @@
 #pragma once
-#include "Geode/cocos/cocoa/CCObject.h"
-#include "Geode/cocos/label_nodes/CCLabelBMFont.h"
+#include <Geode/Geode.hpp>
 #include "protocols_json_struct.hpp"
 
 class TitleCell : public cocos2d::CCNode {

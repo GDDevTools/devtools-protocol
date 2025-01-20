@@ -48,6 +48,7 @@ class PlaygroundPopup : public geode::Popup<> {
   Method currentMethod;
 
   void onExecute(cocos2d::CCObject*);
+  void onExecuteFinish(const matjson::Value& output);
 protected:
   bool setup() override;
 

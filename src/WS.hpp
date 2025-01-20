@@ -5,6 +5,8 @@
 #include <Geode/Result.hpp>
 #include <Geode/loader/Dispatch.hpp>
 #include <matjson.hpp>
+#include <variant>
+#include "future.hpp"
 using matjsonObjectInitType = std::initializer_list<std::pair<std::string, matjson::Value>>;
 
 class Protocol {
@@ -14,6 +16,12 @@ public:
     std::tuple<int, std::string>
   >;
   bool running = false;
+  using ProtocolSyncFunction = std::function<FunctionReturnType(matjson::Value&)>;
+  using ProtocolAsyncFunction = std::function<Future<FunctionReturnType>(matjson::Value&)>;
+  using ProtocolFunction = std::variant<
+    ProtocolSyncFunction,
+    ProtocolAsyncFunction
+  >;
 private:
   friend class PlaygroundPopup;
   std::map<
@@ -27,7 +35,7 @@ private:
   std::unordered_map<
     std::string, // method name
     std::pair<
-      std::function<FunctionReturnType(matjson::Value&)>, // function
+      ProtocolFunction, // function
       std::vector< // required parameters
         std::string // name
       >
@@ -43,7 +51,7 @@ public:
   void broadcastEvent(std::string eventName, matjson::Value const& content);
   void registerFunction(
     std::string funcName, 
-    decltype(functions)::value_type::second_type::first_type function,
+    ProtocolFunction function,
     decltype(functions)::value_type::second_type::second_type requiredParams = {}
   );
   ~Protocol() {close();};
@@ -52,7 +60,7 @@ public:
 void fireEvent(std::string eventName, matjson::Value const& content);
 
 #define $domainMethod(method) static Protocol::FunctionReturnType method(matjson::Value& params)
-#define $domainAsyncMethod(method) void method(matjson::Value& params, void(Protocol::FunctionReturnType) finish)
+#define $domainAsyncMethod(method) static Future<Protocol::FunctionReturnType> method(matjson::Value& params)
 
 namespace errors {
   inline Protocol::FunctionReturnType invalidParameter(std::string msg) {
