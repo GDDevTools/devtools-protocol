@@ -25,10 +25,10 @@ Try sending a click to the node without actually clicking.
 Only works for `button` nodes.
 
 First it tries to cast the node to `CCMenuItem` and clicks it.
-If it isn't a `CCMenuItem` then it will send a `DispatchEvent(\"puppeteer/nodeClicked\")` event
+If it isn't a `CCMenuItem` then it will send a `DispatchEvent("puppeteer/nodeClicked")` event
 to the game so nodes implmenting that can handle as it needs.
 
-If you want real click events then you can use [Input.`dispatchMouseEvent`](#inputdispatchmouseevent) instead.
+If you want real click events then you can use [Input.dispatchMouseEvent](method:Input.dispatchMouseEvent) instead.
 
 <table>
 <thead>
@@ -73,7 +73,128 @@ Disables DOM agent.
 ### DOM.`enable`
 Enables DOM agent.
 
+## Events
+### DOM.`attributeModified`
+Fired when [Node](type:DOM.Node)'s attribute is modified.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong><br>ID of the node that has changed.</td>
+  </tr>
+  <tr>
+    <td><code>name</code></td>
+    <td><strong>string</strong><br>Attribute name</td>
+  </tr>
+  <tr>
+    <td><code>value</code></td>
+    <td><strong>string</strong><br>Attribute value</td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.`attributeRemoved`
+Fired when [Node](type:DOM.Node)'s attribute is removed.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong><br>ID of the node that has changed.</td>
+  </tr>
+  <tr>
+    <td><code>name</code></td>
+    <td><strong>string</strong><br>Attribute name</td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.`childNodeCountUpdated`
+Fired when Node's children count has changed.
+Called in conjunction with other child-related events.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong></td>
+  </tr>
+  <tr>
+    <td><code>childNodeCount</code></td>
+    <td><strong>integer</strong></td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.`childNodeInserted`
+Fired when Node added a child.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>parentNodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong></td>
+  </tr>
+  <tr>
+    <td><code>previousNodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong></td>
+  </tr>
+  <tr>
+    <td><code>node</code></td>
+    <td><strong><a href="#domnode">Node</a></strong></td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.`childNodeRemoved`
+Fired when Node removed a child.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>parentNodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong></td>
+  </tr>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong></td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.`documentUpdated`
+Fired when the Scene has been replaced.
+
 ## Types
+### DOM.`NodeId`
+the
+
 ### DOM.`BoxModel`
 Box model.
 
@@ -193,7 +314,7 @@ Get a local list.
   </tr>
   <tr>
     <td><code>includeLevels</code><br>(optional)</td>
-    <td><strong><a href="#levelsbool">bool</a></strong><br>Bundle the levels with the response. Defaults to false.</td>
+    <td><strong>boolean</strong><br>Bundle the levels with the response. Defaults to false.</td>
   </tr>
 </tbody>
 </table>
@@ -214,7 +335,7 @@ Get a saved online list.
   </tr>
   <tr>
     <td><code>includeLevels</code><br>(optional)</td>
-    <td><strong><a href="#levelsbool">bool</a></strong><br>Bundle the levels with the response. Defaults to false.</td>
+    <td><strong>boolean</strong><br>Bundle the levels with the response. Defaults to false.</td>
   </tr>
 </tbody>
 </table>
@@ -352,7 +473,7 @@ yo list
 <tbody>
   <tr>
     <td><code>type</code></td>
-    <td><strong>string</strong><br>The list type. This indicate which getList function to use.<br>Allowed Values: <code></code></td>
+    <td><strong>string</strong><br>The list type. This indicate which getList function to use.</td>
   </tr>
   <tr>
     <td><code>id</code></td>
@@ -364,11 +485,11 @@ yo list
   </tr>
   <tr>
     <td><code>author</code></td>
-    <td><strong>string</strong><br>The creator of the list.<br>Allowed Values: <code></code></td>
+    <td><strong>string</strong><br>The creator of the list.</td>
   </tr>
   <tr>
     <td><code>name</code></td>
-    <td><strong>string</strong><br>Allowed Values: <code></code></td>
+    <td><strong>string</strong></td>
   </tr>
   <tr>
     <td><code>levels</code></td>
@@ -390,7 +511,7 @@ yo level
 <tbody>
   <tr>
     <td><code>type</code></td>
-    <td><strong>string</strong><br>The level type. This indicate which getLevel function to use.<br>Allowed Values: <code></code></td>
+    <td><strong>string</strong><br>The level type. This indicate which getLevel function to use.</td>
   </tr>
   <tr>
     <td><code>id</code></td>
@@ -402,11 +523,11 @@ yo level
   </tr>
   <tr>
     <td><code>author</code></td>
-    <td><strong>string</strong><br>The creator of the level.<br>Allowed Values: <code></code></td>
+    <td><strong>string</strong><br>The creator of the level.</td>
   </tr>
   <tr>
     <td><code>name</code></td>
-    <td><strong>string</strong><br>Allowed Values: <code></code></td>
+    <td><strong>string</strong></td>
   </tr>
 </tbody>
 </thead>
@@ -419,7 +540,7 @@ Manages a mod.
 ## Methods
 ### Mods.`disableMod`
 Disables a specific mod.
-It won't actually be disabled until you [restart](#game-domain) the game.
+It won't actually be disabled until you [restart](domain:Game) the game.
 
 <table>
 <thead>
@@ -430,14 +551,14 @@ It won't actually be disabled until you [restart](#game-domain) the game.
 <tbody>
   <tr>
     <td><code>mod</code></td>
-    <td><strong>string</strong><br>The mod ID<br>Allowed Values: <code></code></td>
+    <td><strong>string</strong><br>The mod ID</td>
   </tr>
 </tbody>
 </table>
 
 ### Mods.`enableMod`
 Enables a specific mod.
-It won't actually be enabled until you [restart](#game-domain) the game.
+It won't actually be enabled until you [restart](domain:Game) the game.
 
 <table>
 <thead>
@@ -448,7 +569,7 @@ It won't actually be enabled until you [restart](#game-domain) the game.
 <tbody>
   <tr>
     <td><code>mod</code></td>
-    <td><strong>string</strong><br>The mod ID<br>Allowed Values: <code></code></td>
+    <td><strong>string</strong><br>The mod ID</td>
   </tr>
 </tbody>
 </table>
@@ -465,7 +586,7 @@ Get non-custom(?) settings values
 <tbody>
   <tr>
     <td><code>mod</code></td>
-    <td><strong>string</strong><br>The mod ID<br>Allowed Values: <code></code></td>
+    <td><strong>string</strong><br>The mod ID</td>
   </tr>
   <tr>
     <td><code>keys</code><br>(optional)</td>
@@ -486,7 +607,7 @@ Set non-custom(?) settings values
 <tbody>
   <tr>
     <td><code>mod</code></td>
-    <td><strong>string</strong><br>The mod ID<br>Allowed Values: <code></code></td>
+    <td><strong>string</strong><br>The mod ID</td>
   </tr>
   <tr>
     <td><code>data</code></td>

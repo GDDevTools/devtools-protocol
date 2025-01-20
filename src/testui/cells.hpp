@@ -45,7 +45,7 @@ public:
     cocos2d::CCNode::setContentSize(size);
     float centerY = getContentSize().height/2;
     m_title->setPosition({16, centerY + (m_description == nullptr ? 0.f : 6.f)});
-    m_description->setPosition({16, centerY-6});
+    if (m_description) m_description->setPosition({16, centerY-6});
     m_ab->setContentSize(size);
     m_trailingNode->setPosition({size.width - 16, centerY});
   }

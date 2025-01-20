@@ -45,12 +45,15 @@ class PlaygroundPopup : public geode::Popup<> {
   void navigateToDomainsList(cocos2d::CCObject *);
   void navigateBackToDomainContents(cocos2d::CCObject *);
 
+public:
   Domain currentDomain;
   Method currentMethod;
   Event currentEvent;
 
   void onExecute(cocos2d::CCObject*);
   void onExecuteFinish(const matjson::Value& output);
+
+  void onEventReceived(const std::string& output);
 protected:
   bool setup() override;
 

@@ -15,6 +15,51 @@ version
 # Backend keeps track of the nodes that were sent to the client and never sends the same node twice. 
 # It is client's responsibility to collect information about the nodes that were sent to the client.
 domain DOM
+
+  # Fired when [Node](type:DOM.Node)'s attribute is modified.
+  event attributeModified
+    parameters
+      # ID of the node that has changed.
+      NodeId nodeId
+      # Attribute name
+      string name
+      # Attribute value
+      string value
+      
+  # Fired when [Node](type:DOM.Node)'s attribute is removed.
+  event attributeRemoved
+    parameters
+      # ID of the node that has changed.
+      NodeId nodeId
+      # Attribute name
+      string name
+
+  # Fired when Node's children count has changed.
+  # Called in conjunction with other child-related events.
+  event childNodeCountUpdated
+    parameters
+      NodeId nodeId
+      integer childNodeCount
+  
+  # Fired when Node added a child.
+  event childNodeInserted
+    parameters
+      NodeId parentNodeId
+      NodeId previousNodeId
+      Node node
+
+  # Fired when Node removed a child.
+  event childNodeRemoved
+    parameters
+      NodeId parentNodeId
+      NodeId nodeId
+      
+  # Fired when the Scene has been replaced.
+  event documentUpdated
+
+  # the
+  type NodeId extends integer
+
   # Box model.
   type BoxModel extends object
     properties

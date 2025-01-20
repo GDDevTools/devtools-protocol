@@ -13,13 +13,12 @@
     "links": {
         "source":"https://github.com/HenrySck075/gd-devtools-protocol"
     },
-    "dependencies": [
-        {
-            "id": "cvolton.level-id-api",
+    "dependencies": {
+        "cvolton.level-id-api": {
             "version": "v1.1.0",
             "importance": "required"
         }
-    ],
+    },
     "settings": {
         "autostart": {
             "type": "bool",
@@ -33,7 +32,7 @@
         "fonts": {
             "consola": {
                 "path": "resources/consola.ttf",
-                "size": 56
+                "size": 30
             }
         }
     }

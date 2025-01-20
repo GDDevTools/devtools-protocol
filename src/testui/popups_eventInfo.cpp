@@ -42,4 +42,43 @@ void PlaygroundPopup::setupEventInfoList(Event& eventInfo) {
   // description
   auto descArea = MDDocsTextArea::create(eventInfo.description, {paddedLayerSize.width, 77});
   m_infoList->m_contentLayer->addChild(descArea);
+
+  auto ok = currentDomain.domain+"."+currentEvent.name;
+  auto c = queuedEventsContent.find(ok);
+  if (c != queuedEventsContent.end()) {
+    onEventReceived(c->second);
+  }
+
+  m_infoList->m_contentLayer->updateLayout();
 };
+void PlaygroundPopup::onEventReceived(const std::string& output) {
+  auto outputArea = static_cast<geode::SimpleTextArea*>(
+    m_infoList->m_contentLayer->getChildByID("output")
+  );
+  // just in case
+  if (outputArea == nullptr) {
+    outputArea = geode::SimpleTextArea::create(output,"consola.fnt"_spr);
+    outputArea->setID("output");
+    m_infoList->m_contentLayer->addChild(outputArea);
+    m_infoList->m_contentLayer->updateLayout();
+  } else {
+    outputArea->setText(output);
+    m_infoList->m_contentLayer->updateLayout();
+  }
+};
+
+$execute {
+  new geode::EventListener<geode::EventFilter<ProtocolEvent>>(+[](ProtocolEvent* e){
+    auto* popup = cocos2d::CCDirector::get()->getRunningScene()->getChildByType<PlaygroundPopup>(0);
+    auto eventName = e->eventData["name"].asString().unwrap();
+    auto ok = popup->currentDomain.domain+"."+popup->currentEvent.name;
+    if (popup && ok == eventName) {
+      popup->onEventReceived(e->eventData.dump());
+    }
+    else {
+      queuedEventsContent[ok] = e->eventData.dump();
+    }
+
+    return geode::ListenerResult::Stop;
+  });
+}

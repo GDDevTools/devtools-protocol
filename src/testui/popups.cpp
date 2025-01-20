@@ -79,6 +79,10 @@ bool PlaygroundPopup::setup() {
   m_infoList = createScrollLayer();
   m_infoList->setVisible(false);
   m_mainLayer->addChild(m_infoList);
+  static_cast<geode::ColumnLayout*>(m_infoList->m_contentLayer->getLayout())
+  ->setCrossAxisAlignment(geode::AxisAlignment::Start)
+  ->setCrossAxisLineAlignment(geode::AxisAlignment::Start)
+  ->setGap(8);
 
   m_backToDomainButton = CCMenuItemSpriteExtra::create(
     CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png"), this,

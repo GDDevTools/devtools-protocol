@@ -7,7 +7,101 @@
     {
       "domain": "DOM",
       "description": "This domain exposes DOM read/write operations. Each DOM Node is represented with its mirror object\nthat has an `id`. This `id` can be used to get additional information on the Node, and more.\nIt is important that client receives DOM events only for the nodes that are known to the client.\nBackend keeps track of the nodes that were sent to the client and never sends the same node twice.\nIt is client's responsibility to collect information about the nodes that were sent to the client.",
+      "events": [
+        {
+          "name": "attributeModified",
+          "description": "Fired when [Node](type:DOM.Node)'s attribute is modified.",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "description": "ID of the node that has changed.",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "name",
+              "description": "Attribute name",
+              "type": "string"
+            },
+            {
+              "name": "value",
+              "description": "Attribute value",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "attributeRemoved",
+          "description": "Fired when [Node](type:DOM.Node)'s attribute is removed.",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "description": "ID of the node that has changed.",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "name",
+              "description": "Attribute name",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "childNodeCountUpdated",
+          "description": "Fired when Node's children count has changed.\nCalled in conjunction with other child-related events.",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "childNodeCount",
+              "type": "integer"
+            }
+          ]
+        },
+        {
+          "name": "childNodeInserted",
+          "description": "Fired when Node added a child.",
+          "parameters": [
+            {
+              "name": "parentNodeId",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "previousNodeId",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "node",
+              "$ref": "Node"
+            }
+          ]
+        },
+        {
+          "name": "childNodeRemoved",
+          "description": "Fired when Node removed a child.",
+          "parameters": [
+            {
+              "name": "parentNodeId",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            }
+          ]
+        },
+        {
+          "name": "documentUpdated",
+          "description": "Fired when the Scene has been replaced."
+        }
+      ],
       "types": [
+        {
+          "id": "NodeId",
+          "description": "the",
+          "type": "integer"
+        },
         {
           "id": "BoxModel",
           "description": "Box model.",

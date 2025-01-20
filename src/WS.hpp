@@ -18,7 +18,7 @@ class Protocol {
 public:
   using FunctionReturnType = geode::Result<
     matjson::Value, 
-    std::tuple<int, std::string>
+    std::pair<int, std::string>
   >;
   bool running = false;
   using ProtocolSyncFunction = std::function<FunctionReturnType(matjson::Value&)>;
@@ -70,7 +70,7 @@ void fireEvent(std::string eventName, matjson::Value const& content);
 namespace errors {
   inline Protocol::FunctionReturnType invalidParameter(std::string msg) {
     return geode::Err(
-      std::make_tuple(-32602, msg)
+      std::make_pair(-32602, msg)
     );
   }
   inline Protocol::FunctionReturnType requiredParameter(std::string param) {
@@ -78,7 +78,7 @@ namespace errors {
   }
   inline Protocol::FunctionReturnType internalError(std::string msg) {
     return geode::Err(
-      std::make_tuple(-32603, msg)
+      std::make_pair(-32603, msg)
     );
   }
 }

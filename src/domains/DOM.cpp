@@ -6,8 +6,6 @@
 
 #include "DOM.hpp"
 
-#include "../stuff.hpp"
-
 bool DOMDomainDisabled = true;
 
 inline void fireDOMEvent(std::string eventName, matjson::Value const& content = {}) {
@@ -235,17 +233,19 @@ DOMNode::DOMNode(CCNode *node, int depth)
 void CCNode2::removeChild(CCNode *child) {
   CCNode::removeChild(child);
   //if (DOMDomainDisabled) return;
-  if (true) return;
   fireDOMEvent("childNodeRemoved", matjson::makeObject({
     {"parentNodeId", nodeIdOf(this)}, 
     {"nodeId", nodeIdOf(child)}
+  }));
+  fireDOMEvent("childNodeCountUpdated", matjson::makeObject({
+    {"nodeId", nodeIdOf(child)},
+    {"childNodeCount", getChildrenCount()}
   }));
 }
 
 void CCNode2::addChild(CCNode *child) {
   auto p = child->getParent();
   CCNode::addChild(child);
-  if (true) return;
   //if (DOMDomainDisabled) return;
   auto resp = matjson::makeObject({
     {"parentNodeId", nodeIdOf(this)},
@@ -255,6 +255,11 @@ void CCNode2::addChild(CCNode *child) {
     resp["previousNodeId"] = nodeIdOf(p);
   }
   fireDOMEvent("childNodeInserted", resp);
+  
+  fireDOMEvent("childNodeCountUpdated", matjson::makeObject({
+    {"nodeId", nodeIdOf(child)},
+    {"childNodeCount", getChildrenCount()}
+  }));
 }
 
 void CCNode2::setUserObject(std::string const &id, CCObject *value) {
@@ -320,9 +325,7 @@ $domainMethod(describeNode) {
       {"node",DOMNode(node,depth)}
     }));
   } else {
-    return geode::Err(
-      std::make_tuple(-32602, "Node doesn't exist.")
-    );
+    return errors::invalidParameter("Node doesn't exist.");
   }
 }
 $domainMethod(disableDOM) {
@@ -346,9 +349,7 @@ $domainMethod(getAttributes) {
       {"attributes",attributes}
     }));
   } else {
-    return geode::Err(
-      std::make_tuple(-32602, "Node doesn't exist.")
-    );
+    return errors::invalidParameter("Node doesn't exist.");
   }
 }
 $domainMethod(getAttribute) {
@@ -358,9 +359,7 @@ $domainMethod(getAttribute) {
       {"value", jsonValueOf(node->getUserObject(params["name"].asString().unwrap()))}
     }));
   } else {
-    return geode::Err(
-      std::make_tuple(-32602, "Node doesn't exist.")
-    );
+    return errors::invalidParameter("Node doesn't exist.");
   }
 }
 $domainMethod(getBoxModel) {
@@ -371,9 +370,7 @@ $domainMethod(getBoxModel) {
       {"height", node->CCNode::getContentSize().height}
     }));
   } else {
-    return geode::Err(
-      std::make_tuple(-32602, "Node doesn't exist.")
-    );
+    return errors::invalidParameter("Node doesn't exist.");
   }
 }
 $domainMethod(getDocument) {
@@ -385,9 +382,7 @@ $domainMethod(getDocument) {
       {"root",DOMNode(node,depth)}
     }));
   } else {
-    return geode::Err(
-      std::make_tuple(-32602, "No running scene.")
-    );
+    return errors::invalidParameter("No running scene.");
   }
 }
 $domainMethod(getNodeForLocation) {
@@ -432,9 +427,7 @@ $domainMethod(getNodeForLocation) {
       {"nodeId", DOMNode(ret)}
     }));
   } else {
-    return geode::Err(
-      std::make_tuple(-32602, "No running scene.")
-    );
+    return errors::invalidParameter("No running scene.");
   }
 }
 $domainMethod(moveTo) {
@@ -532,9 +525,7 @@ $domainMethod(setAttribute) {
     );
     return geode::Ok(matjson::Value::object());
   } else {
-    return geode::Err(
-      std::make_tuple(-32602, "Node doesn't exist.")
-    );
+    return errors::invalidParameter("Node doesn't exist.");
   }
 }
 $domainMethod(removeAttribute) {

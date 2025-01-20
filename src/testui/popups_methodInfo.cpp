@@ -25,7 +25,7 @@ void PlaygroundPopup::onExecute(cocos2d::CCObject*) {
   auto func = protocol->functions[currentDomain.domain+"."+currentMethod.name].first;
   if (std::holds_alternative<Protocol::ProtocolSyncFunction>(func)) {
     auto j = std::get<Protocol::ProtocolSyncFunction>(func)(p);
-    onExecuteFinish(j.unwrapOr("errored lol"));
+    onExecuteFinish(j.isOk() ? j.unwrap() : j.unwrapErr().second);
   } else {
     std::get<Protocol::ProtocolAsyncFunction>(func)(p).addListener([this,p](auto* v){
       onExecuteFinish(v->unwrapOr("errored lol"));
@@ -36,13 +36,15 @@ void PlaygroundPopup::onExecuteFinish(const matjson::Value& output) {
   auto outputArea = static_cast<geode::SimpleTextArea*>(
     m_infoList->m_contentLayer->getChildByID("output")
   );
+  // just in case
   if (outputArea == nullptr) {
-    outputArea = geode::SimpleTextArea::create(output.dump());
+    outputArea = geode::SimpleTextArea::create(output.dump(),"consola.fnt"_spr);
     outputArea->setID("output");
     m_infoList->m_contentLayer->addChild(outputArea);
     m_infoList->m_contentLayer->updateLayout();
   } else {
     outputArea->setText(output.dump());
+    m_infoList->m_contentLayer->updateLayout();
   }
 };
 
@@ -101,10 +103,6 @@ void PlaygroundPopup::setupMethodInfoList(Method& methodInfo) {
     parametersPage->updateLayout();
     m_infoList->m_contentLayer->addChild(parametersPage);
   } while (0);
-  static_cast<geode::ColumnLayout*>(m_infoList->m_contentLayer->getLayout())
-  ->setCrossAxisAlignment(geode::AxisAlignment::Start)
-  ->setCrossAxisLineAlignment(geode::AxisAlignment::Start)
-  ->setGap(8);
   m_infoList->m_contentLayer->updateLayout();
   m_infoList->moveToTop();
 };

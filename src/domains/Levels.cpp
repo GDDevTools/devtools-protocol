@@ -61,14 +61,14 @@ matjson::Value GJList2Json(GJLevelList* list, bool includeLevels) {
 $domainMethod(getLocalLevel) {
   auto ret = EditorIDs::getLevelByID(params["id"].asInt().unwrap());
   if (ret == nullptr) {
-    return geode::Err(std::make_tuple(-32001, "No level with the specified ID found. Maybe search for online levels instead?"));
+    return errors::invalidParameter("No level with the specified ID found. Maybe search for online levels instead?");
   }
   return geode::Ok(GJLevel2Json(ret));
 }
 $domainMethod(getSavedLevel) {
   auto ret = GameLevelManager::get()->getSavedLevel(params["id"].asInt().unwrap());
   if (ret == nullptr) {
-    return geode::Err(std::make_tuple(-32001, "No level with the specified ID was saved. Maybe try downloading it or search for local levels instead?"));
+    return errors::invalidParameter("No level with the specified ID was saved. Maybe try downloading it or search for local levels instead?");
   }
   return geode::Ok(GJLevel2Json(ret));
 }
@@ -76,17 +76,17 @@ $domainMethod(getSavedLevel) {
 $domainMethod(getLocalList) {
   auto ret = EditorIDs::getListByID(params["id"].asInt().unwrap());
   if (ret == nullptr) {
-    return geode::Err(std::make_tuple(-32001, "No level list with the specified ID found. Maybe search for online list instead?"));
+    return errors::invalidParameter("No level list with the specified ID found. Maybe search for online list instead?");
   }
   return geode::Ok(GJList2Json(ret, params["includeLevels"].asBool().unwrapOr(false)));
 }
 $domainMethod(getSavedList) {
   #ifdef GEODE_IS_WINDOWS
-  return geode::Err(std::make_tuple(-32001, "Doesn't work on Windows :("));
+  return errors::invalidParameter("Doesn't work on Windows :(");
   #else
   auto ret = GameLevelManager::get()->getSavedLevelList(params["id"].asInt().unwrap());
   if (ret == nullptr) {
-    return geode::Err(std::make_tuple(-32001, "No level with the specified ID was saved. Maybe try downloading it or search for local levels instead?"));
+    return errors::invalidParameter("No level with the specified ID was saved. Maybe try downloading it or search for local levels instead?");
   }
   return geode::Ok(GJList2Json(ret, params["includeLevels"].asBool().unwrapOr(false)));
   #endif

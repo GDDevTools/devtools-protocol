@@ -67,7 +67,7 @@ def genPropTable(p: ObjectProps):
     return f"""
   <tr>
     <td><code>{p['name']}</code>{"<br>(optional)" if p.get('optional', False) else ""}</td>
-    <td><strong>{t if primitive else f'<a href="#{d.lower() if "." not in t else ""}{t.lower()}">{t}</a>'}</strong>{"<br>"+p['description'] if "description" in p else ""}{f"<br>Allowed Values: <code>{', '.join(p.get("enums",[]))}</code>" if t == "string" else ""}</td>
+    <td><strong>{t if primitive else f'<a href="#{d.lower() if "." not in t else ""}{t.lower()}">{t}</a>'}</strong>{"<br>"+p['description'] if "description" in p else ""}{f"<br>Allowed Values: <code>{', '.join(p.get("enums",[]))}</code>" if t == "string" and len(p.get("enums",[])) != 0 else ""}</td>
   </tr>"""
 
 def genTypeDocTable(d: str, cmd: Type):
