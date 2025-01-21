@@ -48,6 +48,7 @@ matjson::Value GJList2Json(GJLevelList* list, bool includeLevels) {
     {"id", (int)list->m_listID},
   });
   if (list->m_uploaded) ret["downloads"] = list->m_downloads;
+  #ifndef GEODE_IS_MACOS
   if (includeLevels) {
     std::vector<matjson::Value> joe;
     for (auto* level : geode::cocos::CCArrayExt<GJGameLevel*>(list->getListLevelsArray(nullptr))) {
@@ -55,6 +56,7 @@ matjson::Value GJList2Json(GJLevelList* list, bool includeLevels) {
     };
     ret["levels"] = joe;
   }
+  #endif
   return ret;
 }
 
