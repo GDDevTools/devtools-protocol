@@ -1,7 +1,6 @@
 #include "../state.hpp"
 #include <Geode/cocos/CCDirector.h>
 #include <Geode/modify/CCDirector.hpp>
-#include <Geode/Modify.hpp>
 #include <chrono>
 
 std::chrono::milliseconds lastmod;

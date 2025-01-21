@@ -1,9 +1,9 @@
 //#include "../../../external/tinyjs/TinyJS.hpp"
 #include "../state.hpp"
 #include <Geode/DefaultInclude.hpp>
-#include <Geode/Modify.hpp>
 #include <queue>
 
+#include <Geode/modify/CCNode.hpp>
 struct idk : geode::Modify<idk, cocos2d::CCNode> {
   struct Fields {
     bool retainedByJS = false;
