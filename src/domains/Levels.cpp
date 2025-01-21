@@ -81,8 +81,8 @@ $domainMethod(getLocalList) {
   return geode::Ok(GJList2Json(ret, params["includeLevels"].asBool().unwrapOr(false)));
 }
 $domainMethod(getSavedList) {
-  #ifdef GEODE_IS_WINDOWS
-  return errors::invalidParameter("Doesn't work on Windows :(");
+  #ifndef GEODE_IS_ANDROID
+  return errors::internalError("Only works on Android :(");
   #else
   auto ret = GameLevelManager::get()->getSavedLevelList(params["id"].asInt().unwrap());
   if (ret == nullptr) {
