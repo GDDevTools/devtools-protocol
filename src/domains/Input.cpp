@@ -68,10 +68,14 @@ $domainMethod(handleKeyDownEvent) {
   if (modifiersV.isNumber()) {
     int mod = modifiersV.asInt().unwrap();
     disp->updateModifierKeys(
-      disp->getShiftKeyPressed() || !bit(mod,8),
-      disp->getControlKeyPressed() || !bit(mod,2),
-      disp->getAltKeyPressed() || !bit(mod,1),
-      disp->getCommandKeyPressed() || !bit(mod,4)
+#ifndef GEODE_IS_ANDROID
+      disp->getShiftKeyPress() || !bit(mod,8),
+      disp->getControlKeyPress() || !bit(mod,2),
+      disp->getAltKeyPress() || !bit(mod,1),
+      disp->getCommandKeyPress() || !bit(mod,4)
+#else
+      false, false, false, false
+#endif
     );
   }
   auto code = params["code"].asString();
@@ -92,10 +96,14 @@ $domainMethod(handleKeyUpEvent) {
   if (modifiersV.isNumber()) {
     int mod = modifiersV.asInt().unwrap();
     disp->updateModifierKeys(
-      disp->getShiftKeyPressed() && !bit(mod,8),
-      disp->getControlKeyPressed() && !bit(mod,2),
-      disp->getAltKeyPressed() && !bit(mod,1),
-      disp->getCommandKeyPressed() && !bit(mod,4)
+#ifndef GEODE_IS_ANDROID
+      disp->getShiftKeyPress() && !bit(mod,8),
+      disp->getControlKeyPress() && !bit(mod,2),
+      disp->getAltKeyPress() && !bit(mod,1),
+      disp->getCommandKeyPress() && !bit(mod,4)
+#else
+      false, false, false, false
+#endif
     );
   }
   auto code = params["code"].asString();
@@ -114,10 +122,14 @@ $domainMethod(handleCharEvent) {
   auto disp = cocos2d::CCDirector::get()->getKeyboardDispatcher();
 
   auto modifiersV = params["modifiers"];
-  bool shift = disp->getShiftKeyPressed();
-  bool ctrl = disp->getControlKeyPressed();
-  bool alt = disp->getAltKeyPressed();
-  bool cmd = disp->getCommandKeyPressed();
+#ifndef GEODE_IS_ANDROID
+  bool shift = disp->getShiftKeyPress();
+  bool ctrl = disp->getControlKeyPress();
+  bool alt = disp->getAltKeyPress();
+  bool cmd = disp->getCommandKeyPress();
+#else
+  bool shift = false, ctrl = false, alt = false, cmd = false;
+#endif
   if (modifiersV.isNumber()) {
     int mod = modifiersV.asInt().unwrap();
     disp->updateModifierKeys(
@@ -160,7 +172,6 @@ int touchId = 0;
 geode::cocos::CCArrayExt<cocos2d::CCTouch*> touches;
 $domainMethod(dispatchMouseEvent) {
   if (ignoreInputs) return geode::Ok(matjson::Value::object());
-  geode::log::debug("ifhweofjowejiwejofjiewfiewf");
   auto type = params["type"].asString().unwrap();
   if (type != "mouseWheel") {
     float x = params["x"].asDouble().unwrap();
@@ -169,14 +180,14 @@ $domainMethod(dispatchMouseEvent) {
     int buttonId = std::distance(mouseButton, std::find(mouseButton, mouseButton + 8, button));
 
     cocos2d::CCTouch* touch;
-    if (type == "mousePressed"){
+    if (type == "mousePress"){
       touch = new cocos2d::CCTouch();
       touches.push_back(touch);
       //touch->release(); // risky
     } else {
       // TODO: make mouse move actually do something (gd!lazer) by calling ccegl shit
       if (touches.size() == 0) return geode::Ok(matjson::Value::object());
-      if (type == "mouseReleased") {
+      if (type == "mouseRelease") {
         touch = touches[touches.size()-1];
         touches.inner()->removeLastObject();
       }
@@ -186,9 +197,9 @@ $domainMethod(dispatchMouseEvent) {
     auto set = cocos2d::CCSet::create();
     set->addObject(touch);
     geode::queueInMainThread([type,set]{
-      if (type == "mousePressed") {
+      if (type == "mousePress") {
         cocos2d::CCDirector::get()->getTouchDispatcher()->touchesBegan(set,nullptr);
-      } else if (type == "mouseReleased") {
+      } else if (type == "mouseRelease") {
         cocos2d::CCDirector::get()->getTouchDispatcher()->touchesEnded(set,nullptr);
         //cocos2d::CCDirector::get()->getTouchDispatcher()->touchesCancelled(set,nullptr);
       } else {
@@ -210,7 +221,7 @@ $domainMethod(dispatchMouseEvent) {
   return geode::Ok(matjson::Value::object());
 }
 $domainMethod(setIgnoreInputEvents) {
-  ignoreInputs = params["input"].asBool().unwrap();
+  ignoreInputs = params["ignore"].asBool().unwrap();
   return geode::Ok(matjson::Value::object());
 }
 $execute {
@@ -219,4 +230,4 @@ $execute {
   p->registerFunction("Input.dispatchMouseEvent", &dispatchMouseEvent, {"type","x","y","button"});
   p->registerFunction("Input.setIgnoreInputEvents", &setIgnoreInputEvents, {"input"});
 }
-//{"id":0,"method":"Input.dispatchMouseEvent","params":{"type":"mousePressed","x":284,"y":160}}
+//{"id":0,"method":"Input.dispatchMouseEvent","params":{"type":"mousePress","x":284,"y":160}}

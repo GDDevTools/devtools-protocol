@@ -52,6 +52,7 @@ bool PlaygroundPopup::setup() {
   auto layerSize = m_mainLayer->getContentSize();
   paddedLayerSize = layerSize - cocos2d::CCPoint{48, 60};
 
+
   m_domainList = createScrollLayer();
 
   m_mainLayer->addChild(m_domainList);
@@ -59,6 +60,12 @@ bool PlaygroundPopup::setup() {
   auto protocols = geode::utils::file::readFromJson<ProtocolsMetadata>(
                       geode::Mod::get()->getResourcesDir() / "protocols.json"
                           ).unwrap();
+  auto protocolVer = cocos2d::CCLabelBMFont::create(("Protocol Version "+protocols.version.major+"."+protocols.version.minor).c_str(), "chatFont.fnt");
+  protocolVer->setScale(0.5);
+  protocolVer->setAnchorPoint({0,0});
+  protocolVer->ignoreAnchorPointForPosition(false);
+  protocolVer->setPosition({8,8});
+  m_mainLayer->addChild(protocolVer, 777);
   bool flipper_zero = false;
   for (auto &domain : protocols.domains) {
     auto c = DomainCell::create(domain);
