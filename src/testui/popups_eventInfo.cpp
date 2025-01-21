@@ -72,6 +72,7 @@ $execute {
     auto* popup = cocos2d::CCDirector::get()->getRunningScene()->getChildByType<PlaygroundPopup>(0);
     auto eventName = e->eventData["name"].asString().unwrap();
     auto ok = popup->currentDomain.domain+"."+popup->currentEvent.name;
+    geode::log::debug("{}", e->eventData.dump());
     if (popup && ok == eventName) {
       popup->onEventReceived(e->eventData.dump());
     }

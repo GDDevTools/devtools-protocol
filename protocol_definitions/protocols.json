@@ -587,6 +587,28 @@
           ]
         }
       ]
+    },
+    {
+      "domain": "Runtime",
+      "description": "javascriptin",
+      "commands": [
+        {
+          "name": "evaluate",
+          "description": "Evaluate the given JavaScript expression.",
+          "parameters": [
+            {
+              "name": "expression",
+              "type": "string"
+            }
+          ],
+          "returns": [
+            {
+              "name": "idk",
+              "type": "object"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

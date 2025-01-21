@@ -289,3 +289,12 @@ domain Game
     
       # Geometry Dash version.
       string gameVersion
+
+# javascriptin
+domain Runtime
+  # Evaluate the given JavaScript expression.
+  command evaluate
+    parameters
+      string expression
+    returns
+      object idk

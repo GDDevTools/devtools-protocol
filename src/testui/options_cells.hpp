@@ -22,6 +22,17 @@ public:
   virtual matjson::Value createValue() = 0; // used by array
 };
 
+class AbsolutelyNothing : public OptionCell {
+public:
+  matjson::Value createValue() override {return 0;}
+  bool init(std::string t, std::string d) override {
+    m_trailingNode = cocos2d::CCNode::create();
+    return stupidcell::init(t, d);
+  }
+  static AbsolutelyNothing* create(Parameter& param) {
+    $create_class(AbsolutelyNothing, param.name, param.description);
+  };
+};
 
 class BoolOptionCell : public OptionCell {
   CCMenuItemToggler* m_button;
@@ -61,5 +72,19 @@ public:
   };
   matjson::Value createValue() override {
     return std::stod(m_input->getString());
+  };
+};
+
+class StringOptionCell : public OptionCell {
+  geode::TextInput* m_input;
+protected:
+  bool init(std::string title, std::string description = "") override;
+
+public:
+  static StringOptionCell* create(Parameter& param) {
+    $create_class(StringOptionCell, param.name, param.description);
+  };
+  matjson::Value createValue() override {
+    return m_input->getString();
   };
 };

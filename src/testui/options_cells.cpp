@@ -39,3 +39,9 @@ bool FloatOptionCell::init(std::string title, std::string description) {
 
   return stupidcell::init(title, description);
 }
+bool StringOptionCell::init(std::string title, std::string description) {
+  m_trailingNode = m_input = geode::TextInput::create(250, "");
+  m_input->setCallback([this](std::string const& str){m_input->setString(str);});
+
+  return stupidcell::init(title, description);
+}

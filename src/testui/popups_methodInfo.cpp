@@ -8,6 +8,9 @@ OptionCell* createOptionCell(Parameter& p, float width) {
   if (p.type == "boolean") c = BoolOptionCell::create(p);
   if (p.type == "integer") c = IntOptionCell::create(p);
   if (p.type == "number") c = FloatOptionCell::create(p);
+  if (p.type == "string") c = StringOptionCell::create(p);
+
+  if (c == nullptr) c = AbsolutelyNothing::create(p);
   c->setContentSize({width, 35});
   return c;
 };
