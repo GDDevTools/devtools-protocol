@@ -10,6 +10,7 @@
 using matjsonObjectInitType = std::initializer_list<std::pair<std::string, matjson::Value>>;
 
 class Protocol {
+  std::string g;
 public:
   using FunctionReturnType = geode::Result<
     matjson::Value, 
@@ -73,6 +74,11 @@ namespace errors {
   inline Protocol::FunctionReturnType internalError(std::string msg) {
     return geode::Err(
       std::make_pair(-32603, msg)
+    );
+  }
+  inline Protocol::FunctionReturnType userInterventionError(std::string msg) {
+    return geode::Err(
+      std::make_pair(-32001, msg)
     );
   }
 }

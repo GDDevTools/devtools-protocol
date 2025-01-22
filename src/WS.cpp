@@ -10,10 +10,10 @@ ix::WebSocketServer* ws;
 
 bool Protocol::init() {
   ix::initNetSystem();
+  g = geode::utils::file::readString(geode::Mod::get()->getResourcesDir() / "protocols.json").unwrap();
   ws = new ix::WebSocketServer(1412,"127.0.0.1");
 
   ws->setOnClientMessageCallback([this](std::shared_ptr<ix::ConnectionState> s, ix::WebSocket& c, const ix::WebSocketMessagePtr& msg){
-    
     if (msg->type == ix::WebSocketMessageType::Open) {
       geode::log::info("new connection chat");
     }
@@ -53,6 +53,10 @@ bool Protocol::init() {
       currentIdInfo.first = id;
       
       auto methodName = j["method"].asString().unwrap();
+      if (methodName == "getProtocolInformation") {
+        c.sendText(successResponseStr(id, g));
+        return;
+      }
       decltype(functions)::value_type::second_type method;
       auto i = functions.find(methodName);
       if (i==functions.end()) {

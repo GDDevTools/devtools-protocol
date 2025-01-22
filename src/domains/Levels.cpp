@@ -1,7 +1,6 @@
 #include "../WS.hpp"
 #include <cvolton.level-id-api/include/EditorIDs.hpp>
 #include <matjson.hpp>
-#include <tuple>
 matjson::Value GJLevel2Json(GJGameLevel* level);
 
 bool LevelDomainDisabled = true;
@@ -92,6 +91,34 @@ $domainMethod(getSavedList) {
   }
   return geode::Ok(GJList2Json(ret, params["includeLevels"].asBool().unwrapOr(false)));
   #endif
+}
+
+$domainMethod(createLevel) {
+  GJGameLevel* level = GameLevelManager::get()->createNewLevel();
+  level->m_levelName = params["name"].asString().unwrap();
+  level->m_levelDesc = params["description"].asString().unwrapOr("");
+  return geode::Ok(GJLevel2Json(level));
+}
+$domainAsyncMethod(deleteLevel) {
+  //??????
+  GJGameLevel* level = static_cast<GJGameLevel*>(
+    LocalLevelManager::get()->getAllLevelsInDict()->objectForKey(params["id"].asInt().unwrap())
+  );
+  if (level==nullptr) return geode::Task<Protocol::FunctionReturnType>::immediate(geode::Ok(matjson::Value::object()));
+  return geode::Task<Protocol::FunctionReturnType>::runWithCallback([level](auto finish, auto prog, auto hasBeenCancelled) {
+    geode::createQuickPopup(
+      "Delete Level",
+      "Are you sure you want to <cr>delete</c> <cj>"+level->m_levelName+"</c>?\n<cy>This action cannot be undone.</c>",   // content
+      "No", "Yes",      // buttons
+      [finish](auto, bool btn2) {
+        if (btn2) {
+          finish(geode::Ok(matjson::Value::object()));
+        } else {
+          finish(errors::userInterventionError("User cancelled deleting level."));
+        }
+      }
+    );
+  });
 }
 
 $domainMethod(disableLevel) {
