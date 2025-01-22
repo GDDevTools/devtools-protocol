@@ -16,6 +16,18 @@ OptionCell* createOptionCell(Parameter& p, float width) {
 };
 
 void PlaygroundPopup::onExecute(cocos2d::CCObject*) {
+  auto protocol = Protocol::get();
+  auto funcEntry = protocol->functions.find(currentDomain.domain+"."+currentMethod.name);
+  if (funcEntry == protocol->functions.end()) {
+    FLAlertLayer::create(
+      "Not implemented",
+      "The function "+funcEntry->first+" was documented but not implemented in the mod. Sorry!",
+      "v"
+    )->show();
+    return;
+  }
+  auto func = funcEntry->second.first;
+
   auto paramsPage = static_cast<CollapsibleContentLayer*>(
     m_infoList->m_contentLayer->getChildByID("params")
   );
@@ -26,8 +38,6 @@ void PlaygroundPopup::onExecute(cocos2d::CCObject*) {
       p.set(e.first, e.second);
     }
   }
-  auto protocol = Protocol::get();
-  auto func = protocol->functions[currentDomain.domain+"."+currentMethod.name].first;
   if (std::holds_alternative<Protocol::ProtocolSyncFunction>(func)) {
     auto j = std::get<Protocol::ProtocolSyncFunction>(func)(p);
     onExecuteFinish(j.isOk() ? j.unwrap() : j.unwrapErr().second);
