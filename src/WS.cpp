@@ -130,9 +130,9 @@ void Protocol::broadcastEvent(std::string eventName, matjson::Value const& conte
   auto o = matjson::makeObject({
     {"method", eventName},
     {"params", content}
-  });
+  }).dump(0);
   for (auto& c : ws->getClients()) {
-    c->send(o.dump(0));
+    c->send(o);
   }
 }
 
@@ -152,11 +152,13 @@ void fireEvent(std::string eventName, matjson::Value const& content) {
   if (prot) {
     prot->broadcastEvent(eventName, content);
   }
+  /*
   geode::log::debug("e");
   ProtocolEvent(matjson::makeObject({
     {"method", eventName},
     {"params", content}
   })).post();
+  */
 };
   
 void Protocol::close() {

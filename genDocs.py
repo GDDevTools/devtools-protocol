@@ -7,7 +7,7 @@ Except from some changes (such as `Browser` domain renamed to `Game`), this api 
 
 This .md file is generated from protocols.json so it's guaranteed to match with the protocols list returned.
 
-> **Note 2** most of this docs will sound similar to the docs from the aforementioned protocol and it's intended. Don't ask anything about that.
+> **Note** most of this docs will sound similar to the docs from the aforementioned protocol and it's intended. Don't ask anything about that.
 
 
 <style type="text/css">
