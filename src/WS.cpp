@@ -127,13 +127,12 @@ std::shared_ptr<Protocol> Protocol::get() {
 
 void Protocol::broadcastEvent(std::string eventName, matjson::Value const& content) {
   if (ws==nullptr) return;
+  auto o = matjson::makeObject({
+    {"method", eventName},
+    {"params", content}
+  });
   for (auto& c : ws->getClients()) {
-    auto o = matjson::makeObject({
-      {"method", eventName},
-      {"params", content}
-    });
     c->send(o.dump(0));
-    ProtocolEvent(o).post();
   }
 }
 
@@ -153,6 +152,11 @@ void fireEvent(std::string eventName, matjson::Value const& content) {
   if (prot) {
     prot->broadcastEvent(eventName, content);
   }
+  geode::log::debug("e");
+  ProtocolEvent(matjson::makeObject({
+    {"method", eventName},
+    {"params", content}
+  })).post();
 };
   
 void Protocol::close() {

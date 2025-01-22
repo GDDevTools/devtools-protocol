@@ -30,6 +30,7 @@ class PlaygroundPopup : public geode::Popup<> {
   geode::ScrollLayer* m_domainList;
   geode::ScrollLayer* m_jList;
   geode::ScrollLayer* m_infoList;
+  bool dontBlockEventReceivedConstruct = false;
 
   cocos2d::CCSize paddedLayerSize;
   geode::ScrollLayer *createScrollLayer();
@@ -54,6 +55,7 @@ public:
   void onExecuteFinish(const matjson::Value& output);
 
   void onEventReceived(const std::string& output);
+  void onListenToEvent(cocos2d::CCObject*);
 protected:
   bool setup() override;
 

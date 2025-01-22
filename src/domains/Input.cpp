@@ -68,14 +68,10 @@ $domainMethod(handleKeyDownEvent) {
   if (modifiersV.isNumber()) {
     int mod = modifiersV.asInt().unwrap();
     disp->updateModifierKeys(
-#ifndef GEODE_IS_ANDROID
-      disp->getShiftKeyPress() || !bit(mod,8),
-      disp->getControlKeyPress() || !bit(mod,2),
-      disp->getAltKeyPress() || !bit(mod,1),
-      disp->getCommandKeyPress() || !bit(mod,4)
-#else
-      false, false, false, false
-#endif
+      disp->getShiftKeyPressed() || !bit(mod,8),
+      disp->getControlKeyPressed() || !bit(mod,2),
+      disp->getAltKeyPressed() || !bit(mod,1),
+      disp->getCommandKeyPressed() || !bit(mod,4)
     );
   }
   auto code = params["code"].asString();
@@ -96,14 +92,10 @@ $domainMethod(handleKeyUpEvent) {
   if (modifiersV.isNumber()) {
     int mod = modifiersV.asInt().unwrap();
     disp->updateModifierKeys(
-#ifndef GEODE_IS_ANDROID
-      disp->getShiftKeyPress() && !bit(mod,8),
-      disp->getControlKeyPress() && !bit(mod,2),
-      disp->getAltKeyPress() && !bit(mod,1),
-      disp->getCommandKeyPress() && !bit(mod,4)
-#else
-      false, false, false, false
-#endif
+      disp->getShiftKeyPressed() && !bit(mod,8),
+      disp->getControlKeyPressed() && !bit(mod,2),
+      disp->getAltKeyPressed() && !bit(mod,1),
+      disp->getCommandKeyPressed() && !bit(mod,4)
     );
   }
   auto code = params["code"].asString();
@@ -122,14 +114,11 @@ $domainMethod(handleCharEvent) {
   auto disp = cocos2d::CCDirector::get()->getKeyboardDispatcher();
 
   auto modifiersV = params["modifiers"];
-#ifndef GEODE_IS_ANDROID
-  bool shift = disp->getShiftKeyPress();
-  bool ctrl = disp->getControlKeyPress();
-  bool alt = disp->getAltKeyPress();
-  bool cmd = disp->getCommandKeyPress();
-#else
-  bool shift = false, ctrl = false, alt = false, cmd = false;
-#endif
+  bool shift = disp->getShiftKeyPressed();
+  bool ctrl = disp->getControlKeyPressed();
+  bool alt = disp->getAltKeyPressed();
+  bool cmd = disp->getCommandKeyPressed();
+
   if (modifiersV.isNumber()) {
     int mod = modifiersV.asInt().unwrap();
     disp->updateModifierKeys(

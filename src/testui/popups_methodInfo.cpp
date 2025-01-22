@@ -20,9 +20,11 @@ void PlaygroundPopup::onExecute(cocos2d::CCObject*) {
     m_infoList->m_contentLayer->getChildByID("params")
   );
   auto p = matjson::Value::object();
-  for (auto* c : paramsPage->m_content) {
-    auto e = static_cast<OptionCell*>(c)->createOption();
-    p.set(e.first, e.second);
+  if (paramsPage != nullptr) {
+    for (auto* c : paramsPage->m_content) {
+      auto e = static_cast<OptionCell*>(c)->createOption();
+      p.set(e.first, e.second);
+    }
   }
   auto protocol = Protocol::get();
   auto func = protocol->functions[currentDomain.domain+"."+currentMethod.name].first;

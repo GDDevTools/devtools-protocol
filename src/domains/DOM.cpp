@@ -10,7 +10,7 @@ using namespace cocos2d;
 bool DOMDomainDisabled = true;
 
 inline void fireDOMEvent(std::string eventName, matjson::Value const& content = {}) {
-  fireEvent("DOM."+eventName, content);
+  if (!DOMDomainDisabled) fireEvent("DOM."+eventName, content);
 };
 
 static std::unordered_map<int, CCNode*> s_nodes;
