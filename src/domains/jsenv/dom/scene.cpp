@@ -80,5 +80,7 @@ extern "C" void registerDOMSceneObject() {
 
     s->addNative("function Scene.prototype.requestFullscreen()", Scene_requestFullscreen);
     s->addNative("function Scene.prototype.exitFullscreen()", Scene_exitFullscreen);
+
+    s->execute("var document = new Scene()");
   }
 }
