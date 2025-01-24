@@ -16,6 +16,11 @@ bool Protocol::init() {
   ws->setOnClientMessageCallback([this](std::shared_ptr<ix::ConnectionState> s, ix::WebSocket& c, const ix::WebSocketMessagePtr& msg){
     if (msg->type == ix::WebSocketMessageType::Open) {
       geode::log::info("new connection chat");
+      idsForClient[s->getId()] = std::make_pair(-1, std::vector<int>{});
+    }
+    else if (msg->type == ix::WebSocketMessageType::Close) {
+      geode::log::info("new disconnection chat");
+      idsForClient.erase(s->getId());
     }
     else if (msg->type == ix::WebSocketMessageType::Message || !msg->str.empty()) {
       auto p = matjson::parse(msg->str);
@@ -24,15 +29,12 @@ bool Protocol::init() {
         return;
       }
       auto j = p.unwrap();
-      if (!j["id"].isNumber()) {
-        c.sendText(errorResponseStr(-1,-32602,"Request ID must be a number."));
-        return;
-      } 
+
       int id;
       auto idOptional = j["id"].asInt();
       if (idOptional.isOk()) id = idOptional.unwrap();
       else {
-        c.sendText(errorResponseStr(-1, -32602, "Invalid 'id' type."));
+        c.sendText(errorResponseStr(-1, -32602, "Request ID must be an int."));
         return;
       }
       auto& currentIdInfo = idsForClient[s->getId()];
@@ -105,21 +107,29 @@ bool Protocol::init() {
   return true;
 }
 
+std::string debugPrint(matjson::Value const& v) {
+  return v.dump(0);
+}
+
 std::string Protocol::successResponseStr(int id, matjson::Value const& resp) {
-  return matjson::makeObject({
+  return debugPrint(matjson::makeObject({
+    {"jsonrpc", "2.0"},
     {"id", id},
     {"result", resp}
-  }).dump(0);
+  }));
 };
 
 std::string Protocol::errorResponseStr(int id, int code, std::string message) {
-  return matjson::makeObject({
-    {"id", id},
+  auto c = matjson::makeObject({
+    {"jsonrpc", "2.0"},
     {"error", matjson::makeObject({
       {"code", code},
       {"message", message}
     })}
-  }).dump(0);
+  });
+  if (id < 0) c["id"] = nullptr;
+  else c["id"] = id;
+  return debugPrint(c);
 };
 
 std::shared_ptr<Protocol> Protocol::get() {

@@ -6,7 +6,7 @@
   "domains": [
     {
       "domain": "DOM",
-      "description": "This domain exposes DOM read/write operations. Each DOM Node is represented with its mirror object\nthat has an `id`. This `id` can be used to get additional information on the Node\u0000and more.\nIt is important that client receives DOM events only for the nodes that are known to the client.\nBackend keeps track of the nodes that were sent to the client and never sends the same node twice.\nIt is client's responsibility to collect information about the nodes that were sent to the client.",
+      "description": "This domain exposes DOM read/write operations. Each DOM Node is represented with its mirror object\nthat has an `id`. This `id` can be used to get additional information on the Node, and more.\nIt is important that client receives DOM events only for the nodes that are known to the client.\nBackend keeps track of the nodes that were sent to the client and never sends the same node twice.\nIt is client's responsibility to collect information about the nodes that were sent to the client.",
       "events": [
         {
           "name": "attributeModified",
@@ -178,7 +178,7 @@
         },
         {
           "name": "describeNode",
-          "description": "Describes node given its id\u0000does not require domain to be enabled. Does not start tracking any\nobjects\u0000can be used for automation.",
+          "description": "Describes node given its id, does not require domain to be enabled. Does not start tracking any\nobjects, can be used for automation.",
           "parameters": [
             {
               "name": "nodeId",
@@ -187,7 +187,7 @@
             },
             {
               "name": "depth",
-              "description": "The maximum depth at which children should be retrieved\u0000defaults to 1. Use -1 for the\nentire subtree or provide an integer larger than 0.",
+              "description": "The maximum depth at which children should be retrieved, defaults to 1. Use -1 for the\nentire subtree or provide an integer larger than 0.",
               "optional": true,
               "type": "integer"
             }
@@ -235,16 +235,16 @@
       ]
     },
     {
-      "domain": "Levels",
+      "domain": "Level",
       "description": "Manages the levels list.",
       "commands": [
         {
           "name": "disable",
-          "description": "Disables the Levels agent."
+          "description": "Disables the Level agent."
         },
         {
           "name": "enable",
-          "description": "Enables the Levels agent."
+          "description": "Enables the Level agent."
         },
         {
           "name": "getLocalList",
@@ -252,7 +252,7 @@
           "parameters": [
             {
               "name": "id",
-              "description": "The list ID\u0000can be seen in the game using Editor List ID API (installed as required).",
+              "description": "The list ID, can be seen in the game using Editor List ID API (installed as required).",
               "type": "integer"
             },
             {
@@ -298,7 +298,7 @@
           "parameters": [
             {
               "name": "id",
-              "description": "The level ID\u0000can be seen in the game using Editor Level ID API (installed as required)",
+              "description": "The level ID, can be seen in the game using Editor Level ID API (installed as required)",
               "type": "integer"
             }
           ],
@@ -427,7 +427,7 @@
             },
             {
               "name": "levels",
-              "description": "list of levels\u0000empty if includeLevels is false",
+              "description": "list of levels, empty if includeLevels is false",
               "type": "array",
               "items": {
                 "$ref": "Level"
@@ -565,7 +565,7 @@
           "returns": [
             {
               "name": "protocolVersion",
-              "description": "This mod's version in the style of `[major\u0000minor\u0000patch]`",
+              "description": "This mod's version in the style of `[major, minor, patch]`",
               "type": "array",
               "items": {
                 "type": "integer"
@@ -573,7 +573,7 @@
             },
             {
               "name": "loaderVersion",
-              "description": "Geode version in the style of `[major\u0000minor\u0000patch]`",
+              "description": "Geode version in the style of `[major, minor, patch]`",
               "type": "array",
               "items": {
                 "type": "integer"
@@ -670,6 +670,36 @@
             {
               "name": "ignore",
               "type": "boolean"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "domain": "Network",
+      "description": "Network domain allows tracking network activities of the page. It exposes information about http, file, data and other requests and responses, their headers, bodies, timing, etc.",
+      "commands": [
+        {
+          "name": "disable",
+          "description": "Disables Network agent."
+        },
+        {
+          "name": "enable",
+          "description": "Enables Network agent."
+        },
+        {
+          "name": "getRequestPostData",
+          "parameters": [
+            {
+              "name": "requestId",
+              "type": "integer"
+            }
+          ],
+          "returns": [
+            {
+              "name": "postData",
+              "description": "Request body string",
+              "type": "string"
             }
           ]
         }

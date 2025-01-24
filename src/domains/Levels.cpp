@@ -39,7 +39,7 @@ matjson::Value GJLevel2Json(GJGameLevel* level) {
   return ret;
 }
 
-matjson::Value GJList2Json(GJLevelList* list, bool includeLevels) {
+matjson::Value GJList2Json(GJLevelList* list, bool includeLevel) {
   auto ret = matjson::makeObject({
     {"name", std::string(list->m_listName)},
     {"author", std::string(list->m_creatorName)},
@@ -48,7 +48,7 @@ matjson::Value GJList2Json(GJLevelList* list, bool includeLevels) {
   });
   if (list->m_uploaded) ret["downloads"] = list->m_downloads;
   #ifndef GEODE_IS_MACOS
-  if (includeLevels) {
+  if (includeLevel) {
     std::vector<matjson::Value> joe;
     for (auto* level : geode::cocos::CCArrayExt<GJGameLevel*>(list->getListLevelsArray(nullptr))) {
       joe.push_back(GJLevel2Json(level));
@@ -79,7 +79,7 @@ $domainMethod(getLocalList) {
   if (ret == nullptr) {
     return errors::invalidParameter("No level list with the specified ID found. Maybe search for online list instead?");
   }
-  return geode::Ok(GJList2Json(ret, params["includeLevels"].asBool().unwrapOr(false)));
+  return geode::Ok(GJList2Json(ret, params["includeLevel"].asBool().unwrapOr(false)));
 }
 $domainMethod(getSavedList) {
   #ifndef GEODE_IS_ANDROID
@@ -89,7 +89,7 @@ $domainMethod(getSavedList) {
   if (ret == nullptr) {
     return errors::invalidParameter("No level with the specified ID was saved. Maybe try downloading it or search for local levels instead?");
   }
-  return geode::Ok(GJList2Json(ret, params["includeLevels"].asBool().unwrapOr(false)));
+  return geode::Ok(GJList2Json(ret, params["includeLevel"].asBool().unwrapOr(false)));
   #endif
 }
 
@@ -132,10 +132,10 @@ $domainMethod(enableLevel) {
 
 $execute {
   auto p = Protocol::get();
-  p->registerFunction("Levels.disable", disableLevel);
-  p->registerFunction("Levels.enable", enableLevel);
-  p->registerFunction("Levels.getLocalLevel", getLocalLevel, {"id"});
-  p->registerFunction("Levels.getSavedLevel", getSavedLevel, {"id"});
-  p->registerFunction("Levels.getLocalList", getLocalList, {"id"});
-  p->registerFunction("Levels.getSavedList", getSavedList, {"id"});
+  p->registerFunction("Level.disable", disableLevel);
+  p->registerFunction("Level.enable", enableLevel);
+  p->registerFunction("Level.getLocalLevel", getLocalLevel, {"id"});
+  p->registerFunction("Level.getSavedLevel", getSavedLevel, {"id"});
+  p->registerFunction("Level.getLocalList", getLocalList, {"id"});
+  p->registerFunction("Level.getSavedList", getSavedList, {"id"});
 }

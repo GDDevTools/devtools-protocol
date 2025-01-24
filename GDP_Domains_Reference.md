@@ -5,7 +5,7 @@ Except from some changes (such as `Browser` domain renamed to `Game`), this api 
 
 This .md file is generated from protocols.json so it's guaranteed to match with the protocols list returned.
 
-> **Note 2** most of this docs will sound similar to the docs from the aforementioned protocol and it's intended. Don't ask anything about that.
+> **Note** most of this docs will sound similar to the docs from the aforementioned protocol and it's intended. Don't ask anything about that.
 
 
 <style type="text/css">
@@ -288,17 +288,17 @@ Issued when a new message was logged.
 </table>
 
 
-# `Levels` Domain
+# `Level` Domain
 Manages the levels list.
 
 ## Methods
-### Levels.`disable`
-Disables the Levels agent.
+### Level.`disable`
+Disables the Level agent.
 
-### Levels.`enable`
-Enables the Levels agent.
+### Level.`enable`
+Enables the Level agent.
 
-### Levels.`getLocalList`
+### Level.`getLocalList`
 Get a local list.
 
 <table>
@@ -319,7 +319,7 @@ Get a local list.
 </tbody>
 </table>
 
-### Levels.`getSavedList`
+### Level.`getSavedList`
 Get a saved online list.
 
 <table>
@@ -340,7 +340,7 @@ Get a saved online list.
 </tbody>
 </table>
 
-### Levels.`getLocalLevel`
+### Level.`getLocalLevel`
 Get a local level.
 
 <table>
@@ -357,7 +357,7 @@ Get a local level.
 </tbody>
 </table>
 
-### Levels.`getSavedLevel`
+### Level.`getSavedLevel`
 Get a saved online level.
 
 <table>
@@ -374,7 +374,7 @@ Get a saved online level.
 </tbody>
 </table>
 
-### Levels.`getSavedLevels`
+### Level.`getSavedLevels`
 Get some online level.
 
 <table>
@@ -392,7 +392,7 @@ Get some online level.
 </table>
 
 ## Events
-### Levels.`listCreated`
+### Level.`listCreated`
 Fired when a new list was created
 
 <table>
@@ -404,12 +404,12 @@ Fired when a new list was created
 <tbody>
   <tr>
     <td><code>list</code></td>
-    <td><strong><a href="#levelslevellist">LevelList</a></strong></td>
+    <td><strong><a href="#levellevellist">LevelList</a></strong></td>
   </tr>
 </tbody>
 </table>
 
-### Levels.`listDeleted`
+### Level.`listDeleted`
 Fired when a list was deleted
 
 <table>
@@ -421,12 +421,12 @@ Fired when a list was deleted
 <tbody>
   <tr>
     <td><code>list</code></td>
-    <td><strong><a href="#levelslevellist">LevelList</a></strong></td>
+    <td><strong><a href="#levellevellist">LevelList</a></strong></td>
   </tr>
 </tbody>
 </table>
 
-### Levels.`levelCreated`
+### Level.`levelCreated`
 Fired when a new level was created
 
 <table>
@@ -438,12 +438,12 @@ Fired when a new level was created
 <tbody>
   <tr>
     <td><code>level</code></td>
-    <td><strong><a href="#levelslevel">Level</a></strong></td>
+    <td><strong><a href="#levellevel">Level</a></strong></td>
   </tr>
 </tbody>
 </table>
 
-### Levels.`levelDeleted`
+### Level.`levelDeleted`
 Fired when a level was deleted
 
 <table>
@@ -455,13 +455,13 @@ Fired when a level was deleted
 <tbody>
   <tr>
     <td><code>level</code></td>
-    <td><strong><a href="#levelslevel">Level</a></strong></td>
+    <td><strong><a href="#levellevel">Level</a></strong></td>
   </tr>
 </tbody>
 </table>
 
 ## Types
-### Levels.`LevelList`
+### Level.`LevelList`
 yo list
 
 <table>
@@ -499,7 +499,7 @@ yo list
 </thead>
 </table>
 
-### Levels.`Level`
+### Level.`Level`
 yo level
 
 <table>
@@ -632,5 +632,139 @@ Restart game gracefully.
 
 ### Game.`getVersion`
 Returns version information.
+
+
+# `Input` Domain
+User inputs.
+
+## Methods
+### Input.`dispatchMouseEvent`
+
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>type</code></td>
+    <td><strong>string</strong><br>Mouse event type.</td>
+  </tr>
+  <tr>
+    <td><code>x</code></td>
+    <td><strong>number</strong><br>Mouse X position</td>
+  </tr>
+  <tr>
+    <td><code>y</code></td>
+    <td><strong>number</strong><br>Mouse Y position</td>
+  </tr>
+  <tr>
+    <td><code>deltaX</code></td>
+    <td><strong>number</strong><br>Mouse horizontal scroll delta</td>
+  </tr>
+  <tr>
+    <td><code>deltaY</code></td>
+    <td><strong>number</strong><br>Mouse vertical scroll delta</td>
+  </tr>
+  <tr>
+    <td><code>button</code></td>
+    <td><strong>string</strong><br>Mouse button</td>
+  </tr>
+</tbody>
+</table>
+
+### Input.`dispatchKeyEvent`
+
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>type</code></td>
+    <td><strong>string</strong></td>
+  </tr>
+  <tr>
+    <td><code>modifiers</code></td>
+    <td><strong>integer</strong></td>
+  </tr>
+  <tr>
+    <td><code>code</code></td>
+    <td><strong>string</strong></td>
+  </tr>
+</tbody>
+</table>
+
+### Input.`setIgnoreInputEvents`
+
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>ignore</code></td>
+    <td><strong>boolean</strong></td>
+  </tr>
+</tbody>
+</table>
+
+
+# `Network` Domain
+Network domain allows tracking network activities of the page. It exposes information about http, file, data and other requests and responses, their headers, bodies, timing, etc.
+
+## Methods
+### Network.`disable`
+Disables Network agent.
+
+### Network.`enable`
+Enables Network agent.
+
+### Network.`getRequestPostData`
+
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>requestId</code></td>
+    <td><strong>integer</strong></td>
+  </tr>
+</tbody>
+</table>
+
+
+# `Runtime` Domain
+javascriptin
+
+## Methods
+### Runtime.`evaluate`
+Evaluate the given JavaScript expression.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>expression</code></td>
+    <td><strong>string</strong></td>
+  </tr>
+</tbody>
+</table>
 
 

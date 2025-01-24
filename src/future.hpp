@@ -13,7 +13,8 @@ public:
     m_taskListener.bind([this](Task::Event* event) {
       if (T* result = event->getValue()) {
         while (m_listeners.empty()) {
-          m_listeners.pop()(result);
+          m_listeners.back()(result);
+          m_listeners.pop();
         }
       }
     });
