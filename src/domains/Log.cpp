@@ -41,7 +41,7 @@ geode::Hook* vlogHook;
 $domainMethod(disableLog) {
   if (vlogHook) {
     if (vlogHook->disable().isOk())
-      return geode::Ok(matjson::Value::object());
+      return emptyResponse();
     return errors::internalError("Cannot disable vlogImpl hook.");
   }
   return errors::internalError("vlogImpl hook not available.");
@@ -49,7 +49,7 @@ $domainMethod(disableLog) {
 $domainMethod(enableLog) {
   if (vlogHook) {
     if (vlogHook->enable().isOk())
-      return geode::Ok(matjson::Value::object());
+      return emptyResponse();
     // Err isn't returned in these functions but we'll see
     return errors::internalError("Cannot enable vlogImpl hook.");
   }

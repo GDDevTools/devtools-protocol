@@ -68,6 +68,7 @@ domain DOM
       integer width
       # Node height
       integer height
+
   # DOM interaction is implemented in terms of mirror objects that represent the actual DOM nodes.
   # DOMNode is a base node mirror type.
   type Node extends object
@@ -119,6 +120,90 @@ domain DOM
   # Enables DOM agent.
   command enable
 
+  # Get a node's attribute.
+  command getAttribute
+    parameters
+      # The target node's ID
+      NodeId nodeId
+      # The attribute's name
+      string name
+    returns 
+      # The attribute's value
+      any value
+
+  # Returns attributes for the specified node.
+  command getAttributes
+    parameters
+      # The target node's ID
+      NodeId nodeId
+    returns 
+      # The node's attributes
+      object attributes
+  
+  command getBoxModel
+    parameters
+      # The target node's ID
+      NodeId nodeId
+    returns
+      BoxModel model
+  # Returns the root DOM node (the scene) (and optionally the subtree) to the caller. 
+  # Implicitly enables the DOM domain events for the current target.
+  command getDocument
+    parameters
+      # The maximum depth at which children should be retrieved, defaults to 1. Use -1 for the entire subtree or provide an integer larger than 0.
+      optional integer depth
+    returns
+      Node root
+
+  # Returns node id at given location. Depending on whether DOM domain is enabled, nodeId is either returned or not.
+  command getNodeForLocation
+    parameters
+      # X coordinate.
+      integer x
+      # Y coordinate.
+      integer y
+    returns
+      NodeId nodeId
+
+  # Moves node into the new parent, places it before the given anchor.
+  command moveTo
+    parameters
+      # Id of the node to move.
+      NodeId nodeId
+      # Id of the element to drop the moved node into.
+      NodeId targetNodeId
+      # Drop node before this one (if absent, the moved node becomes the last child of `targetNodeId`)
+
+  # Executes querySelector on a given node.
+  command querySelector
+    parameters
+      # Id of the node to query upon.
+      NodeId nodeId
+      # Selector string
+      string selector
+    returns
+      NodeId result
+  
+  # Removes attribute with given name from an element with given id.
+  command removeAttribute
+    parameters
+      NodeId nodeId
+      string name
+  
+  # Removes node with given id.
+  command removeNode
+    parameters
+      # Id of the node to remove.
+      NodeId nodeId
+  
+  # Sets attribute for an element with given id.
+  command setAttribute
+    parameters
+      NodeId nodeId
+      string name
+      string value
+
+
 # Get events whenever a log is pushed.
 domain Log
   command disable
@@ -139,7 +224,7 @@ domain Level
   # Get a local list.
   command getLocalList
     parameters
-      # The list ID, can be seen in the game using Editor List ID API (installed as required).
+      # The list ID.
       integer id
       # Bundle the levels with the response. Defaults to false.
       optional boolean includeLevels
@@ -159,7 +244,7 @@ domain Level
   # Get a local level.
   command getLocalLevel
     parameters
-      # The level ID, can be seen in the game using Editor Level ID API (installed as required)
+      # The level ID.
       integer id
     returns
       Level level
@@ -180,6 +265,23 @@ domain Level
     returns
       array of Level levels
 
+  # Delete a saved online level. Asks the user before doing so and returns an error if the user rejects the request.
+  command deleteSavedLevel
+    parameters
+      # The level ID.
+      integer id
+  # Delete a local level. Asks the user before doing so and returns an error if the user rejects the request.
+  command deleteLocalLevel
+    parameters
+      # The level ID.
+      integer id
+  # Create a new local level.
+  command createLevel
+    parameters
+      # The level name.
+      string name
+      # The level description.
+      optional string description
 
   # Fired when a new list was created
   event listCreated
@@ -234,7 +336,7 @@ domain Level
       string name
 
 # Manages a mod.
-domain Mods
+domain Mod
   # Disables a specific mod.  
   # It won't actually be disabled until you [restart](domain:Game) the game.
   command disableMod
@@ -290,11 +392,36 @@ domain Game
     
       # Geometry Dash version.
       string gameVersion
+  
+  # Get position and size of the game window.
+  command getWindowBounds
+    returns
+      Bounds bounds
+  # Set position and/or size of the game window.
+  command getWindowBounds
+    parameters
+      Bounds bounds
+  
+  # Game window bounds information
+  type Bounds extends object
+    properties
+      integer left
+      integer top
+      integer width
+      integer height
+      enum windowState
+        normal
+        minimized
+        maximized
+        fullscreen
 
 # User inputs.
 domain Input
+  # Dispatches a mouse event to the game.
   command dispatchMouseEvent
     parameters
+      # Time at which the event occured.
+      integer timestamp
       # Mouse event type.
       enum type
         mouseWheel
@@ -318,9 +445,11 @@ domain Input
         6
         7
         8
-
+  # Dispatches a key event to the game.
   command dispatchKeyEvent
     parameters
+      # Time at which the event occured.
+      integer timestamp
       enum type
         keyDown
         keyUp

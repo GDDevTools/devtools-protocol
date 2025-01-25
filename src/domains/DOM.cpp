@@ -314,7 +314,7 @@ $domainMethod(click) {
     } else {
       return errors::invalidParameter("Node isn't classified as a button.");
     }
-    return geode::Ok(matjson::Value::object());
+    return emptyResponse();
   }
   return errors::internalError("Node doesn't exist.");
 }
@@ -331,11 +331,11 @@ $domainMethod(describeNode) {
 }
 $domainMethod(disableDOM) {
   DOMDomainDisabled = true;
-  return geode::Ok(matjson::Value::object());
+  return emptyResponse();
 }
 $domainMethod(enableDOM) {
   DOMDomainDisabled = false;
-  return geode::Ok(matjson::Value::object());
+  return emptyResponse();
 }
 $domainMethod(getAttributes) {
   CCNode* node = getNodeAt(params["nodeId"].asInt().unwrapOr(0)); 
@@ -388,7 +388,7 @@ $domainMethod(getDocument) {
 }
 $domainMethod(getNodeForLocation) {
   if (DOMDomainDisabled) {
-    return geode::Ok(matjson::Value::object());
+    return emptyResponse();
   }
   auto root = CCDirector::sharedDirector()->getRunningScene();
   if (root) {
@@ -475,16 +475,7 @@ $domainMethod(moveTo) {
   else if (afterId.isErr())
   dest->insertAfter(target, getNodeAt(afterId.unwrap()));
   else dest->addChild(target);
-  return geode::Ok(matjson::Value::object());
-}
-$domainMethod(removeNode) { 
-  CCNode* node = getNodeAt(params["nodeId"].asInt().unwrapOr(0)); 
-  if (node) {
-    geode::queueInMainThread([node]{
-      node->removeFromParentAndCleanup(false);
-    });
-  }
-  return geode::Ok(matjson::Value::object());
+  return emptyResponse();
 }
 $domainMethod(querySelector) { 
   CCNode* node = getNodeAt(params["nodeId"].asInt().unwrapOr(0)); 
@@ -498,6 +489,16 @@ $domainMethod(querySelector) {
   }
   return errors::internalError("Node doesn't exist.");
 }
+$domainMethod(removeNode) { 
+  CCNode* node = getNodeAt(params["nodeId"].asInt().unwrapOr(0)); 
+  if (node) {
+    geode::queueInMainThread([node]{
+      node->removeFromParentAndCleanup(false);
+    });
+  }
+  return emptyResponse();
+}
+
 CCObject* cocosObjOf(matjson::Value& val) {
   if (val.isNull()) return nullptr;
   else if (val.isArray()) {
@@ -524,7 +525,7 @@ $domainMethod(setAttribute) {
       params["name"].asString().unwrap(),
       cocosObjOf(params["value"])
     );
-    return geode::Ok(matjson::Value::object());
+    return emptyResponse();
   } else {
     return errors::invalidParameter("Node doesn't exist.");
   }

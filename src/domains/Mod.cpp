@@ -10,14 +10,14 @@ $domainMethod(disableMod) {
     auto m = Loader::get()->getLoadedMod(params["mod"].asString().unwrap())
   )
     m->disable();
-  return geode::Ok(matjson::Value::object());
+  return emptyResponse();
 }
 $domainMethod(enableMod) {
   if (
     auto m = Loader::get()->getInstalledMod(params["mod"].asString().unwrap())
   )
     m->enable();
-  return geode::Ok(matjson::Value::object());
+  return emptyResponse();
 }
 $domainMethod(getSettingsItems) {
   matjson::Value ret;
@@ -44,15 +44,15 @@ $domainMethod(setSettings) {
       else if (v.isString()) set(std::string);
 #undef set
     }
-    return geode::Ok(matjson::Value::object());
+    return emptyResponse();
   }
   return errors::invalidParameter("Mod not installed.");
 }
 
 $execute {
   auto p = Protocol::get();
-  p->registerFunction("Mods.disableMod", &disableMod, {"mod"});
-  p->registerFunction("Mods.enableMod", &disableMod, {"mod"});
-  p->registerFunction("Mods.getSettingsItems", &getSettingsItems, {"mod"});
-  p->registerFunction("Mods.setSettings", &setSettings, {"mod", "settings"});
+  p->registerFunction("Mod.disableMod", &disableMod, {"mod"});
+  p->registerFunction("Mod.enableMod", &disableMod, {"mod"});
+  p->registerFunction("Mod.getSettingsItems", &getSettingsItems, {"mod"});
+  p->registerFunction("Mod.setSettings", &setSettings, {"mod", "settings"});
 }

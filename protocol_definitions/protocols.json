@@ -207,6 +207,184 @@
         {
           "name": "enable",
           "description": "Enables DOM agent."
+        },
+        {
+          "name": "getAttribute",
+          "description": "Get a node's attribute.",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "description": "The target node's ID",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "name",
+              "description": "The attribute's name",
+              "type": "string"
+            }
+          ],
+          "returns": [
+            {
+              "name": "value",
+              "description": "The attribute's value",
+              "type": "any"
+            }
+          ]
+        },
+        {
+          "name": "getAttributes",
+          "description": "Returns attributes for the specified node.",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "description": "The target node's ID",
+              "$ref": "NodeId"
+            }
+          ],
+          "returns": [
+            {
+              "name": "attributes",
+              "description": "The node's attributes",
+              "type": "object"
+            }
+          ]
+        },
+        {
+          "name": "getBoxModel",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "description": "The target node's ID",
+              "$ref": "NodeId"
+            }
+          ],
+          "returns": [
+            {
+              "name": "model",
+              "$ref": "BoxModel"
+            }
+          ]
+        },
+        {
+          "name": "getDocument",
+          "description": "Returns the root DOM node (the scene) (and optionally the subtree) to the caller.\nImplicitly enables the DOM domain events for the current target.",
+          "parameters": [
+            {
+              "name": "depth",
+              "description": "The maximum depth at which children should be retrieved, defaults to 1. Use -1 for the entire subtree or provide an integer larger than 0.",
+              "optional": true,
+              "type": "integer"
+            }
+          ],
+          "returns": [
+            {
+              "name": "root",
+              "$ref": "Node"
+            }
+          ]
+        },
+        {
+          "name": "getNodeForLocation",
+          "description": "Returns node id at given location. Depending on whether DOM domain is enabled, nodeId is either returned or not.",
+          "parameters": [
+            {
+              "name": "x",
+              "description": "X coordinate.",
+              "type": "integer"
+            },
+            {
+              "name": "y",
+              "description": "Y coordinate.",
+              "type": "integer"
+            }
+          ],
+          "returns": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            }
+          ]
+        },
+        {
+          "name": "moveTo",
+          "description": "Moves node into the new parent, places it before the given anchor.",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "description": "Id of the node to move.",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "targetNodeId",
+              "description": "Id of the element to drop the moved node into.",
+              "$ref": "NodeId"
+            }
+          ]
+        },
+        {
+          "name": "querySelector",
+          "description": "Executes querySelector on a given node.",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "description": "Id of the node to query upon.",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "selector",
+              "description": "Selector string",
+              "type": "string"
+            }
+          ],
+          "returns": [
+            {
+              "name": "result",
+              "$ref": "NodeId"
+            }
+          ]
+        },
+        {
+          "name": "removeAttribute",
+          "description": "Removes attribute with given name from an element with given id.",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "removeNode",
+          "description": "Removes node with given id.",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "description": "Id of the node to remove.",
+              "$ref": "NodeId"
+            }
+          ]
+        },
+        {
+          "name": "setAttribute",
+          "description": "Sets attribute for an element with given id.",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "value",
+              "type": "string"
+            }
+          ]
         }
       ]
     },
@@ -252,7 +430,7 @@
           "parameters": [
             {
               "name": "id",
-              "description": "The list ID, can be seen in the game using Editor List ID API (installed as required).",
+              "description": "The list ID.",
               "type": "integer"
             },
             {
@@ -298,7 +476,7 @@
           "parameters": [
             {
               "name": "id",
-              "description": "The level ID, can be seen in the game using Editor Level ID API (installed as required)",
+              "description": "The level ID.",
               "type": "integer"
             }
           ],
@@ -344,6 +522,45 @@
               "items": {
                 "$ref": "Level"
               }
+            }
+          ]
+        },
+        {
+          "name": "deleteSavedLevel",
+          "description": "Delete a saved online level. Asks the user before doing so and returns an error if the user rejects the request.",
+          "parameters": [
+            {
+              "name": "id",
+              "description": "The level ID.",
+              "type": "integer"
+            }
+          ]
+        },
+        {
+          "name": "deleteLocalLevel",
+          "description": "Delete a local level. Asks the user before doing so and returns an error if the user rejects the request.",
+          "parameters": [
+            {
+              "name": "id",
+              "description": "The level ID.",
+              "type": "integer"
+            }
+          ]
+        },
+        {
+          "name": "createLevel",
+          "description": "Create a new local level.",
+          "parameters": [
+            {
+              "name": "name",
+              "description": "The level name.",
+              "type": "string"
+            },
+            {
+              "name": "description",
+              "description": "The level description.",
+              "optional": true,
+              "type": "string"
             }
           ]
         }
@@ -474,7 +691,7 @@
       ]
     },
     {
-      "domain": "Mods",
+      "domain": "Mod",
       "description": "Manages a mod.",
       "commands": [
         {
@@ -585,6 +802,61 @@
               "type": "string"
             }
           ]
+        },
+        {
+          "name": "getWindowBounds",
+          "description": "Get position and size of the game window.",
+          "returns": [
+            {
+              "name": "bounds",
+              "$ref": "Bounds"
+            }
+          ]
+        },
+        {
+          "name": "getWindowBounds",
+          "description": "Set position and/or size of the game window.",
+          "parameters": [
+            {
+              "name": "bounds",
+              "$ref": "Bounds"
+            }
+          ]
+        }
+      ],
+      "types": [
+        {
+          "id": "Bounds",
+          "description": "Game window bounds information",
+          "type": "object",
+          "properties": [
+            {
+              "name": "left",
+              "type": "integer"
+            },
+            {
+              "name": "top",
+              "type": "integer"
+            },
+            {
+              "name": "width",
+              "type": "integer"
+            },
+            {
+              "name": "height",
+              "type": "integer"
+            },
+            {
+              "name": "windowState",
+              "type": "string",
+              "enum": [
+                "normal",
+                "minimized",
+                "maximized",
+                "fullscreen"
+              ]
+            }
+          ]
         }
       ]
     },
@@ -594,7 +866,13 @@
       "commands": [
         {
           "name": "dispatchMouseEvent",
+          "description": "Dispatches a mouse event to the game.",
           "parameters": [
+            {
+              "name": "timestamp",
+              "description": "Time at which the event occured.",
+              "type": "integer"
+            },
             {
               "name": "type",
               "description": "Mouse event type.",
@@ -644,7 +922,13 @@
         },
         {
           "name": "dispatchKeyEvent",
+          "description": "Dispatches a key event to the game.",
           "parameters": [
+            {
+              "name": "timestamp",
+              "description": "Time at which the event occured.",
+              "type": "integer"
+            },
             {
               "name": "type",
               "type": "string",

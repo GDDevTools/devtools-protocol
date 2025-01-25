@@ -73,6 +73,205 @@ Disables DOM agent.
 ### DOM.`enable`
 Enables DOM agent.
 
+### DOM.`getAttribute`
+Get a node's attribute.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong><br>The target node's ID</td>
+  </tr>
+  <tr>
+    <td><code>name</code></td>
+    <td><strong>string</strong><br>The attribute's name</td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.`getAttributes`
+Returns attributes for the specified node.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong><br>The target node's ID</td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.`getBoxModel`
+
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong><br>The target node's ID</td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.`getDocument`
+Returns the root DOM node (the scene) (and optionally the subtree) to the caller.
+Implicitly enables the DOM domain events for the current target.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>depth</code><br>(optional)</td>
+    <td><strong>integer</strong><br>The maximum depth at which children should be retrieved, defaults to 1. Use -1 for the entire subtree or provide an integer larger than 0.</td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.`getNodeForLocation`
+Returns node id at given location. Depending on whether DOM domain is enabled, nodeId is either returned or not.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>x</code></td>
+    <td><strong>integer</strong><br>X coordinate.</td>
+  </tr>
+  <tr>
+    <td><code>y</code></td>
+    <td><strong>integer</strong><br>Y coordinate.</td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.`moveTo`
+Moves node into the new parent, places it before the given anchor.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong><br>Id of the node to move.</td>
+  </tr>
+  <tr>
+    <td><code>targetNodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong><br>Id of the element to drop the moved node into.</td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.`querySelector`
+Executes querySelector on a given node.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong><br>Id of the node to query upon.</td>
+  </tr>
+  <tr>
+    <td><code>selector</code></td>
+    <td><strong>string</strong><br>Selector string</td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.`removeAttribute`
+Removes attribute with given name from an element with given id.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong></td>
+  </tr>
+  <tr>
+    <td><code>name</code></td>
+    <td><strong>string</strong></td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.`removeNode`
+Removes node with given id.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong><br>Id of the node to remove.</td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.`setAttribute`
+Sets attribute for an element with given id.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong></td>
+  </tr>
+  <tr>
+    <td><code>name</code></td>
+    <td><strong>string</strong></td>
+  </tr>
+  <tr>
+    <td><code>value</code></td>
+    <td><strong>string</strong></td>
+  </tr>
+</tbody>
+</table>
+
 ## Events
 ### DOM.`attributeModified`
 Fired when [Node](type:DOM.Node)'s attribute is modified.
@@ -310,7 +509,7 @@ Get a local list.
 <tbody>
   <tr>
     <td><code>id</code></td>
-    <td><strong>integer</strong><br>The list ID, can be seen in the game using Editor List ID API (installed as required).</td>
+    <td><strong>integer</strong><br>The list ID.</td>
   </tr>
   <tr>
     <td><code>includeLevels</code><br>(optional)</td>
@@ -352,7 +551,7 @@ Get a local level.
 <tbody>
   <tr>
     <td><code>id</code></td>
-    <td><strong>integer</strong><br>The level ID, can be seen in the game using Editor Level ID API (installed as required)</td>
+    <td><strong>integer</strong><br>The level ID.</td>
   </tr>
 </tbody>
 </table>
@@ -387,6 +586,61 @@ Get some online level.
   <tr>
     <td><code>page</code><br>(optional)</td>
     <td><strong>integer</strong><br>The page to retrieve the list from. Leave empty to fetch all of them</td>
+  </tr>
+</tbody>
+</table>
+
+### Level.`deleteSavedLevel`
+Delete a saved online level. Asks the user before doing so and returns an error if the user rejects the request.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>id</code></td>
+    <td><strong>integer</strong><br>The level ID.</td>
+  </tr>
+</tbody>
+</table>
+
+### Level.`deleteLocalLevel`
+Delete a local level. Asks the user before doing so and returns an error if the user rejects the request.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>id</code></td>
+    <td><strong>integer</strong><br>The level ID.</td>
+  </tr>
+</tbody>
+</table>
+
+### Level.`createLevel`
+Create a new local level.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>name</code></td>
+    <td><strong>string</strong><br>The level name.</td>
+  </tr>
+  <tr>
+    <td><code>description</code><br>(optional)</td>
+    <td><strong>string</strong><br>The level description.</td>
   </tr>
 </tbody>
 </table>
@@ -534,11 +788,11 @@ yo level
 </table>
 
 
-# `Mods` Domain
+# `Mod` Domain
 Manages a mod.
 
 ## Methods
-### Mods.`disableMod`
+### Mod.`disableMod`
 Disables a specific mod.
 It won't actually be disabled until you [restart](domain:Game) the game.
 
@@ -556,7 +810,7 @@ It won't actually be disabled until you [restart](domain:Game) the game.
 </tbody>
 </table>
 
-### Mods.`enableMod`
+### Mod.`enableMod`
 Enables a specific mod.
 It won't actually be enabled until you [restart](domain:Game) the game.
 
@@ -574,7 +828,7 @@ It won't actually be enabled until you [restart](domain:Game) the game.
 </tbody>
 </table>
 
-### Mods.`getSettingsItems`
+### Mod.`getSettingsItems`
 Get non-custom(?) settings values
 
 <table>
@@ -595,7 +849,7 @@ Get non-custom(?) settings values
 </tbody>
 </table>
 
-### Mods.`setSettings`
+### Mod.`setSettings`
 Set non-custom(?) settings values
 
 <table>
@@ -633,13 +887,11 @@ Restart game gracefully.
 ### Game.`getVersion`
 Returns version information.
 
+### Game.`getWindowBounds`
+Get position and size of the game window.
 
-# `Input` Domain
-User inputs.
-
-## Methods
-### Input.`dispatchMouseEvent`
-
+### Game.`getWindowBounds`
+Set position and/or size of the game window.
 
 <table>
 <thead>
@@ -648,6 +900,67 @@ User inputs.
 </tr>
 </thead>
 <tbody>
+  <tr>
+    <td><code>bounds</code></td>
+    <td><strong><a href="#gamebounds">Bounds</a></strong></td>
+  </tr>
+</tbody>
+</table>
+
+## Types
+### Game.`Bounds`
+Game window bounds information
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Properties</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>left</code></td>
+    <td><strong>integer</strong></td>
+  </tr>
+  <tr>
+    <td><code>top</code></td>
+    <td><strong>integer</strong></td>
+  </tr>
+  <tr>
+    <td><code>width</code></td>
+    <td><strong>integer</strong></td>
+  </tr>
+  <tr>
+    <td><code>height</code></td>
+    <td><strong>integer</strong></td>
+  </tr>
+  <tr>
+    <td><code>windowState</code></td>
+    <td><strong>string</strong></td>
+  </tr>
+</tbody>
+</thead>
+</table>
+
+
+# `Input` Domain
+User inputs.
+
+## Methods
+### Input.`dispatchMouseEvent`
+Dispatches a mouse event to the game.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>timestamp</code></td>
+    <td><strong>integer</strong><br>Time at which the event occured.</td>
+  </tr>
   <tr>
     <td><code>type</code></td>
     <td><strong>string</strong><br>Mouse event type.</td>
@@ -676,7 +989,7 @@ User inputs.
 </table>
 
 ### Input.`dispatchKeyEvent`
-
+Dispatches a key event to the game.
 
 <table>
 <thead>
@@ -685,6 +998,10 @@ User inputs.
 </tr>
 </thead>
 <tbody>
+  <tr>
+    <td><code>timestamp</code></td>
+    <td><strong>integer</strong><br>Time at which the event occured.</td>
+  </tr>
   <tr>
     <td><code>type</code></td>
     <td><strong>string</strong></td>

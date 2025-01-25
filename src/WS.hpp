@@ -6,7 +6,6 @@
 #include <Geode/loader/Dispatch.hpp>
 #include <matjson.hpp>
 #include <variant>
-#include "future.hpp"
 using matjsonObjectInitType = std::initializer_list<std::pair<std::string, matjson::Value>>;
 
 class Protocol {
@@ -16,9 +15,10 @@ public:
     matjson::Value, 
     std::pair<int, std::string>
   >;
+  using AsyncFunctionTask = geode::Task<FunctionReturnType>;
   bool running = false;
   using ProtocolSyncFunction = std::function<FunctionReturnType(matjson::Value&)>;
-  using ProtocolAsyncFunction = std::function<Future<FunctionReturnType>(matjson::Value&)>;
+  using ProtocolAsyncFunction = std::function<void(matjson::Value&, AsyncFunctionTask::PostResult)>;
   using ProtocolFunction = std::variant<
     ProtocolSyncFunction,
     ProtocolAsyncFunction
@@ -59,8 +59,12 @@ public:
 };
 void fireEvent(std::string eventName, matjson::Value const& content);
 
+inline Protocol::FunctionReturnType emptyResponse() {
+  return geode::Ok(matjson::Value::object());
+}
+
 #define $domainMethod(method) static Protocol::FunctionReturnType method(matjson::Value& params)
-#define $domainAsyncMethod(method) static Future<Protocol::FunctionReturnType> method(matjson::Value& params)
+#define $domainAsyncMethod(method) static void method(matjson::Value& params, Protocol::AsyncFunctionTask::PostResult finish)
 
 namespace errors {
   inline Protocol::FunctionReturnType invalidParameter(std::string msg) {

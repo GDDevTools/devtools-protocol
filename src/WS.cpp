@@ -88,9 +88,22 @@ bool Protocol::init() {
         auto mm = std::get<ProtocolSyncFunction>(func)(params);
         baaa(&mm);
       } else {
-        std::get<ProtocolAsyncFunction>(func)(params).addListener([baaa](FunctionReturnType* v){
-          baaa(v);
+        auto g = std::get<ProtocolAsyncFunction>(func);
+        // the horror to allocate the task to somewhere else
+        // (i hope it works)
+        auto task = AsyncFunctionTask::runWithCallback([&g,&params,&baaa](AsyncFunctionTask::PostResult finish, auto prog, auto cancelled){
+          g(params, finish);
         });
+        AsyncFunctionTask* taskPtr = new AsyncFunctionTask(std::move(task));
+        auto listener = new geode::EventListener<AsyncFunctionTask>;
+        listener->bind([&baaa, taskPtr, listener](AsyncFunctionTask::Event* e){
+          if (auto result = e->getValue()) {
+            baaa(result);
+            delete taskPtr;
+            delete listener; // troll
+          }
+        });
+        listener->setFilter(*taskPtr);
       }
     }
   });

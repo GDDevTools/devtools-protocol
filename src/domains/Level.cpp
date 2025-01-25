@@ -99,43 +99,75 @@ $domainMethod(createLevel) {
   level->m_levelDesc = params["description"].asString().unwrapOr("");
   return geode::Ok(GJLevel2Json(level));
 }
-$domainAsyncMethod(deleteLevel) {
+$domainAsyncMethod(deleteSavedLevel) {
+  //??????
+  GJGameLevel* level = GameLevelManager::get()->getSavedLevel(params["id"].asInt().unwrap());
+  if (level==nullptr) {
+    finish(emptyResponse());
+  }
+  geode::createQuickPopup(
+    "Delete Level",
+    fmt::format("Are you sure you want to <cr>delete</c> <cj>{}</c>?",level->m_levelName.c_str()), // content
+    "No", "Yes",      // buttons
+    [finish](auto, bool btn2) {
+      if (btn2) {
+        finish(emptyResponse());
+      } else {
+        finish(errors::userInterventionError("User cancelled deleting level."));
+      }
+    }
+  );
+}
+$domainAsyncMethod(deleteLocalLevel) {
   //??????
   GJGameLevel* level = static_cast<GJGameLevel*>(
     LocalLevelManager::get()->getAllLevelsInDict()->objectForKey(params["id"].asInt().unwrap())
   );
-  if (level==nullptr) return geode::Task<Protocol::FunctionReturnType>::immediate(geode::Ok(matjson::Value::object()));
-  return geode::Task<Protocol::FunctionReturnType>::runWithCallback([level](auto finish, auto prog, auto hasBeenCancelled) {
-    geode::createQuickPopup(
-      "Delete Level",
-      "Are you sure you want to <cr>delete</c> <cj>"+level->m_levelName+"</c>?\n<cy>This action cannot be undone.</c>",   // content
-      "No", "Yes",      // buttons
-      [finish](auto, bool btn2) {
-        if (btn2) {
-          finish(geode::Ok(matjson::Value::object()));
-        } else {
-          finish(errors::userInterventionError("User cancelled deleting level."));
-        }
+  if (level==nullptr) {
+    finish(emptyResponse());
+    return;
+  }
+  geode::createQuickPopup(
+    "Delete Level",
+    fmt::format(
+      "Are you sure you want to <cr>delete</c> <cj>{}</c>?\n"
+      "<cy>This action cannot be undone.</c>",
+      level->m_levelName.c_str()
+    ),   // content
+    "No", "Yes",      // buttons
+    [finish](auto, bool btn2) {
+      if (btn2) {
+        finish(emptyResponse());
+      } else {
+        finish(errors::userInterventionError("User cancelled deleting level."));
       }
-    );
-  });
+    }
+  );
 }
 
 $domainMethod(disableLevel) {
   LevelDomainDisabled = true;
-  return geode::Ok(matjson::Value::object());
+  return emptyResponse();
 };
 $domainMethod(enableLevel) {
   LevelDomainDisabled = false;
-  return geode::Ok(matjson::Value::object());
+  return emptyResponse();
 };
 
 $execute {
   auto p = Protocol::get();
+  
   p->registerFunction("Level.disable", disableLevel);
   p->registerFunction("Level.enable", enableLevel);
+
   p->registerFunction("Level.getLocalLevel", getLocalLevel, {"id"});
   p->registerFunction("Level.getSavedLevel", getSavedLevel, {"id"});
+
   p->registerFunction("Level.getLocalList", getLocalList, {"id"});
   p->registerFunction("Level.getSavedList", getSavedList, {"id"});
+
+  p->registerFunction("Level.createLevel", createLevel, {"name"});
+
+  p->registerFunction("Level.deleteLocalLevel", deleteLocalLevel, {"id"});
+  p->registerFunction("Level.deleteSavedLevel", deleteSavedLevel, {"id"});
 }

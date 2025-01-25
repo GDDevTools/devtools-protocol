@@ -2,25 +2,23 @@
 #include <Geode/Geode.hpp>
 #include <matjson.hpp>
 
-namespace nameCollision {
-$domainMethod(close) {
+$domainMethod(closeGame) {
   geode::queueInMainThread([]{
     geode::utils::game::exit();
   });
-  return geode::Ok(matjson::Value::object());
-};
+  return emptyResponse();
 };
 $domainMethod(crash) {
   geode::queueInMainThread([]{
     throw std::runtime_error("Manually initiated crash");
   });
-  return geode::Ok(matjson::Value::object());
+  return emptyResponse();
 };
 $domainMethod(restart) {
   geode::queueInMainThread([]{
     geode::utils::game::restart();
   });
-  return geode::Ok(matjson::Value::object());
+  return emptyResponse();
 };
 $domainMethod(getVersion) {
   auto modVer = geode::Mod::get()->getVersion();
@@ -118,13 +116,15 @@ class $modify(cocos2d::CCEGLView) {
 $domainMethod(getWindowBounds) {
   auto winSize = cocos2d::CCDirector::sharedDirector()->getOpenGLView()->getFrameSize();
 
-  return geode::Ok(matjson::Value{Bounds{
-    .left = (int)winPos.x,
-    .top = (int)winPos.y,
-    .width = (int)winSize.width,
-    .height = (int)winSize.height,
-    .windowState = state
-  }});
+  return geode::Ok(matjson::makeObject({
+    {"bounds", Bounds{
+      .left = (int)winPos.x,
+      .top = (int)winPos.y,
+      .width = (int)winSize.width,
+      .height = (int)winSize.height,
+      .windowState = state
+    }}
+  }));
 }
 
 $domainMethod(setWindowBounds) {
@@ -150,13 +150,13 @@ $domainMethod(setWindowBounds) {
   }
 #endif
 
-  return geode::Ok(matjson::Value::object());
+  return emptyResponse();
 }
 
 
 $execute {
   auto p = Protocol::get();
-  p->registerFunction("Game.close", &nameCollision::close);
+  p->registerFunction("Game.close", &closeGame);
   p->registerFunction("Game.crash", &crash);
   p->registerFunction("Game.restart", &restart);
   p->registerFunction("Game.getVersion", &getVersion);

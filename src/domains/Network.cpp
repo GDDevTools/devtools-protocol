@@ -223,13 +223,13 @@ $domainMethod(disableNetwork) {
   NetworkDomainDisabled = true;
   if (wrSendHook) wrSendHook->disable();
   //if (ccDispatchHook) ccDispatchHook->disable();
-  return geode::Ok(matjson::Value::object());
+  return emptyResponse();
 }
 $domainMethod(enableNetwork) {
   NetworkDomainDisabled = false;
   if (wrSendHook) wrSendHook->enable();
   //if (ccDispatchHook) ccDispatchHook->enable();
-  return geode::Ok(matjson::Value::object());
+  return emptyResponse();
 }
 $domainMethod(getRequestPostData) {
   auto i = requestPostData.find(params["requestId"].asInt().unwrap());

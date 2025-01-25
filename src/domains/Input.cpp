@@ -2,11 +2,11 @@
 // clangd is bad
 #include "Geode/cocos/robtop/mouse_dispatcher/CCMouseDispatcher.h"
 #include "Geode/cocos/touch_dispatcher/CCTouchDispatcher.h"
-#include "stuff.hpp"
 #include <Geode/utils/cocos.hpp>
 #include <Geode/loader/Loader.hpp>
 #include <Geode/cocos/CCDirector.h>
 #include <Geode/cocos/robtop/keyboard_dispatcher/CCKeyboardDispatcher.h>
+#include <chrono>
 
 inline bool bit(int n, int k) {
   return (n & ( 1 << k )) >> k;
@@ -84,7 +84,7 @@ $domainMethod(handleKeyDownEvent) {
       );
     });
   }
-  return geode::Ok(matjson::Value::object());
+  return emptyResponse();
 }
 $domainMethod(handleKeyUpEvent) {
   auto disp = cocos2d::CCDirector::get()->getKeyboardDispatcher();
@@ -108,7 +108,7 @@ $domainMethod(handleKeyUpEvent) {
     );
     });
   }
-  return geode::Ok(matjson::Value::object());
+  return emptyResponse();
 }
 $domainMethod(handleCharEvent) {
   auto disp = cocos2d::CCDirector::get()->getKeyboardDispatcher();
@@ -142,26 +142,42 @@ $domainMethod(handleCharEvent) {
     disp->updateModifierKeys(shift,ctrl,alt,cmd);
   });
 
-  return geode::Ok(matjson::Value::object());
+  return emptyResponse();
 }
 bool ignoreInputs = false;
-$domainMethod(dispatchKeyEvent) {
-  if (ignoreInputs) return geode::Ok(matjson::Value::object());
+$domainAsyncMethod(dispatchKeyEvent) {
+  if (ignoreInputs) return finish(emptyResponse());
   auto type = params["type"].asString().unwrap();
-  if (type == "keyDown") return handleKeyDownEvent(params);
-  if (type == "keyUp") return handleKeyUpEvent(params);
-  if (type == "char") return handleCharEvent(params);
+  
+  auto tsDiff = params["timestamp"].asInt().unwrapOr(0) - std::chrono::duration_cast<std::chrono::seconds>(
+    std::chrono::system_clock::now().time_since_epoch()
+  ).count();
 
-  return errors::invalidParameter("Unknown key event type '"+type+"'");
+  // async methods are run in a different thread because Task said so
+  if (tsDiff > 0) std::this_thread::sleep_for(std::chrono::seconds(tsDiff));
+
+  if (type == "keyDown") return finish(handleKeyDownEvent(params));
+  if (type == "keyUp") return finish(handleKeyUpEvent(params));
+  if (type == "char") return finish(handleCharEvent(params));
+
+  return finish(errors::invalidParameter("Unknown key event type '"+type+"'"));
 }
 const std::string mouseButton[8] = {
   "left", "middle", "right", "back", "forward", "6", "7", "8"
 };
 int touchId = 0;
 geode::cocos::CCArrayExt<cocos2d::CCTouch*> touches;
-$domainMethod(dispatchMouseEvent) {
-  if (ignoreInputs) return geode::Ok(matjson::Value::object());
+$domainAsyncMethod(dispatchMouseEvent) {
+  if (ignoreInputs) return finish(emptyResponse());
   auto type = params["type"].asString().unwrap();
+  
+  auto tsDiff = params["timestamp"].asInt().unwrapOr(0) - std::chrono::duration_cast<std::chrono::seconds>(
+    std::chrono::system_clock::now().time_since_epoch()
+  ).count();
+
+  // async methods are run in a different thread because Task said so
+  if (tsDiff > 0) std::this_thread::sleep_for(std::chrono::seconds(tsDiff));
+
   if (type != "mouseWheel") {
     float x = params["x"].asDouble().unwrap();
     float y = params["y"].asDouble().unwrap();
@@ -175,7 +191,7 @@ $domainMethod(dispatchMouseEvent) {
       //touch->release(); // risky
     } else {
       // TODO: make mouse move actually do something (gd!lazer) by calling ccegl shit
-      if (touches.size() == 0) return geode::Ok(matjson::Value::object());
+      if (touches.size() == 0) return finish(emptyResponse());
       if (type == "mouseRelease") {
         touch = touches[touches.size()-1];
         touches.inner()->removeLastObject();
@@ -185,7 +201,7 @@ $domainMethod(dispatchMouseEvent) {
     touch->setTouchInfo(touchId, x, y);
     auto set = cocos2d::CCSet::create();
     set->addObject(touch);
-    geode::queueInMainThread([type,set]{
+    geode::queueInMainThread([type,set,&finish]{
       if (type == "mousePress") {
         cocos2d::CCDirector::get()->getTouchDispatcher()->touchesBegan(set,nullptr);
       } else if (type == "mouseRelease") {
@@ -194,6 +210,7 @@ $domainMethod(dispatchMouseEvent) {
       } else {
         cocos2d::CCDirector::get()->getTouchDispatcher()->touchesMoved(set,nullptr);
       }
+      finish(emptyResponse());
     });
   } else {
     int x = 0,y = 0;
@@ -203,15 +220,15 @@ $domainMethod(dispatchMouseEvent) {
       auto y2 = params["deltaY"];
       if (!y2.isNumber()) y = y2.asDouble().unwrap();
     }
-    geode::queueInMainThread([x,y]{
+    geode::queueInMainThread([x,y,&finish]{
       cocos2d::CCDirector::get()->getMouseDispatcher()->dispatchScrollMSG(x,y);
+      finish(emptyResponse());
     });
   }
-  return geode::Ok(matjson::Value::object());
 }
 $domainMethod(setIgnoreInputEvents) {
   ignoreInputs = params["ignore"].asBool().unwrap();
-  return geode::Ok(matjson::Value::object());
+  return emptyResponse();
 }
 $execute {
   auto p = Protocol::get();
