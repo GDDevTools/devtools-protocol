@@ -13,17 +13,17 @@ uhm
 An offline copy of it can be found in the mod's `.geode` file, under `GDP_Domains_Reference.md`
 
 ## Resources
-In the future I might add the ability to test domain methods in-game, but for now, https://tryitands.ee
+https://github.com/HenrySck075/gd-devtoolz-playground
 
 # Frequently Asked Questions
 ## What's the port
 1412
 
 ## How is the protocol defined?
-idk i just did
+The canonical protocol definitions live in the mod's source tree: (gd_protocol.pdl). They are maintained manually by the DevTools engineering team. The declarative protocol definitions are used across tools; for instance, a documentation generator for the definitions, and the playground app that is used for, well, testing.
 
 ## Can I get the protocol as JSON?
-resources/protocols.json
+resources/protocols.json, and the `getProtocolInformation` method of the protocol.
 
 ## Does the protocol support multiple simultaneous clients?
 I haven't tested it yet but I think if IXWebSocket supports it then yeah you can
