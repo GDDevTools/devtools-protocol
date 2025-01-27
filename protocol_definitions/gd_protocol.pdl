@@ -99,7 +99,7 @@ domain DOM
   command click
     parameters
       # The node id. Must be a button node
-      NodeID nodeId
+      NodeId nodeId
 
   # Describes node given its id, does not require domain to be enabled. Does not start tracking any
   # objects, can be used for automation.
@@ -222,59 +222,44 @@ domain Level
   command enable
 
   # Get a local list.
-  command getLocalList
+  command getList
     parameters
       # The list ID.
       integer id
+      # The level type.
+      LevelType type
       # Bundle the levels with the response. Defaults to false.
       optional boolean includeLevels
     returns
       LevelList list
 
-  # Get a saved online list.
-  command getSavedList
-    parameters
-      # The list ID.
-      integer id
-      # Bundle the levels with the response. Defaults to false.
-      optional boolean includeLevels
-    returns
-      LevelList list
-
-  # Get a local level.
-  command getLocalLevel
+  # Get a locally saved level, either created level or saved level.
+  command getLevel
     parameters
       # The level ID.
       integer id
-    returns
-      Level level
-
-  # Get a saved online level.
-  command getSavedLevel
-    parameters
-      # The level ID.
-      integer id
+      # The level type.
+      LevelType type
     returns
       Level level
 
   # Get some online level.
-  command getSavedLevels
+  # To get levels from a list, use [getList](method:Level.getList) instead
+  command getLevels
     parameters
       # The page to retrieve the list from. Leave empty to fetch all of them
       optional integer page
     returns
       array of Level levels
 
-  # Delete a saved online level. Asks the user before doing so and returns an error if the user rejects the request.
-  command deleteSavedLevel
+  # Delete a level. Asks the user before doing so and returns an error if the user rejects the request.
+  command deleteLevel
     parameters
       # The level ID.
       integer id
-  # Delete a local level. Asks the user before doing so and returns an error if the user rejects the request.
-  command deleteLocalLevel
-    parameters
-      # The level ID.
-      integer id
+      # The level type.
+      LevelType type
+
   # Create a new local level.
   command createLevel
     parameters
@@ -282,6 +267,17 @@ domain Level
       string name
       # The level description.
       optional string description
+
+  # Update a local level info.
+  # All fields in the info is optional, and some fields will be ignored.
+  command updateLevel
+    parameters
+      # The level ID.
+      integer id
+      # The updated level info. Unspecified fields will be left unchanged.
+      Level info
+    returns
+      Level 
 
   # Fired when a new list was created
   event listCreated
@@ -320,13 +316,16 @@ domain Level
       # list of levels, empty if includeLevels is false
       array of Level levels
 
+  type LevelType extends string
+    enum
+      local
+      online
+
   # yo level
   type Level extends object
     properties
-      # The level type. This indicate which getLevel function to use.
-      enum type
-        local
-        online
+      # The level type.
+      LevelType type        
       # The level ID.
       integer id
       # Downloads count

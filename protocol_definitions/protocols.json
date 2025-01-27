@@ -172,7 +172,7 @@
             {
               "name": "nodeId",
               "description": "The node id. Must be a button node",
-              "$ref": "NodeID"
+              "$ref": "NodeId"
             }
           ]
         },
@@ -425,7 +425,7 @@
           "description": "Enables the Level agent."
         },
         {
-          "name": "getLocalList",
+          "name": "getList",
           "description": "Get a local list.",
           "parameters": [
             {
@@ -434,27 +434,9 @@
               "type": "integer"
             },
             {
-              "name": "includeLevels",
-              "description": "Bundle the levels with the response. Defaults to false.",
-              "optional": true,
-              "type": "boolean"
-            }
-          ],
-          "returns": [
-            {
-              "name": "list",
-              "$ref": "LevelList"
-            }
-          ]
-        },
-        {
-          "name": "getSavedList",
-          "description": "Get a saved online list.",
-          "parameters": [
-            {
-              "name": "id",
-              "description": "The list ID.",
-              "type": "integer"
+              "name": "type",
+              "description": "The level type.",
+              "$ref": "LevelType"
             },
             {
               "name": "includeLevels",
@@ -471,13 +453,18 @@
           ]
         },
         {
-          "name": "getLocalLevel",
-          "description": "Get a local level.",
+          "name": "getLevel",
+          "description": "Get a locally saved level, either created level or saved level.",
           "parameters": [
             {
               "name": "id",
               "description": "The level ID.",
               "type": "integer"
+            },
+            {
+              "name": "type",
+              "description": "The level type.",
+              "$ref": "LevelType"
             }
           ],
           "returns": [
@@ -488,25 +475,8 @@
           ]
         },
         {
-          "name": "getSavedLevel",
-          "description": "Get a saved online level.",
-          "parameters": [
-            {
-              "name": "id",
-              "description": "The level ID.",
-              "type": "integer"
-            }
-          ],
-          "returns": [
-            {
-              "name": "level",
-              "$ref": "Level"
-            }
-          ]
-        },
-        {
-          "name": "getSavedLevels",
-          "description": "Get some online level.",
+          "name": "getLevels",
+          "description": "Get some online level.\nTo get levels from a list, use [getList](method:Level.getList) instead",
           "parameters": [
             {
               "name": "page",
@@ -526,24 +496,18 @@
           ]
         },
         {
-          "name": "deleteSavedLevel",
-          "description": "Delete a saved online level. Asks the user before doing so and returns an error if the user rejects the request.",
+          "name": "deleteLevel",
+          "description": "Delete a level. Asks the user before doing so and returns an error if the user rejects the request.",
           "parameters": [
             {
               "name": "id",
               "description": "The level ID.",
               "type": "integer"
-            }
-          ]
-        },
-        {
-          "name": "deleteLocalLevel",
-          "description": "Delete a local level. Asks the user before doing so and returns an error if the user rejects the request.",
-          "parameters": [
+            },
             {
-              "name": "id",
-              "description": "The level ID.",
-              "type": "integer"
+              "name": "type",
+              "description": "The level type.",
+              "$ref": "LevelType"
             }
           ]
         },
@@ -653,18 +617,22 @@
           ]
         },
         {
+          "id": "LevelType",
+          "type": "string",
+          "enum": [
+            "local",
+            "online"
+          ]
+        },
+        {
           "id": "Level",
           "description": "yo level",
           "type": "object",
           "properties": [
             {
               "name": "type",
-              "description": "The level type. This indicate which getLevel function to use.",
-              "type": "string",
-              "enum": [
-                "local",
-                "online"
-              ]
+              "description": "The level type.",
+              "$ref": "LevelType"
             },
             {
               "name": "id",

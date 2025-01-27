@@ -11,9 +11,10 @@ using matjsonObjectInitType = std::initializer_list<std::pair<std::string, matjs
 class Protocol {
   std::string g;
 public:
+  using FunctionErrorReturnType = std::pair<int, std::string>;
   using FunctionReturnType = geode::Result<
     matjson::Value, 
-    std::pair<int, std::string>
+    FunctionErrorReturnType  
   >;
   using AsyncFunctionTask = geode::Task<FunctionReturnType>;
   bool running = false;
@@ -57,7 +58,9 @@ public:
   ~Protocol() {close();};
   void close();
 };
-void fireEvent(std::string eventName, matjson::Value const& content);
+
+#define $fireEventArguments std::string eventName, matjson::Value const& content = {}
+void fireEvent($fireEventArguments);
 
 inline Protocol::FunctionReturnType emptyResponse() {
   return geode::Ok(matjson::Value::object());

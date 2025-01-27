@@ -39,7 +39,7 @@ If you want real click events then you can use [Input.dispatchMouseEvent](method
 <tbody>
   <tr>
     <td><code>nodeId</code></td>
-    <td><strong><a href="#domnodeid">NodeID</a></strong><br>The node id. Must be a button node</td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong><br>The node id. Must be a button node</td>
   </tr>
 </tbody>
 </table>
@@ -497,7 +497,7 @@ Disables the Level agent.
 ### Level.`enable`
 Enables the Level agent.
 
-### Level.`getLocalList`
+### Level.`getList`
 Get a local list.
 
 <table>
@@ -512,25 +512,8 @@ Get a local list.
     <td><strong>integer</strong><br>The list ID.</td>
   </tr>
   <tr>
-    <td><code>includeLevels</code><br>(optional)</td>
-    <td><strong>boolean</strong><br>Bundle the levels with the response. Defaults to false.</td>
-  </tr>
-</tbody>
-</table>
-
-### Level.`getSavedList`
-Get a saved online list.
-
-<table>
-<thead>
-<tr>
-<th colspan="2">Parameters</th>
-</tr>
-</thead>
-<tbody>
-  <tr>
-    <td><code>id</code></td>
-    <td><strong>integer</strong><br>The list ID.</td>
+    <td><code>type</code></td>
+    <td><strong><a href="#levelleveltype">LevelType</a></strong><br>The level type.</td>
   </tr>
   <tr>
     <td><code>includeLevels</code><br>(optional)</td>
@@ -539,8 +522,8 @@ Get a saved online list.
 </tbody>
 </table>
 
-### Level.`getLocalLevel`
-Get a local level.
+### Level.`getLevel`
+Get a locally saved level, either created level or saved level.
 
 <table>
 <thead>
@@ -553,28 +536,16 @@ Get a local level.
     <td><code>id</code></td>
     <td><strong>integer</strong><br>The level ID.</td>
   </tr>
-</tbody>
-</table>
-
-### Level.`getSavedLevel`
-Get a saved online level.
-
-<table>
-<thead>
-<tr>
-<th colspan="2">Parameters</th>
-</tr>
-</thead>
-<tbody>
   <tr>
-    <td><code>id</code></td>
-    <td><strong>integer</strong><br>The level ID.</td>
+    <td><code>type</code></td>
+    <td><strong><a href="#levelleveltype">LevelType</a></strong><br>The level type.</td>
   </tr>
 </tbody>
 </table>
 
-### Level.`getSavedLevels`
+### Level.`getLevels`
 Get some online level.
+To get levels from a list, use [getList](method:Level.getList) instead
 
 <table>
 <thead>
@@ -590,8 +561,8 @@ Get some online level.
 </tbody>
 </table>
 
-### Level.`deleteSavedLevel`
-Delete a saved online level. Asks the user before doing so and returns an error if the user rejects the request.
+### Level.`deleteLevel`
+Delete a level. Asks the user before doing so and returns an error if the user rejects the request.
 
 <table>
 <thead>
@@ -604,22 +575,9 @@ Delete a saved online level. Asks the user before doing so and returns an error 
     <td><code>id</code></td>
     <td><strong>integer</strong><br>The level ID.</td>
   </tr>
-</tbody>
-</table>
-
-### Level.`deleteLocalLevel`
-Delete a local level. Asks the user before doing so and returns an error if the user rejects the request.
-
-<table>
-<thead>
-<tr>
-<th colspan="2">Parameters</th>
-</tr>
-</thead>
-<tbody>
   <tr>
-    <td><code>id</code></td>
-    <td><strong>integer</strong><br>The level ID.</td>
+    <td><code>type</code></td>
+    <td><strong><a href="#levelleveltype">LevelType</a></strong><br>The level type.</td>
   </tr>
 </tbody>
 </table>
@@ -753,6 +711,9 @@ yo list
 </thead>
 </table>
 
+### Level.`LevelType`
+
+
 ### Level.`Level`
 yo level
 
@@ -765,7 +726,7 @@ yo level
 <tbody>
   <tr>
     <td><code>type</code></td>
-    <td><strong>string</strong><br>The level type. This indicate which getLevel function to use.</td>
+    <td><strong><a href="#levelleveltype">LevelType</a></strong><br>The level type.</td>
   </tr>
   <tr>
     <td><code>id</code></td>

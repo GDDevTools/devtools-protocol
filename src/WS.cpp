@@ -66,6 +66,7 @@ bool Protocol::init() {
         return;
       }
       auto params = j["params"];
+      geode::log::debug("Parameters for {}\n{}", methodName, params.dump(2));
       for (auto& p : i->second.second) {
         if (!params.contains(std::string(p))) {
           c.sendText(errorResponseStr(id,-32602,"Required parameter '"+p+"' not present."));
@@ -91,8 +92,9 @@ bool Protocol::init() {
         auto g = std::get<ProtocolAsyncFunction>(func);
         // the horror to allocate the task to somewhere else
         // (i hope it works)
-        auto task = AsyncFunctionTask::runWithCallback([&g,&params,&baaa](AsyncFunctionTask::PostResult finish, auto prog, auto cancelled){
-          g(params, finish);
+        auto task = AsyncFunctionTask::runWithCallback([g,params,&baaa](AsyncFunctionTask::PostResult finish, auto prog, auto cancelled){
+          matjson::Value bro = params;
+          g(bro, finish);
         });
         AsyncFunctionTask* taskPtr = new AsyncFunctionTask(std::move(task));
         auto listener = new geode::EventListener<AsyncFunctionTask>;
