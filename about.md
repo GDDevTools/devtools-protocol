@@ -13,7 +13,7 @@ uhm
 An offline copy of it can be found in the mod's `.geode` file, under `GDP_Domains_Reference.md`
 
 ## Resources
-https://github.com/HenrySck075/gd-devtoolz-playground
+Check out https://github.com/HenrySck075/gd-devtools-playground for the playground application.
 
 # Frequently Asked Questions
 ## What's the port
