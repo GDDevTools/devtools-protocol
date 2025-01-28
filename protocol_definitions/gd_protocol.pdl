@@ -80,6 +80,7 @@ domain DOM
       # The id of the parent node if any.
       optional NodeId parentId
       # `Node`'s nodeType.
+      # Mods can override this property by setting the `puppeteer/nodeTypeOverride` user object to a CCString of a valid node type.
       integer nodeType
       # Child count for this node.
       optional integer childNodeCount

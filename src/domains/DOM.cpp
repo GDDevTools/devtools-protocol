@@ -17,8 +17,9 @@ static std::unordered_map<int, CCNode*> s_nodes;
 
 CCNode* getNodeAt(int id) {
   if (id < 0) return nullptr;
-  if (s_nodes.find(id)!=s_nodes.end()) {
-    return s_nodes[id];
+  auto e = s_nodes.find(id);
+  if (e!=s_nodes.end()) {
+    return e->second;
   } else {
     return nullptr;
   }
@@ -40,19 +41,6 @@ struct CCNode2 : geode::Modify<CCNode2, CCNode> {
     cocos2d::CCNode();
   }
   */
-  void retain() {
-    if (retainCount()==0) {
-      s_nodes[m_fields->nodeId] = this;
-
-      // since ctor hook randomly doesnt work
-      if (!m_fields->initFinished) {
-        // basically init
-        m_fields->nodeId = ++highestNodeId;
-      }
-      m_fields->initFinished = true;
-    }
-    CCNode::retain();
-  }
   void release() {
     if (retainCount()==1) {
       s_nodes.erase(m_fields->nodeId);
@@ -70,7 +58,15 @@ struct CCNode2 : geode::Modify<CCNode2, CCNode> {
       c->updateNodeDepth();
     }
   }
+  // assigns a node id when this node actually participates in the tree
   void setParent(CCNode* parent) {
+    // since ctor hook randomly doesnt work
+    if (!m_fields->initFinished) {
+      // basically init
+      m_fields->nodeId = ++highestNodeId;
+    }
+    s_nodes[m_fields->nodeId] = this;
+    m_fields->initFinished = true;
     CCNode::setParent(parent);
     updateNodeDepth();
   }
@@ -138,14 +134,15 @@ struct matjson::Serialize<DOMNode> {
     });
   }
   static matjson::Value toJson(const DOMNode& node) {
-    return matjson::makeObject({
+    auto b = matjson::makeObject({
       {"nodeId", node.nodeId},
-      {"parentId", node.parentId},
       {"nodeType", node.type},
       {"childNodeCount", node.childNodeCount},
-      {"children", node.children},
+      {"children", node.children.asArray().unwrapOr(std::vector<matjson::Value>{})},
       {"attributes", node.attributes},
     });
+    if (node.parentId >= 0) b.set("parentId", node.parentId);
+    return b;
   }
 };
 
@@ -190,15 +187,17 @@ matjson::Value jsonValueOf(CCObject* obj) {
 };
 
 int nodeIdOf(CCNode* n) {
+  if (n==nullptr) return -1; // no parent; DOMNode will omit this value
+                             // (the parentNodeId property but i will make an assert later)
   return static_cast<CCNode2*>(n)->m_fields->nodeId;
 }
 
+// the depth is used as the children inclusion depth so do NOT use it as the depth property
 DOMNode::DOMNode(CCNode *node, int depth)
-  : nodeId(nodeIdOf(node)), parentId(nodeIdOf(node)), childNodeCount(node->getChildrenCount()) {
+  : nodeId(nodeIdOf(node)), parentId(nodeIdOf(node->m_pParent)), childNodeCount(node->getChildrenCount()), children(matjson::Value::array()) {
 #pragma region DOMNode children
-  
   //children.reserve(childNodeCount);
-  if (depth == 0) {
+  if (depth != 0) {
     for (auto *c : geode::cocos::CCArrayExt<CCNode *>(node->getChildren())) {
       children.push(DOMNode(c,depth-1));
     }
@@ -233,6 +232,7 @@ DOMNode::DOMNode(CCNode *node, int depth)
 
 void CCNode2::removeChild(CCNode *child) {
   CCNode::removeChild(child);
+  if (!isRunning()) return;
   //if (DOMDomainDisabled) return;
   fireDOMEvent("childNodeRemoved", matjson::makeObject({
     {"parentNodeId", nodeIdOf(this)}, 
@@ -247,6 +247,7 @@ void CCNode2::removeChild(CCNode *child) {
 void CCNode2::addChild(CCNode *child) {
   auto p = child->getParent();
   CCNode::addChild(child);
+  if (!isRunning()) return;
   //if (DOMDomainDisabled) return;
   auto resp = matjson::makeObject({
     {"parentNodeId", nodeIdOf(this)},

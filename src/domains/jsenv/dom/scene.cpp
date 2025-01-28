@@ -52,9 +52,12 @@ $jsMethod(new_Scene) {
   // creates a new one
   auto obj = newScriptVar(getState(), Object);
   obj->setUserData(CCDirector::sharedDirector()->getRunningScene());
+  obj->addChild("prototype", getState()->getRoot()->findChildByPath("Scene.prototype"));
+  v->setReturnVar(obj);
 };
 
 $jsMethod(Scene_requestFullscreen) {
+  geode::log::debug("idk");
 #ifdef GEODE_IS_DESKTOP
   CCDirector::get()->getOpenGLView()->toggleFullScreen(true, false, false);
 #endif
@@ -73,7 +76,7 @@ extern "C" void registerDOMSceneObject() {
   auto s = getState();
   auto node = s->addNative("function Scene()", new_Scene,0,SCRIPTVARLINK_CONSTANT);
   auto proto = node->findChild(TINYJS_PROTOTYPE_CLASS)->getVarPtr();
-  proto->addChild(TINYJS_CONSTRUCTOR_VAR, node);
+  proto->addChild(TINYJS_CONSTRUCTOR_VAR, node, SCRIPTVARLINK_BUILDINDEFAULT);
   node->addChild(TINYJS___PROTO___VAR, s->getRoot()->findChildByPath("Node.prototype"));
   {
     proto->addChild("fullscreenEnabled", newScriptVarAccessor(s, Scene_fullscreenEnabled_g, 0, nothing, 0));
@@ -81,6 +84,7 @@ extern "C" void registerDOMSceneObject() {
     s->addNative("function Scene.prototype.requestFullscreen()", Scene_requestFullscreen);
     s->addNative("function Scene.prototype.exitFullscreen()", Scene_exitFullscreen);
 
-    s->execute("var document = new Scene()");
   }
+  s->addNative("function Scene.__constructor__()", new_Scene, (void*)1,SCRIPTVARLINK_CONSTANT);
+  s->execute("var document = new Scene()");
 }

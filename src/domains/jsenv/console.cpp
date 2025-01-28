@@ -184,9 +184,9 @@ static void Console_timeLog_impl(CFunctionsScopePtr const& v, bool end) {
 
   pushLogStr(
     label+": "+std::to_string((
-      timers[label] - std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()
-      )
+      ) - timers[label]
     ).count())+"ms"
       +(end?" - timer ended":""), 
     geode::Severity::Info

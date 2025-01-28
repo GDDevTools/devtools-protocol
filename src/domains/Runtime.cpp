@@ -152,10 +152,25 @@ matjson::Value jsvalToJsonVal(CScriptVar* val) {
   return ret;
 }
 */
+
+std::string error_type_enum_name[6] = {
+  "Error",
+	"EvalError",
+	"RangeError",
+	"ReferenceError",
+	"SyntaxError",
+	"TypeError"
+};
+
 $domainMethod(evaluate) {
   auto s = getState();
-  auto ret = s->evaluateComplex(params["expression"].asString().unwrapOr("").c_str());
-  return geode::Ok(RemoteObject(ret->getVarPtr().getVar()));
+  try {
+    auto ret = s->evaluateComplex(params["expression"].asString().unwrapOr("").c_str());
+    return geode::Ok(RemoteObject(ret->getVarPtr().getVar()));
+  } catch (CScriptException& e) {
+    geode::log::error("[JavaScript]: {}: {}", error_type_enum_name[e.errorType], e.message);
+    return errors::internalError(fmt::format("{}: {}", error_type_enum_name[e.errorType], e.message));
+  }
 }
 
 $execute {
