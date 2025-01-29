@@ -147,9 +147,7 @@ $domainAsyncMethod(deleteSavedLevel) {
 }
 $domainAsyncMethod(deleteLocalLevel) {
   //??????
-  GJGameLevel* level = static_cast<GJGameLevel*>(
-    LocalLevelManager::get()->getAllLevelsInDict()->objectForKey(params["id"].asInt().unwrap())
-  );
+  GJGameLevel* level = EditorIDs::getLevelByID(params["id"].asInt().unwrap());
   if (level==nullptr) {
     finish(emptyResponse());
     return;
