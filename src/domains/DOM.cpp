@@ -86,6 +86,8 @@ struct CCNode2 : geode::Modify<CCNode2, CCNode> {
 struct DOMNode {
   intmax_t nodeId;
   intmax_t parentId;
+  // nope, not the numerical node id you're looking for
+  std::string geodeNodeId;
   std::string type;
   int childNodeCount;
   // array
@@ -97,6 +99,7 @@ struct DOMNode {
   DOMNode(
     intmax_t _nodeId,
     intmax_t _parentId,
+    std::string _geodeNodeId,
     std::string _type,
     int _childNodeCount,
     decltype(children) _children,
@@ -104,6 +107,7 @@ struct DOMNode {
   ): 
     nodeId(_nodeId), 
     parentId(_parentId), 
+    geodeNodeId(_geodeNodeId), 
     type(_type),
     childNodeCount(_childNodeCount), 
     children(_children),
@@ -117,19 +121,13 @@ matjson::Value jsonValueOf(CCObject* obj);
 template<>
 struct matjson::Serialize<DOMNode> {
   static geode::Result<DOMNode> fromJson(const matjson::Value& value) {
-    if (
-      !value["nodeId"].isNumber() ||
-      !value["parentId"].isNumber() ||
-      !value["nodeType"].isString() ||
-      !value["childNodeCount"].isNumber() ||
-      !value["children"].isArray()
-    ) return geode::Err("");
     return geode::Ok(DOMNode {
-      value["nodeId"].asInt().unwrap(),
-      value["parentId"].asInt().unwrap(),
-      value["nodeType"].asString().unwrap(),
-      (int)value["childNodeCount"].asInt().unwrap(),
-      value["children"],
+      value["nodeId"].asInt().unwrapOr(-1),
+      value["parentId"].asInt().unwrapOr(-1),
+      value["geodeNodeId"].asString().unwrapOr(""),
+      value["nodeType"].asString().unwrapOr("node"),
+      (int)value["childNodeCount"].asInt().unwrapOr(0),
+      value["children"].asArray().unwrapOr(std::vector<matjson::Value>{}),
       value["attributes"]
     });
   }
@@ -142,6 +140,7 @@ struct matjson::Serialize<DOMNode> {
       {"attributes", node.attributes},
     });
     if (node.parentId >= 0) b.set("parentId", node.parentId);
+    if (!node.geodeNodeId.empty()) b.set("geodeNodeId", node.geodeNodeId);
     return b;
   }
 };
@@ -194,7 +193,7 @@ int nodeIdOf(CCNode* n) {
 
 // the depth is used as the children inclusion depth so do NOT use it as the depth property
 DOMNode::DOMNode(CCNode *node, int depth)
-  : nodeId(nodeIdOf(node)), parentId(nodeIdOf(node->m_pParent)), childNodeCount(node->getChildrenCount()), children(matjson::Value::array()) {
+  : nodeId(nodeIdOf(node)), parentId(nodeIdOf(node->m_pParent)), geodeNodeId(node->getID()), childNodeCount(node->getChildrenCount()), children(matjson::Value::array()) {
 #pragma region DOMNode children
   //children.reserve(childNodeCount);
   if (depth != 0) {
@@ -231,8 +230,6 @@ DOMNode::DOMNode(CCNode *node, int depth)
 }
 
 void CCNode2::removeChild(CCNode *child) {
-  CCNode::removeChild(child);
-  if (!isRunning()) return;
   //if (DOMDomainDisabled) return;
   fireDOMEvent("childNodeRemoved", matjson::makeObject({
     {"parentNodeId", nodeIdOf(this)}, 
@@ -242,6 +239,7 @@ void CCNode2::removeChild(CCNode *child) {
     {"nodeId", nodeIdOf(child)},
     {"childNodeCount", getChildrenCount()}
   }));
+  CCNode::removeChild(child);
 }
 
 void CCNode2::addChild(CCNode *child) {
@@ -494,7 +492,7 @@ $domainMethod(removeNode) {
   CCNode* node = getNodeAt(params["nodeId"].asInt().unwrapOr(0)); 
   if (node) {
     geode::queueInMainThread([node]{
-      node->removeFromParentAndCleanup(false);
+      node->removeFromParent();
     });
   }
   return emptyResponse();

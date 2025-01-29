@@ -50,9 +50,9 @@ $jsMethod(Scene_lastModified_g) {
 
 $jsMethod(new_Scene) {
   // creates a new one
-  auto obj = newScriptVar(getState(), Object);
+  auto obj = v->newScriptVar(Object);
   obj->setUserData(CCDirector::sharedDirector()->getRunningScene());
-  obj->addChildOrReplace("__proto__", getState()->getRoot()->findChildByPath("Scene.prototype"));
+  obj->addChildOrReplace(TINYJS___PROTO___VAR, getState()->getRoot()->findChildByPath("Scene.prototype"));
   v->setReturnVar(obj);
 };
 
@@ -86,7 +86,7 @@ extern "C" void registerDOMSceneObject() {
   auto node = s->addNative("function Scene()", new_Scene,0,SCRIPTVARLINK_CONSTANT);
   auto proto = node->findChild(TINYJS_PROTOTYPE_CLASS)->getVarPtr();
   proto->addChild(TINYJS_CONSTRUCTOR_VAR, node, SCRIPTVARLINK_BUILDINDEFAULT);
-  proto->addChild(TINYJS___PROTO___VAR, s->getRoot()->findChildByPath("Node.prototype"));
+  proto->addChildOrReplace(TINYJS___PROTO___VAR, s->getRoot()->findChildByPath("Node.prototype"));
   {
     proto->addChild("fullscreenEnabled", newScriptVarAccessor(s, Scene_fullscreenEnabled_g, 0, nothing, 0));
 

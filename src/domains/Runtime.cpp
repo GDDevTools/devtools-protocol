@@ -93,6 +93,8 @@ struct RemoteObject : public Preview {
       value = matjson::Serialize<ObjectPreview>::toJson(ObjectPreview(val));
     }
     else if (type=="string") value = val->toString();
+    else if (type=="boolean") value = val->toBoolean();
+    else if (type=="number") value = val->toNumber().toDouble();
   }
 };
 template<>
