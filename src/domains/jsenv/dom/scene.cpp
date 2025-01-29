@@ -57,7 +57,7 @@ $jsMethod(new_Scene) {
 };
 
 $jsMethod(Scene_requestFullscreen) {
-#ifdef GEODE_IS_DESKTOP
+#ifdef GEODE_IS_WINDOWS
   bool borderless = v->getArgumentsLength() != 0 ? v->getArgument(1)->toBoolean() : false;
   //CCDirector::get()->getOpenGLView()->toggleFullScreen(true, false, false);
   CCDirector::get()->pushScene(GraphicsReloadLayer::scene(
@@ -68,7 +68,7 @@ $jsMethod(Scene_requestFullscreen) {
   v->setReturnVar(newScriptVarUndefined(getState()));
 }
 $jsMethod(Scene_exitFullscreen) {
-#ifdef GEODE_IS_DESKTOP
+#ifdef GEODE_IS_WINDOWS
   bool borderless = v->getArgumentsLength() != 0 ? v->getArgument(1)->toBoolean() : false;
   //CCDirector::get()->getOpenGLView()->toggleFullScreen(false, false, false);
   CCDirector::get()->pushScene(GraphicsReloadLayer::scene(
