@@ -208,15 +208,13 @@ $jsMethod(Console_timeEnd) {
 }
 
 $execute{
-  /*
   geode::ModMetadata meta("henrysck075.puppeteer.js");
 
   meta.setName("JavaScript");
   meta.setVersion(geode::VersionInfo{7,7,7});
   meta.setDescription("The representation of the JavaScript console output from GD DevTools Protocol.");
   meta.setDevelopers(geode::Mod::get()->getDevelopers());
-*/
-  representer = geode::Mod::get();
+  representer = new geode::Mod(meta);
 
   auto s = getState();
   {

@@ -52,20 +52,29 @@ $jsMethod(new_Scene) {
   // creates a new one
   auto obj = newScriptVar(getState(), Object);
   obj->setUserData(CCDirector::sharedDirector()->getRunningScene());
-  obj->addChild("prototype", getState()->getRoot()->findChildByPath("Scene.prototype"));
+  obj->addChildOrReplace("__proto__", getState()->getRoot()->findChildByPath("Scene.prototype"));
   v->setReturnVar(obj);
 };
 
 $jsMethod(Scene_requestFullscreen) {
-  geode::log::debug("idk");
 #ifdef GEODE_IS_DESKTOP
-  CCDirector::get()->getOpenGLView()->toggleFullScreen(true, false, false);
+  bool borderless = v->getArgumentsLength() != 0 ? v->getArgument(1)->toBoolean() : false;
+  //CCDirector::get()->getOpenGLView()->toggleFullScreen(true, false, false);
+  CCDirector::get()->pushScene(GraphicsReloadLayer::scene(
+    CCDirector::get()->getLoadedTextureQuality(), 
+    {0,0}, true, borderless, false, false
+  ));
 #endif
   v->setReturnVar(newScriptVarUndefined(getState()));
 }
 $jsMethod(Scene_exitFullscreen) {
 #ifdef GEODE_IS_DESKTOP
-  CCDirector::get()->getOpenGLView()->toggleFullScreen(false, false, false);
+  bool borderless = v->getArgumentsLength() != 0 ? v->getArgument(1)->toBoolean() : false;
+  //CCDirector::get()->getOpenGLView()->toggleFullScreen(false, false, false);
+  CCDirector::get()->pushScene(GraphicsReloadLayer::scene(
+    CCDirector::get()->getLoadedTextureQuality(), 
+    {0,0}, false, borderless, false, true
+  ));
 #endif
   v->setReturnVar(newScriptVarUndefined(getState()));
 }
@@ -77,12 +86,12 @@ extern "C" void registerDOMSceneObject() {
   auto node = s->addNative("function Scene()", new_Scene,0,SCRIPTVARLINK_CONSTANT);
   auto proto = node->findChild(TINYJS_PROTOTYPE_CLASS)->getVarPtr();
   proto->addChild(TINYJS_CONSTRUCTOR_VAR, node, SCRIPTVARLINK_BUILDINDEFAULT);
-  node->addChild(TINYJS___PROTO___VAR, s->getRoot()->findChildByPath("Node.prototype"));
+  proto->addChild(TINYJS___PROTO___VAR, s->getRoot()->findChildByPath("Node.prototype"));
   {
     proto->addChild("fullscreenEnabled", newScriptVarAccessor(s, Scene_fullscreenEnabled_g, 0, nothing, 0));
 
-    s->addNative("function Scene.prototype.requestFullscreen()", Scene_requestFullscreen);
-    s->addNative("function Scene.prototype.exitFullscreen()", Scene_exitFullscreen);
+    s->addNative("function Scene.prototype.requestFullscreen(scene, borderless)", Scene_requestFullscreen);
+    s->addNative("function Scene.prototype.exitFullscreen(scene, borderless)", Scene_exitFullscreen);
 
   }
   s->addNative("function Scene.__constructor__()", new_Scene, (void*)1,SCRIPTVARLINK_CONSTANT);

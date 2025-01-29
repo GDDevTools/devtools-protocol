@@ -163,6 +163,7 @@ $jsMethod(new_Node) {
   static_cast<idk*>(n)->m_fields->retainedByJS = true;
   auto obj = newScriptVar(getState(), Object);
   obj->setUserData(n);
+  obj->addChildOrReplace("__proto__", getState()->getRoot()->findChildByPath("Node.prototype"));
 };
 #define $getNodeOfVariable2(n, var) \
   cocos2d::CCNode* n = nullptr; \
@@ -301,7 +302,7 @@ extern "C" void registerDOMNodeObject() {
   auto s = getState();
   auto node = s->addNative("function Node()", new_Node,0,SCRIPTVARLINK_CONSTANT);
   auto proto = node->findChild(TINYJS_PROTOTYPE_CLASS)->getVarPtr();
-  proto->addChild(TINYJS_CONSTRUCTOR_VAR, node);
+  proto->addChild(TINYJS_CONSTRUCTOR_VAR, node, SCRIPTVARLINK_BUILDINDEFAULT);
   {
     proto->addChild("childList", newScriptVarAccessor(s, Node_childList_g,0,&nothing,0));
     proto->addChild("firstChild", newScriptVarAccessor(s, Node_firstChild_g,0,&nothing,0));
@@ -313,13 +314,13 @@ extern "C" void registerDOMNodeObject() {
 
     s->addNative("function Node.prototype.appendChild(node)", Node_appendChild);
     s->addNative("function Node.prototype.contains(node)", Node_contains);
-    s->addNative("function Node.prototype.getChildById(id)", Node_getChildById);
+    s->addNative("function Node.prototype.getChildById(node, id)", Node_getChildById);
     s->addNative("function Node.prototype.getRootNode(node)", Node_getRootNode);
     s->addNative("function Node.prototype.hasChildNodes(node)", Node_hasChildNodes);
     s->addNative("function Node.prototype.insertBefore(node, refNode)", Node_insertBefore);
     s->addNative("function Node.prototype.isSameNode(node)", Node_isSameNode);
     s->addNative("function Node.prototype.removeChild(node)", Node_removeChild);
-    s->addNative("function Node.prototype.replaceChild(newChild, oldChild)", Node_replaceChild);
+    s->addNative("function Node.prototype.replaceChild(node, newChild, oldChild)", Node_replaceChild);
   }
   auto var = s->addNative("function Node.__constructor__()", new_Node, 0, SCRIPTVARLINK_CONSTANT);
   var->getFunctionData()->name = "Node";
