@@ -10,4 +10,6 @@ public:
   ConsoleEvent(std::string type) : type(type) {};
 };
 
+geode::Mod* theFakeJSMod();
+
 #endif

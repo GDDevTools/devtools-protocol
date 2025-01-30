@@ -26,13 +26,16 @@ struct amoung : geode::Modify<amoung, CCDirector> {
 };
 
 #pragma region Properties
+/// Returns whether or not the game is in fullscreen
+/// 
+/// Returns false on unsupported platforms (aka not windows)
 $jsMethod(Scene_fullscreenEnabled_g) {
   v->setReturnVar(newScriptVarBool(
     getState(),
-#ifdef GEODE_IS_DESKTOP
+#ifdef GEODE_IS_WINDOWS
     CCDirector::sharedDirector()->getOpenGLView()->getIsFullscreen()
 #else
-    true
+    false
 #endif
   ));
 }

@@ -5,6 +5,7 @@
 #include <matjson.hpp>
 #include <optional>
 #include "Geode/loader/Loader.hpp"
+#include "jsenv/console.hpp"
 #include "jsenv/state.hpp"
 #undef inline
 
@@ -164,7 +165,6 @@ std::string error_type_enum_name[6] = {
 	"SyntaxError",
 	"TypeError"
 };
-
 $domainAsyncMethod(evaluate) {
   geode::queueInMainThread([params, finish]{
     auto s = getState();
@@ -172,7 +172,7 @@ $domainAsyncMethod(evaluate) {
       auto ret = s->evaluateComplex(params["expression"].asString().unwrapOr("").c_str());
       finish(geode::Ok(RemoteObject(ret->getVarPtr().getVar())));
     } catch (CScriptException* e) {
-      geode::log::error("[JavaScript]: {}: {}", error_type_enum_name[e->errorType], e->message);
+      geode::log::logImpl(geode::Severity::Error, theFakeJSMod(), "[JavaScript]: {}: {}", error_type_enum_name[e->errorType], e->message);
       finish(errors::internalError(fmt::format("{}: {}", error_type_enum_name[e->errorType], e->message)));
     }
   });

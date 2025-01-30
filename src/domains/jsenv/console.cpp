@@ -15,10 +15,11 @@
 
 #define fireConsoleEvent(type) fireEvent("Runtime.consoleAPICalled", matjson::makeObject({{"type", type}}))
 
-geode::Mod* representer;
+geode::Mod* jsRepresenter;
+geode::Mod* theFakeJSMod() {return jsRepresenter;};
 
 static void pushLogStr(std::string const& msg, geode::Severity severity) {
-  geode::log::logImpl(severity, representer, "{}", msg);
+  geode::log::logImpl(severity, jsRepresenter, "{}", msg);
 }
 static void pushLog(CFunctionsScopePtr const& msg, geode::Severity severity) {
   std::string j;
@@ -74,71 +75,79 @@ $jsMethod(Console_error) {
 }
 
 $jsMethod(Console_group) {
-  geode::log::pushNest(representer);
+  geode::log::pushNest(jsRepresenter);
   fireConsoleEvent("startGroup");
 }
 $jsMethod(Console_groupEnd) {
-  geode::log::popNest(representer);
+  geode::log::popNest(jsRepresenter);
   fireConsoleEvent("endGroup");
 }
 
-#include <cstdlib>
+// isolation - nighthawk20tuah
+void tableRowCooking(std::vector<std::string>& row, CScriptVarPtr c, int& rowlen, std::vector<int>& maxstrlen) {
+  if (c->isArray()) {
+    int scc = c->getArrayLength();
+    int oldrl = rowlen;
+    rowlen = std::max(rowlen, scc);
+    maxstrlen.reserve(rowlen);
+    for (int _ = oldrl; _<=rowlen; _++) {
+      maxstrlen.push_back(0);
+    }
+    row.reserve(scc+1);
+
+    for (int j = 0; j < scc; j++) {
+      std::stringstream idk;
+      idk << std::quoted(
+        c->getArrayIndex(j)->toString(), '\'', '\\'
+      );
+      auto s = idk.str();
+      if (maxstrlen[j+1]<s.size()) 
+        maxstrlen[j+1] = s.size();
+      row.push_back(s);
+    }
+
+  } else if (c->isPrimitive()) {
+    std::stringstream ba;
+    ba << std::quoted(
+      c->toString(), '\'', '\\'
+    );
+    auto s = ba.str();
+    if (maxstrlen[1]<s.size()) 
+      maxstrlen[1] = s.size();
+    row.push_back(s);
+  }
+}
+
+/// kms
 $jsMethod(Console_table) {
   std::vector<std::vector<std::string>> table;
   // max string length per cell on all rows
-  std::vector<int> maxstrlen{7, 0};
+  std::vector<int> maxstrlen{7, 6};
+
+  auto arg = v->getArgument(0);
 
   int rowlen = 1;
-  if (v->isArray()) {
-    int cc = v->getArrayLength();
+  std::vector<std::string> header{"(index)"};
+  if (arg->isArray()) {
+    int cc = arg->getArrayLength();
 
     for (int i = 0; i < cc; i++) {
       std::vector<std::string> row{std::to_string(i)};
-      auto c = v->getArrayIndex(i);
+      auto c = arg->getArrayIndex(i);
 
-      if (c->isArray()) {
-        int scc = c->getArrayLength();
-        int oldrl = rowlen;
-        rowlen = std::max(rowlen, scc);
-        maxstrlen.reserve(rowlen);
-        std::fill(maxstrlen.begin()+oldrl, maxstrlen.end(), 0);
-        row.reserve(scc+1);
-
-        for (int j = 0; j < scc; j++) {
-          std::stringstream idk;
-          idk << std::quoted(
-            c->getArrayIndex(j)->toString(), '\'', '\\'
-          );
-          auto s = idk.str();
-          if (maxstrlen[j+1]<s.size()) 
-            maxstrlen[j+1] = s.size();
-          row.push_back(s);
-        }
-
-      } else if (c->isPrimitive()) {
-        std::stringstream ba;
-        ba << std::quoted(
-          c->toString(), '\'', '\\'
-        );
-        auto s = ba.str();
-        if (maxstrlen[1]<s.size()) 
-          maxstrlen[1] = s.size();
-        row.push_back(s);
-      }
+      tableRowCooking(row, c, rowlen, maxstrlen);
 
       table.push_back(row);
     }
-  } else if (!v->isPrimitive()) {}
+    if (rowlen > 1) {
+      for (int i = 0; i<rowlen; i++) {
+        header.push_back(std::to_string(i));
+      }
+    }
+    table.insert(table.begin(), header);
+  } else if (!arg->isPrimitive()) {}
 
-  std::vector<std::string> r{"(index)"};
-  r.reserve(rowlen+1);
-  for (int i = 0; i < rowlen; i++) {
-    r.push_back(std::to_string(i));
-  }
-
-  table.insert(table.begin(), r);
-
-  int totallen = std::reduce(maxstrlen.begin(), maxstrlen.end()) + maxstrlen.size()-1;
+  int totallen = std::reduce(maxstrlen.begin(), maxstrlen.end()) + rowlen;
   std::stringstream out;
   std::string sep(totallen, '-');
   out << '\n';
@@ -148,11 +157,11 @@ $jsMethod(Console_table) {
     auto& row = table[ridx];
     out << '|';
     int rl = row.size();
-    for (int cidx = 0; cidx < rowlen; cidx++) {
+    for (int cidx = 0; cidx < rl; cidx++) {
       std::string cc;
       if (cidx<rl) cc = row[cidx];
       else cc = "";
-      out << cc << std::string(maxstrlen[cidx],cc.size()) << '|';
+      out << cc << std::string(maxstrlen[cidx]-cc.size(),' ') << '|';
     }
     if (ridx != tl-1) 
       out << "\n|" << sep << "|\n";
@@ -214,7 +223,7 @@ $execute{
   meta.setVersion(geode::VersionInfo{7,7,7});
   meta.setDescription("The representation of the JavaScript console output from GD DevTools Protocol.");
   meta.setDevelopers(geode::Mod::get()->getDevelopers());
-  representer = new geode::Mod(meta);
+  jsRepresenter = new geode::Mod(meta);
 
   auto s = getState();
   {

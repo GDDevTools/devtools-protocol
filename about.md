@@ -12,6 +12,8 @@ uhm
 
 An offline copy of it can be found in the mod's `.geode` file, under `GDP_Domains_Reference.md`
 
+Or you can get the protocol as a JSON file via the files listed in the relevant FAQ below.
+
 ## Resources
 Check out https://github.com/HenrySck075/gd-devtools-playground for the playground application.
 
@@ -23,10 +25,10 @@ Check out https://github.com/HenrySck075/gd-devtools-playground for the playgrou
 The canonical protocol definitions live in the mod's source tree: (gd_protocol.pdl). They are maintained manually by the DevTools engineering team. The declarative protocol definitions are used across tools; for instance, a documentation generator for the definitions, and the playground app that is used for, well, testing.
 
 ## Can I get the protocol as JSON?
-resources/protocols.json, and the `getProtocolInformation` method of the protocol.
+These canonical .pdl files are then used to generate the `protocols.json` file -and subsequently, the .md docs file-, which is included in the mod as a resource, and used as the response for the `getProtocolInformation` method.
 
 ## Does the protocol support multiple simultaneous clients?
-I haven't tested it yet but I think if IXWebSocket supports it then yeah you can
+yeah sure go ahead but remember that events state are shared between clients
 
 ## Can I have a catgirl?
 [no](https://www.pixiv.net/artworks/100528610)

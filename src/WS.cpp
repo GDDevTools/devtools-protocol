@@ -11,6 +11,7 @@ ix::WebSocketServer* ws;
 bool Protocol::init() {
   ix::initNetSystem();
   g = geode::utils::file::readString(geode::Mod::get()->getResourcesDir() / "protocols.json").unwrap();
+  // TODO: this only allows for 1 singular server instance to run
   ws = new ix::WebSocketServer(1412,"127.0.0.1");
 
   ws->setOnClientMessageCallback([this](std::shared_ptr<ix::ConnectionState> s, ix::WebSocket& c, const ix::WebSocketMessagePtr& msg){
