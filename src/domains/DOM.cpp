@@ -230,15 +230,16 @@ DOMNode::DOMNode(CCNode *node, int depth)
 }
 
 void CCNode2::removeChild(CCNode *child) {
-  //if (DOMDomainDisabled) return;
-  fireDOMEvent("childNodeRemoved", matjson::makeObject({
-    {"parentNodeId", nodeIdOf(this)}, 
-    {"nodeId", nodeIdOf(child)}
-  }));
-  fireDOMEvent("childNodeCountUpdated", matjson::makeObject({
-    {"nodeId", nodeIdOf(child)},
-    {"childNodeCount", getChildrenCount()}
-  }));
+  if (isRunning()) {
+    fireDOMEvent("childNodeRemoved", matjson::makeObject({
+      {"parentNodeId", nodeIdOf(this)}, 
+      {"nodeId", nodeIdOf(child)}
+    }));
+    fireDOMEvent("childNodeCountUpdated", matjson::makeObject({
+      {"nodeId", nodeIdOf(child)},
+      {"childNodeCount", getChildrenCount()}
+    }));
+  }
   CCNode::removeChild(child);
 }
 
