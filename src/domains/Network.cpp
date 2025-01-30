@@ -9,8 +9,6 @@ void fireNetworkEvent(std::string eventName, matjson::Value const &content) {
   fireEvent("Network."+eventName, content);
 };
 
-bool NetworkDomainDisabled = true;
-
 #define wrSelf geode::utils::web::WebRequest* self
 
 std::map<std::size_t, std::string> responseBody;
@@ -58,7 +56,7 @@ geode::utils::web::WebTask send(wrSelf, std::string_view method, std::string_vie
       requestPostData[self->getID()] = std::string(d->begin(), d->end());
   }
   auto sUrl = std::string(url);
-  if (!NetworkDomainDisabled) {
+  {
     fireNetworkEvent("requestWillBeSent",matjson::makeObject({
       {"requestId", self->getID()},
       {"initiator", "geode"},
@@ -121,7 +119,7 @@ void dispatchResponseCallbacks(cocos2d::extension::CCHttpClient* self, float d) 
       }
     }
     if (!done) throw std::runtime_error("huh? theres no request in the list? (if its known to happen please make this a log)");
-    if (!NetworkDomainDisabled) {
+    {
       auto respD = resp->getResponseData();
       responseBody[id] = std::string(respD->begin(), respD->end());
       matjson::Object headers;
@@ -174,7 +172,7 @@ class $modify(cocos2d::extension::CCHttpClient) {
     j->addObject(CCInteger::create(id));
     j->addObject(request);
     reqids.push_back(j);
-    if (!NetworkDomainDisabled) {
+    {
       matjson::Object headers;
       if (true) {
         auto headersStr = request->getHeaders();
@@ -220,13 +218,11 @@ $execute {
 */
 
 $domainMethod(disableNetwork) {
-  NetworkDomainDisabled = true;
   if (wrSendHook) wrSendHook->disable();
   //if (ccDispatchHook) ccDispatchHook->disable();
   return emptyResponse();
 }
 $domainMethod(enableNetwork) {
-  NetworkDomainDisabled = false;
   if (wrSendHook) wrSendHook->enable();
   //if (ccDispatchHook) ccDispatchHook->enable();
   return emptyResponse();

@@ -8,20 +8,34 @@ std::shared_ptr<Protocol> prot = nullptr;
 /// theres only one protocol instance for the entire lifetime so
 ix::WebSocketServer* ws;
 
+std::unordered_map<ix::WebSocket*, int> associatedId;
+
 bool Protocol::init() {
   ix::initNetSystem();
   g = geode::utils::file::readString(geode::Mod::get()->getResourcesDir() / "protocols.json").unwrap();
   // TODO: this only allows for 1 singular server instance to run
+  auto idk = matjson::parse(g).unwrap();
+  for (auto& d : idk["domains"].asArray().unwrap()) {
+    domainsList.push_back(d["domain"].asString().unwrap());
+  }
   ws = new ix::WebSocketServer(1412,"127.0.0.1");
 
   ws->setOnClientMessageCallback([this](std::shared_ptr<ix::ConnectionState> s, ix::WebSocket& c, const ix::WebSocketMessagePtr& msg){
     if (msg->type == ix::WebSocketMessageType::Open) {
       geode::log::info("new connection chat");
-      idsForClient[s->getId()] = std::make_pair(-1, std::vector<int>{});
+      std::string id = s->getId();
+      idsForClient[id] = std::make_pair(-1, std::vector<int>{});
+      for (std::string& d : domainsList) {
+        domainEnabledState[d][id] = false;
+      }
     }
     else if (msg->type == ix::WebSocketMessageType::Close) {
       geode::log::info("new disconnection chat");
-      idsForClient.erase(s->getId());
+      std::string id = s->getId();
+      idsForClient.erase(id);
+      for (std::string& d : domainsList) {
+        domainEnabledState[d].erase(id);
+      }
     }
     else if (msg->type == ix::WebSocketMessageType::Message || !msg->str.empty()) {
       auto p = matjson::parse(msg->str);
@@ -99,7 +113,7 @@ bool Protocol::init() {
         });
         AsyncFunctionTask* taskPtr = new AsyncFunctionTask(std::move(task));
         auto listener = new geode::EventListener<AsyncFunctionTask>;
-        listener->bind([&baaa, taskPtr, listener](AsyncFunctionTask::Event* e){
+        listener->bind([baaa, taskPtr, listener](AsyncFunctionTask::Event* e){
           if (auto result = e->getValue()) {
             baaa(result);
             delete taskPtr;
@@ -162,6 +176,7 @@ void Protocol::broadcastEvent(std::string eventName, matjson::Value const& conte
     {"params", content}
   }).dump(0);
   for (auto& c : ws->getClients()) {
+    //if (domainEnabledState[eventName.substr(0,eventName.find_first_of("."))][c.])
     c->send(o);
   }
 }

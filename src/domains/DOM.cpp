@@ -7,10 +7,8 @@
 using namespace cocos2d;
 #include "DOM.hpp"
 
-bool DOMDomainDisabled = true;
-
 inline void fireDOMEvent(std::string eventName, matjson::Value const& content = {}) {
-  if (!DOMDomainDisabled) fireEvent("DOM."+eventName, content);
+  fireEvent("DOM."+eventName, content);
 };
 
 static std::unordered_map<int, CCNode*> s_nodes;
@@ -73,7 +71,7 @@ struct CCNode2 : geode::Modify<CCNode2, CCNode> {
 
   // child nodes
   void fireChildCountEvent() {
-    if (DOMDomainDisabled) return;
+    return;
     fireDOMEvent("childNodeCountUpdated", matjson::makeObject({
       {"nodeId",m_fields->nodeId}, 
       {"childNodeCount",getChildrenCount()}
@@ -221,7 +219,6 @@ DOMNode::DOMNode(CCNode *node, int depth)
 
   /*
   auto modify = static_cast<CCNode2*>(node);
-  if (IsDebuggerPresent() && !DOMDomainDisabled) DebugBreak();
   auto fields = modify->m_fields;
   for (auto& pair : fields->m_userObjects) {
     attributes[pair.first] = jsonValueOf(pair.second);
@@ -230,24 +227,21 @@ DOMNode::DOMNode(CCNode *node, int depth)
 }
 
 void CCNode2::removeChild(CCNode *child) {
-  if (isRunning()) {
-    fireDOMEvent("childNodeRemoved", matjson::makeObject({
-      {"parentNodeId", nodeIdOf(this)}, 
-      {"nodeId", nodeIdOf(child)}
-    }));
-    fireDOMEvent("childNodeCountUpdated", matjson::makeObject({
-      {"nodeId", nodeIdOf(child)},
-      {"childNodeCount", getChildrenCount()}
-    }));
-  }
+  fireDOMEvent("childNodeRemoved", matjson::makeObject({
+    {"parentNodeId", nodeIdOf(this)}, 
+    {"nodeId", nodeIdOf(child)}
+  }));
+  fireDOMEvent("childNodeCountUpdated", matjson::makeObject({
+    {"nodeId", nodeIdOf(child)},
+    {"childNodeCount", getChildrenCount()}
+  }));
   CCNode::removeChild(child);
 }
 
 void CCNode2::addChild(CCNode *child) {
   auto p = child->getParent();
   CCNode::addChild(child);
-  if (!isRunning()) return;
-  //if (DOMDomainDisabled) return;
+  //return;
   auto resp = matjson::makeObject({
     {"parentNodeId", nodeIdOf(this)},
     {"node", DOMNode(child)}
@@ -267,7 +261,7 @@ void CCNode2::setUserObject(std::string const &id, CCObject *value) {
   CCNode::setUserObject(id, value);
   if (value) {
     m_fields->m_userObjects[id] = value;
-    if (DOMDomainDisabled) return;
+    return;
     fireDOMEvent("attributeModified", matjson::makeObject({
       {"nodeId", nodeIdOf(this)},
       {"name", id},
@@ -275,7 +269,7 @@ void CCNode2::setUserObject(std::string const &id, CCObject *value) {
     }));
   } else {
     m_fields->m_userObjects.erase(id);
-    if (DOMDomainDisabled) return;
+    return;
     fireDOMEvent("attributeRemoved", matjson::makeObject({
       {"nodeId", nodeIdOf(this)}, 
       {"name", id}
@@ -330,11 +324,9 @@ $domainMethod(describeNode) {
   }
 }
 $domainMethod(disableDOM) {
-  DOMDomainDisabled = true;
   return emptyResponse();
 }
 $domainMethod(enableDOM) {
-  DOMDomainDisabled = false;
   return emptyResponse();
 }
 $domainMethod(getAttributes) {
@@ -377,7 +369,6 @@ $domainMethod(getBoxModel) {
 $domainMethod(getDocument) {
   CCNode* node = CCDirector::sharedDirector()->getRunningScene(); 
   if (node) {
-    DOMDomainDisabled = false;
     int depth = params["depth"].asInt().unwrapOr(1);
     return geode::Ok(matjson::makeObject({
       {"root",DOMNode(node,depth)}
@@ -387,7 +378,7 @@ $domainMethod(getDocument) {
   }
 }
 $domainMethod(getNodeForLocation) {
-  if (DOMDomainDisabled) {
+  {
     return emptyResponse();
   }
   auto root = CCDirector::sharedDirector()->getRunningScene();

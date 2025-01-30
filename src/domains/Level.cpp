@@ -5,10 +5,8 @@
 #include "b64.hpp"
 matjson::Value GJLevel2Json(GJGameLevel* level);
 
-bool LevelDomainDisabled = true;
-
 inline void fireLevelEvent(std::string eventName, matjson::Value const& content = {}) {
-  if (!LevelDomainDisabled) fireEvent("Level."+eventName, content);
+  fireEvent("Level."+eventName, content);
 };
 
 #include <Geode/modify/GameLevelManager.hpp>
@@ -202,11 +200,9 @@ $domainMethod(updateLevel) {
 }
 
 $domainMethod(disableLevel) {
-  LevelDomainDisabled = true;
   return emptyResponse();
 };
 $domainMethod(enableLevel) {
-  LevelDomainDisabled = false;
   return emptyResponse();
 };
 

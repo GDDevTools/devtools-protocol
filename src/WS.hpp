@@ -10,6 +10,7 @@ using matjsonObjectInitType = std::initializer_list<std::pair<std::string, matjs
 
 class Protocol {
   std::string g;
+  std::vector<std::string> domainsList;
 public:
   using FunctionErrorReturnType = std::pair<int, std::string>;
   using FunctionReturnType = geode::Result<
@@ -25,13 +26,21 @@ public:
     ProtocolAsyncFunction
   >;
 private:
-  std::map<
+  std::unordered_map<
     std::string, // client id
     std::pair<
       int, // last id
       std::vector<int> // unused id
     >
   > idsForClient;
+
+  std::unordered_map<
+    std::string, // domain name
+    std::unordered_map<
+      std::string, // client id
+      bool // domain enabled
+    >
+  > domainEnabledState;
 
   std::unordered_map<
     std::string, // method name
