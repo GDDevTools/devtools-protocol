@@ -122,7 +122,7 @@ $domainMethod(createLevel) {
     {"level",GJLevel2Json(level)}
   }));
 }
-$domainAsyncMethod(deleteSavedLevel) {
+$domainAsyncMethodUndepended(deleteSavedLevel) {
   //??????
   GJGameLevel* level = GameLevelManager::get()->getSavedLevel(params["id"].asInt().unwrap());
   if (level==nullptr) {
@@ -143,7 +143,7 @@ $domainAsyncMethod(deleteSavedLevel) {
     }
   );
 }
-$domainAsyncMethod(deleteLocalLevel) {
+$domainAsyncMethodUndepended(deleteLocalLevel) {
   //??????
   GJGameLevel* level = EditorIDs::getLevelByID(params["id"].asInt().unwrap());
   if (level==nullptr) {

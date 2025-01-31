@@ -13,7 +13,6 @@ struct Preview {
   std::string type;
   std::string subtype;
   std::string className;
-  std::string desc;
 
   Preview(CScriptVar* val) {
     if (false) {}
@@ -35,31 +34,11 @@ struct Preview {
   };
 };
 
+struct PropertyPreview;
+
 struct ObjectPreview : public Preview {
-  matjson::Value props;
-  ObjectPreview(CScriptVar* val) : Preview(val) {}
-};
-
-template<>
-struct matjson::Serialize<Preview> {
-  static matjson::Value toJson(const Preview& p) {
-    auto ret = matjson::makeObject( {
-      {"type", p.type},
-      {"description", p.desc}
-    });
-
-    return ret;
-  }
-};
-
-template<>
-struct matjson::Serialize<ObjectPreview> {
-  static matjson::Value toJson(const ObjectPreview& o) {
-    auto ret = matjson::Serialize<Preview>::toJson(o);
-    ret["properties"] = o.props;
-
-    return ret;
-  }
+  std::vector<matjson::Value> props;
+  ObjectPreview(CScriptVar* val);
 };
 
 struct PropertyPreview : public Preview {
@@ -75,6 +54,28 @@ struct PropertyPreview : public Preview {
 };
 
 template<>
+struct matjson::Serialize<Preview> {
+  static matjson::Value toJson(const Preview& p) {
+    auto ret = matjson::makeObject( {
+      {"type", p.type}
+    });
+    if (!p.subtype.empty()) ret.set("subtype", p.subtype);
+
+    return ret;
+  }
+};
+
+template<>
+struct matjson::Serialize<ObjectPreview> {
+  static matjson::Value toJson(const ObjectPreview& o) {
+    auto ret = matjson::Serialize<Preview>::toJson(o);
+    ret["properties"] = o.props;
+
+    return ret;
+  }
+};
+
+template<>
 struct matjson::Serialize<PropertyPreview> {
   static matjson::Value toJson(const PropertyPreview& p) {
     auto ret = matjson::Serialize<Preview>::toJson(p);
@@ -84,6 +85,13 @@ struct matjson::Serialize<PropertyPreview> {
     return ret;
   }
 };
+
+ObjectPreview::ObjectPreview(CScriptVar* val) : Preview(val) {
+  props.reserve(val->Childs.size());
+  for (auto& child : val->Childs) {
+    props.push_back(matjson::Serialize<PropertyPreview>::toJson({child->getVarPtr().getVar()}));
+  }
+}
 
 struct RemoteObject : public Preview {
   matjson::Value value;
@@ -168,6 +176,9 @@ std::string error_type_enum_name[6] = {
 $domainAsyncMethod(evaluate) {
   geode::queueInMainThread([params, finish]{
     auto s = getState();
+    #ifdef GEODE_IS_WINDOWS
+    if (IsDebuggerPresent()) DebugBreak();
+    #endif
     try {
       auto ret = s->evaluateComplex(params["expression"].asString().unwrapOr("").c_str());
       finish(geode::Ok(RemoteObject(ret->getVarPtr().getVar())));

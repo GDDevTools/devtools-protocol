@@ -8,7 +8,16 @@ std::shared_ptr<Protocol> prot = nullptr;
 /// theres only one protocol instance for the entire lifetime so
 ix::WebSocketServer* ws;
 
-std::unordered_map<ix::WebSocket*, int> associatedId;
+std::unordered_map<ix::WebSocket*, std::string> associatedId;
+
+bool ClientConfig::isDomainEnabled(std::string domain) {
+  if (!prot->domainEnabledState.contains(domain)) return false;
+  return prot->domainEnabledState[domain][id];
+}
+void ClientConfig::setDomainEnabled(std::string domain, bool enable) {
+  if (!prot->domainEnabledState.contains(domain)) return;
+  prot->domainEnabledState[domain][id] = enable;
+}
 
 bool Protocol::init() {
   ix::initNetSystem();
@@ -28,6 +37,7 @@ bool Protocol::init() {
       for (std::string& d : domainsList) {
         domainEnabledState[d][id] = false;
       }
+      associatedId[&c] = id;
     }
     else if (msg->type == ix::WebSocketMessageType::Close) {
       geode::log::info("new disconnection chat");
@@ -36,6 +46,7 @@ bool Protocol::init() {
       for (std::string& d : domainsList) {
         domainEnabledState[d].erase(id);
       }
+      associatedId.erase(&c);
     }
     else if (msg->type == ix::WebSocketMessageType::Message || !msg->str.empty()) {
       auto p = matjson::parse(msg->str);
@@ -101,15 +112,15 @@ bool Protocol::init() {
 
       auto func = i->second.first;
       if (std::holds_alternative<ProtocolSyncFunction>(func)) {
-        auto mm = std::get<ProtocolSyncFunction>(func)(params);
+        auto mm = std::get<ProtocolSyncFunction>(func)(ClientConfig(s->getId()), params);
         baaa(&mm);
       } else {
         auto g = std::get<ProtocolAsyncFunction>(func);
         // the horror to allocate the task to somewhere else
         // (i hope it works)
-        auto task = AsyncFunctionTask::runWithCallback([g,params,&baaa](AsyncFunctionTask::PostResult finish, auto prog, auto cancelled){
+        auto task = AsyncFunctionTask::runWithCallback([s,g,params,&baaa](AsyncFunctionTask::PostResult finish, auto prog, auto cancelled){
           matjson::Value bro = params;
-          g(bro, finish);
+          g(ClientConfig(s->getId()), bro, finish);
         });
         AsyncFunctionTask* taskPtr = new AsyncFunctionTask(std::move(task));
         auto listener = new geode::EventListener<AsyncFunctionTask>;
@@ -176,7 +187,10 @@ void Protocol::broadcastEvent(std::string eventName, matjson::Value const& conte
     {"params", content}
   }).dump(0);
   for (auto& c : ws->getClients()) {
-    //if (domainEnabledState[eventName.substr(0,eventName.find_first_of("."))][c.])
+    if (!domainEnabledState
+      [eventName.substr(0,eventName.find_first_of("."))]
+      [associatedId[c.get()]]
+    ) continue;
     c->send(o);
   }
 }

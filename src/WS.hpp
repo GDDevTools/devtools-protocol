@@ -8,9 +8,20 @@
 #include <variant>
 using matjsonObjectInitType = std::initializer_list<std::pair<std::string, matjson::Value>>;
 
+struct ClientConfig {
+  bool isDomainEnabled(std::string domain);
+  void setDomainEnabled(std::string domain, bool enable);
+private:
+  std::string id;
+
+  ClientConfig(std::string id) : id(id) {}
+  friend class Protocol;
+};
+
 class Protocol {
   std::string g;
   std::vector<std::string> domainsList;
+  friend struct ClientConfig;
 public:
   using FunctionErrorReturnType = std::pair<int, std::string>;
   using FunctionReturnType = geode::Result<
@@ -19,8 +30,8 @@ public:
   >;
   using AsyncFunctionTask = geode::Task<FunctionReturnType>;
   bool running = false;
-  using ProtocolSyncFunction = std::function<FunctionReturnType(matjson::Value&)>;
-  using ProtocolAsyncFunction = std::function<void(matjson::Value&, AsyncFunctionTask::PostResult)>;
+  using ProtocolSyncFunction = std::function<FunctionReturnType(ClientConfig, matjson::Value&)>;
+  using ProtocolAsyncFunction = std::function<void(ClientConfig, matjson::Value&, AsyncFunctionTask::PostResult)>;
   using ProtocolFunction = std::variant<
     ProtocolSyncFunction,
     ProtocolAsyncFunction
@@ -75,8 +86,22 @@ inline Protocol::FunctionReturnType emptyResponse() {
   return geode::Ok(matjson::Value::object());
 }
 
-#define $domainMethod(method) static Protocol::FunctionReturnType method(matjson::Value& params)
-#define $domainAsyncMethod(method) static void method(matjson::Value& params, Protocol::AsyncFunctionTask::PostResult finish)
+#define $domainMethod(method) static Protocol::FunctionReturnType method( \
+  ClientConfig info, \
+  matjson::Value& params \
+)
+#define $domainMethodUndepended(method) static Protocol::FunctionReturnType method( \
+  matjson::Value& params \
+)
+#define $domainAsyncMethod(method) static void method( \
+  ClientConfig info, \
+  matjson::Value& params, \
+  Protocol::AsyncFunctionTask::PostResult finish \
+)
+#define $domainAsyncMethodUndepended(method) static void method( \
+  matjson::Value& params, \
+  Protocol::AsyncFunctionTask::PostResult finish \
+)
 
 namespace errors {
   inline Protocol::FunctionReturnType invalidParameter(std::string msg) {

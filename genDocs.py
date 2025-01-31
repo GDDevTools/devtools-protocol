@@ -9,7 +9,6 @@ This .md file is generated from protocols.json so it's guaranteed to match with 
 
 > **Note** most of this docs will sound similar to the docs from the aforementioned protocol and it's intended. Don't ask anything about that.
 
-
 <style type="text/css">
   tbody>tr>td:first-child {text-align: right}
 </style>

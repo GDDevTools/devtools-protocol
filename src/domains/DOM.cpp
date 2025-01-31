@@ -378,7 +378,7 @@ $domainMethod(getDocument) {
   }
 }
 $domainMethod(getNodeForLocation) {
-  {
+  if (info.isDomainEnabled("DOM")) {
     return emptyResponse();
   }
   auto root = CCDirector::sharedDirector()->getRunningScene();
@@ -523,7 +523,7 @@ $domainMethod(setAttribute) {
 }
 $domainMethod(removeAttribute) {
   params["value"] = nullptr;
-  return setAttribute(params);
+  return setAttribute(info, params);
 }
 
 $execute {

@@ -52,10 +52,10 @@ $jsMethod(Scene_lastModified_g) {
 #pragma region Functions
 
 $jsMethod(new_Scene) {
+  auto state = getState();
   // creates a new one
-  auto obj = v->newScriptVar(Object);
+  auto obj = newScriptVar(state, Object, state->getRoot()->findChildByPath("Scene.prototype"));
   obj->setUserData(CCDirector::sharedDirector()->getRunningScene());
-  obj->addChildOrReplace(TINYJS___PROTO___VAR, getState()->getRoot()->findChildByPath("Scene.prototype"));
   v->setReturnVar(obj);
 };
 

@@ -62,7 +62,7 @@ inline cocos2d::enumKeyCodes keyEnumForChar(char c) {
 }
 
 // code dupe i know
-$domainMethod(handleKeyDownEvent) {
+$domainMethodUndepended(handleKeyDownEvent) {
   auto disp = cocos2d::CCDirector::get()->getKeyboardDispatcher();
   auto modifiersV = params["modifiers"];
   if (modifiersV.isNumber()) {
@@ -86,7 +86,7 @@ $domainMethod(handleKeyDownEvent) {
   }
   return emptyResponse();
 }
-$domainMethod(handleKeyUpEvent) {
+$domainMethodUndepended(handleKeyUpEvent) {
   auto disp = cocos2d::CCDirector::get()->getKeyboardDispatcher();
   auto modifiersV = params["modifiers"];
   if (modifiersV.isNumber()) {
@@ -110,7 +110,7 @@ $domainMethod(handleKeyUpEvent) {
   }
   return emptyResponse();
 }
-$domainMethod(handleCharEvent) {
+$domainMethodUndepended(handleCharEvent) {
   auto disp = cocos2d::CCDirector::get()->getKeyboardDispatcher();
 
   auto modifiersV = params["modifiers"];

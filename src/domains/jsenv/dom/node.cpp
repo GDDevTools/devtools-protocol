@@ -161,9 +161,8 @@ $jsMethod(new_Node) {
   // keep it until this object gets removed
   n->retain();
   static_cast<idk*>(n)->m_fields->retainedByJS = true;
-  auto obj = newScriptVar(getState(), Object);
+  auto obj = newScriptVar(getState(), Object,getState()->getRoot()->findChildByPath("Node.prototype"));
   obj->setUserData(n);
-  obj->addChildOrReplace("__proto__", getState()->getRoot()->findChildByPath("Node.prototype"));
 };
 #define $getNodeOfVariable2(n, var) \
   cocos2d::CCNode* n = nullptr; \
