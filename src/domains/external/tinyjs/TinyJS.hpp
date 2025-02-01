@@ -1006,6 +1006,7 @@ public:
 	bool operator ==(const CScriptVarLinkPtr &rhs) const { return link==rhs.link; }
 	// access to CScriptVarLink
 	CScriptVarLink *operator ->() const { return link; } 
+	CScriptVarLink *getVar() const { return link; } 
 
 	operator const CScriptVarPtr &() const { static CScriptVarPtr NullPtr; return link?link->getVarPtr():NullPtr; }
 

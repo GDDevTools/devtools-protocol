@@ -41,7 +41,7 @@ $jsMethod(Node_childList_g) {
   auto arr = newScriptVar(getState(), Array);
   int idx = 0;
   for (auto* c : geode::cocos::CCArrayExt<cocos2d::CCNode*>(
-                  static_cast<cocos2d::CCNode*>(v->getArgument("this")->getUserData())
+                  static_cast<cocos2d::CCNode*>(v->findChild("this")->getVarPtr()->getUserData())
                   ->getChildren()
                 )
   ) {
@@ -56,7 +56,7 @@ $jsMethod(Node_isConnected_g) {
     newScriptVarBool(
       getState(),
       static_cast<cocos2d::CCNode*>(
-        v->getArgument("this")->getUserData()
+        v->findChild("this")->getVarPtr()->getUserData()
       )->isRunning() // this is usually the way to determine if its connected to the scene
                      // but you know you can never trust a modder
     )
@@ -68,7 +68,7 @@ $jsMethod(Node_isSameNode) {
       getState(),
 
       // check if these 2 variables points to the same address
-      v->getArgument("this")->getUserData()
+      v->findChild("this")->getVarPtr()->getUserData()
       ==
       v->getArgument("node")->getUserData()
     )
@@ -76,7 +76,7 @@ $jsMethod(Node_isSameNode) {
 }
 
 $jsMethod(Node_firstChild_g) {
-  auto node = static_cast<cocos2d::CCNode*>(v->getArgument("this")->getUserData());
+  auto node = static_cast<cocos2d::CCNode*>(v->findChild("this")->getVarPtr()->getUserData());
   auto cl = node->getChildren();
   if (cl == nullptr || cl->count()==0) goto retnull; 
   returnNode(v, static_cast<cocos2d::CCNode*>(cl->firstObject())); return;
@@ -86,7 +86,7 @@ retnull:
 }
 
 $jsMethod(Node_lastChild_g) {
-  auto node = static_cast<cocos2d::CCNode*>(v->getArgument("this")->getUserData());
+  auto node = static_cast<cocos2d::CCNode*>(v->findChild("this")->getVarPtr()->getUserData());
   auto cl = node->getChildren();
   if (cl == nullptr || cl->count()==0) goto retnull; 
   returnNode(v, static_cast<cocos2d::CCNode*>(cl->lastObject())); return;
@@ -97,7 +97,7 @@ retnull:
 
 
 $jsMethod(Node_nextSibling_g) {
-  auto node = static_cast<cocos2d::CCNode*>(v->getArgument("this")->getUserData());
+  auto node = static_cast<cocos2d::CCNode*>(v->findChild("this")->getVarPtr()->getUserData());
   if (auto p = node->getParent()) {
     auto cl = p->getChildren();
     auto i = cl->indexOfObject(node);
@@ -110,7 +110,7 @@ retnull:
 }
 
 $jsMethod(Node_previousSibling_g) {
-  auto node = static_cast<cocos2d::CCNode*>(v->getArgument("this")->getUserData());
+  auto node = static_cast<cocos2d::CCNode*>(v->findChild("this")->getVarPtr()->getUserData());
   if (auto p = node->getParent()) {
     auto cl = p->getChildren();
     auto i = cl->indexOfObject(node);
@@ -124,7 +124,7 @@ retnull:
 
 
 $jsMethod(Node_textContent_g) {
-  auto node = static_cast<cocos2d::CCNode*>(v->getArgument("this")->getUserData());
+  auto node = static_cast<cocos2d::CCNode*>(v->findChild("this")->getVarPtr()->getUserData());
   cocos2d::CCLabelProtocol* textNode = geode::cast::typeinfo_cast<cocos2d::CCLabelTTF*>(node);
   if (textNode == nullptr) 
     textNode = geode::cast::typeinfo_cast<cocos2d::CCLabelBMFont*>(node);
@@ -137,7 +137,7 @@ retnull:
 $jsMethod(Node_textContent_s) {
   if (!v->getArgument(1)->isString()) goto ret;
   {
-    auto node = static_cast<cocos2d::CCNode*>(v->getArgument("this")->getUserData());
+    auto node = static_cast<cocos2d::CCNode*>(v->findChild("this")->getVarPtr()->getUserData());
     cocos2d::CCLabelProtocol* textNode = geode::cast::typeinfo_cast<cocos2d::CCLabelTTF*>(node);
     if (textNode == nullptr) 
       textNode = geode::cast::typeinfo_cast<cocos2d::CCLabelBMFont*>(node);
@@ -180,18 +180,18 @@ $jsMethod(new_Node) {
 
 $jsMethod(Node_appendChild) {
   $getNodeOfVariable(v->getArgument("node"));
-  static_cast<idk*>(v->getArgument("this")->getUserData())->addChild(n);
+  static_cast<idk*>(v->findChild("this")->getVarPtr()->getUserData())->addChild(n);
   v->setReturnVar(newScriptVarUndefined(getState()));
 }
 $jsMethod(Node_removeChild) {
   $getNodeOfVariable(v->getArgument("node"));
-  static_cast<idk*>(v->getArgument("this")->getUserData())->removeChild(n);
+  static_cast<idk*>(v->findChild("this")->getVarPtr()->getUserData())->removeChild(n);
   v->setReturnVar(newScriptVarUndefined(getState()));
 }
 $jsMethod(Node_replaceChild) {
   $getNodeOfVariable2(oldNode, v->getArgument("oldChild"));
   $getNodeOfVariable2(newNode, v->getArgument("newChild"));
-  auto thisNode = static_cast<cocos2d::CCNode*>(v->getArgument("this")->getUserData());
+  auto thisNode = static_cast<cocos2d::CCNode*>(v->findChild("this")->getVarPtr()->getUserData());
   auto children = thisNode->getChildren();
   int insertIndex = -1;
   if (children) {
@@ -212,10 +212,10 @@ $jsMethod(Node_insertBefore) {
   $getNodeOfVariable(v->getArgument("node"));
   auto rnv = v->getArgument("refNode");
   if (rnv->isNull())
-    static_cast<idk*>(v->getArgument("this")->getUserData())->addChild(n);
+    static_cast<idk*>(v->findChild("this")->getVarPtr()->getUserData())->addChild(n);
   else if (rnv->isObject())
     static_cast<idk*>(
-      v->getArgument("this")->getUserData()
+      v->findChild("this")->getVarPtr()->getUserData()
     )->insertBefore(
       n, 
       static_cast<idk*>(rnv->getUserData())
@@ -234,7 +234,7 @@ $jsMethod(Node_contains) {
     v->setReturnVar(newScriptVarBool(getState(), false));
     return;
   }
-  auto thisNode = static_cast<idk*>(v->getArgument("this")->getUserData());
+  auto thisNode = static_cast<idk*>(v->findChild("this")->getVarPtr()->getUserData());
   auto targetNode = static_cast<idk*>(nodeVar->getUserData());
   if (thisNode == targetNode) {
     v->setReturnVar(newScriptVarBool(getState(), true));
@@ -261,7 +261,7 @@ $jsMethod(Node_contains) {
 }
 
 $jsMethod(Node_getRootNode) {
-  auto thisNode = static_cast<idk*>(v->getArgument("this")->getUserData());
+  auto thisNode = static_cast<idk*>(v->findChild("this")->getVarPtr()->getUserData());
 
   cocos2d::CCNode* lp = thisNode;
   cocos2d::CCNode* p = thisNode->getParent();
@@ -273,7 +273,7 @@ $jsMethod(Node_getRootNode) {
   returnNode(v, lp); return;
 }
 $jsMethod(Node_getChildById) {
-  auto thisNode = static_cast<idk*>(v->getArgument("this")->getUserData());
+  auto thisNode = static_cast<idk*>(v->findChild("this")->getVarPtr()->getUserData());
   auto nodeId = v->getArgument("id")->toString();
 
   auto node = thisNode->getChildByID(nodeId);
@@ -290,7 +290,7 @@ $jsMethod(Node_hasChildNodes) {
     newScriptVarBool(
       getState(),
       static_cast<cocos2d::CCNode*>(
-        v->getArgument("this")->getUserData()
+        v->findChild("this")->getVarPtr()->getUserData()
       )->getChildrenCount() != 0
     )
   );

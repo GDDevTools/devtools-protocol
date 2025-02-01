@@ -2,122 +2,115 @@
 
 #include "Geode/DefaultInclude.hpp"
 #include "../WS.hpp"
+#include <fmt/format.h>
 #include <matjson.hpp>
-#include <optional>
 #include "Geode/loader/Loader.hpp"
+#include "external/tinyjs/TinyJS.hpp"
 #include "jsenv/console.hpp"
 #include "jsenv/state.hpp"
 #undef inline
 
-struct Preview {
+std::string descriptionFor(CScriptVarLink* link) {
+  CScriptVar* var = link->getVarPtr().getVar();
+  if (var->isObject()) {
+    CScriptResult amogus;
+    auto g = 
+      var->callJS_toString(amogus);
+    return g->toString();
+  }
+  return "";
+}
+
+matjson::Value serializePreview(CScriptVar* val) {
   std::string type;
   std::string subtype;
   std::string className;
 
-  Preview(CScriptVar* val) {
+  if (false) {}
+  else if (val->isUndefined()) type = "undefined";
+  else if (val->isString())    type = "string";
+  else if (val->isNumber())    type = "number";
+  else if (val->isBool())      type = "boolean";
+  else if (val->isFunction())  type = "function";
+  else {
+    type = "object";
+    className = "idk";
     if (false) {}
-    else if (val->isUndefined()) type = "undefined";
-    else if (val->isString())    type = "string";
-    else if (val->isNumber())    type = "number";
-    else if (val->isBool())      type = "boolean";
-    else if (val->isFunction())  type = "function";
-    else {
-      type = "object";
-      className = "idk";
-      if (false) {}
-      else if (val->isArray())     subtype = "array";
-      else if (val->isNull())      subtype = "null";
-      else if (val->isGenerator()) subtype = "generator";
-      else if (val->isIterator())  subtype = "iterator";
-    }
-
-  };
-};
-
-struct PropertyPreview;
-
-struct ObjectPreview : public Preview {
-  std::vector<matjson::Value> props;
-  ObjectPreview(CScriptVar* val);
-};
-
-struct PropertyPreview : public Preview {
-  std::optional<ObjectPreview> valuePreview;
-  std::string value;
-  PropertyPreview(CScriptVar* val) : Preview(val) {
-    value = val->toString();
-    if (type == "object") 
-      valuePreview = std::make_optional(ObjectPreview(val));
-    else
-      valuePreview = std::nullopt;
+    else if (val->isArray())     subtype = "array";
+    else if (val->isNull())      subtype = "null";
+    else if (val->isGenerator()) subtype = "generator";
+    else if (val->isIterator())  subtype = "iterator";
+    else if (val->isAccessor())  subtype = "accessor";
   }
-};
 
-template<>
-struct matjson::Serialize<Preview> {
-  static matjson::Value toJson(const Preview& p) {
-    auto ret = matjson::makeObject( {
-      {"type", p.type}
-    });
-    if (!p.subtype.empty()) ret.set("subtype", p.subtype);
+  auto ret = matjson::makeObject( {
+    {"type", type}
+  });
+  if (!subtype.empty()) ret.set("subtype", subtype);
 
-    return ret;
-  }
-};
-
-template<>
-struct matjson::Serialize<ObjectPreview> {
-  static matjson::Value toJson(const ObjectPreview& o) {
-    auto ret = matjson::Serialize<Preview>::toJson(o);
-    ret["properties"] = o.props;
-
-    return ret;
-  }
-};
-
-template<>
-struct matjson::Serialize<PropertyPreview> {
-  static matjson::Value toJson(const PropertyPreview& p) {
-    auto ret = matjson::Serialize<Preview>::toJson(p);
-    if (p.valuePreview.has_value())
-      ret["valuePreview"] = matjson::Serialize<ObjectPreview>::toJson(p.valuePreview.value());
-
-    return ret;
-  }
-};
-
-ObjectPreview::ObjectPreview(CScriptVar* val) : Preview(val) {
-  props.reserve(val->Childs.size());
-  for (auto& child : val->Childs) {
-    props.push_back(matjson::Serialize<PropertyPreview>::toJson({child->getVarPtr().getVar()}));
-  }
+  return ret;
 }
 
-struct RemoteObject : public Preview {
-  matjson::Value value;
+matjson::Value serializeObjectPreview(CScriptVarLink* val);
+matjson::Value serializePropertyPreview(CScriptVarLink* val) {
+  /*
+  
+  */
+  auto ret = serializePreview(val->getVarPtr().getVar());
+  ret["name"] = val->getName();
+  // check if subtype exists before comparing or else it will create a new object under that property
+  if (val->getVarPtr()->isObject()) {
+    if (
+      !ret.contains("subtype")  // doesnt have a subtype hint (custom class or just object)
+      //ret["subtype"].asString().unwrapOr("").empty()
+      ||                            // or
+      val->getVarPtr()->isArray()   // does have a subtype hint and is array (for now)
+    )
+    ret["valuePreview"] = serializeObjectPreview(val);
+  }
 
-  RemoteObject(CScriptVar* val) : Preview(val) {
-    if (false) {}
-    else if (type=="object") {
-      value = matjson::Serialize<ObjectPreview>::toJson(ObjectPreview(val));
+  return ret;
+}
+
+matjson::Value serializeObjectPreview(CScriptVarLink* link) {
+  auto val = link->getVarPtr().getVar();
+  auto ret = serializePreview(val);
+  if (val->isObject() && !val->isFunction()) {
+    std::vector<matjson::Value> props;
+    props.reserve(val->Childs.size());
+    for (auto& child : val->Childs) {
+      CScriptVarLink* link = child.operator->();
+      // prevent recursion
+      if (link->getVarPtr().getVar() != val)
+        props.push_back(serializePropertyPreview(link));
     }
-    else if (type=="string") value = val->toString();
-    else if (type=="boolean") value = val->toBoolean();
-    else if (type=="number") value = val->toNumber().toDouble();
+    ret["properties"] = props;
   }
-};
-template<>
-struct matjson::Serialize<RemoteObject> {
-  static matjson::Value toJson(const RemoteObject& r) {
-    auto ret = matjson::Serialize<Preview>::toJson(r);
-    if (ret["type"] == "object") {
-      ret["preview"] = r.value;
-    } else if (ret["type"] != "undefined") {
-      ret["value"] = r.value;
-    }
-    return ret;
+  auto desc = descriptionFor(link);
+  if (!desc.empty()) ret["description"] = desc;
+
+  return ret;
+}
+
+matjson::Value serializeRemoteObject(CScriptVarLink* val) {
+  matjson::Value value;
+  matjson::Value preview;
+  auto ret = serializePreview(val->getVarPtr().getVar());
+  std::string type = ret["type"].asString().unwrap();
+  preview = serializeObjectPreview(val);
+  if (false) {}
+  else if (type=="object") {
   }
-};
+  else if (type=="string") value = val->toString();
+  else if (type=="boolean") value = val->toBoolean();
+  else if (type=="number") value = val->toNumber().toDouble();
+  ret["preview"] = preview;
+  if (type == "object") {
+  } else if (type != "undefined") {
+    ret["value"] = value;
+  }
+  return ret;
+}
 /*
 matjson::Value jsvalToJsonVal(CScriptVar* val) {
   matjson::Value ret;
@@ -181,7 +174,7 @@ $domainAsyncMethod(evaluate) {
     #endif
     try {
       auto ret = s->evaluateComplex(params["expression"].asString().unwrapOr("").c_str());
-      finish(geode::Ok(RemoteObject(ret->getVarPtr().getVar())));
+      finish(geode::Ok(serializeRemoteObject(ret.getVar())));
     } catch (CScriptException* e) {
       geode::log::logImpl(geode::Severity::Error, theFakeJSMod(), "[JavaScript]: {}: {}", error_type_enum_name[e->errorType], e->message);
       finish(errors::internalError(fmt::format("{}: {}", error_type_enum_name[e->errorType], e->message)));

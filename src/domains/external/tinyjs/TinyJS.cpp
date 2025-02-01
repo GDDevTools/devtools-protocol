@@ -4241,10 +4241,15 @@ CTinyJS::CTinyJS() {
 	//////////////////////////////////////////////////////////////////////////
 	// Object-Prototype
 	// must be created as first object because this prototype is the base of all objects
-	objectPrototype = newScriptVar(Object); 
+
+
+	// well thats the original, but to be consistent with the mozilla docs, the very top __proto__ is undefined
+	// (different from the docs where it's a null but yknow it's also an object so)
+	objectPrototype = newScriptVarUndefined(this); 
 	
 	// all objects have a prototype. Also the prototype of prototypes
-	objectPrototype->addChild(TINYJS___PROTO___VAR, objectPrototype, 0);
+	// except for the very root object
+	// objectPrototype->addChild(TINYJS___PROTO___VAR, objectPrototype, 0);
 
 	//////////////////////////////////////////////////////////////////////////
 	// Function-Prototype
