@@ -1,42 +1,36 @@
-/// Prepare for the completely unreadable source code!
-
-
 //#include "../../../external/tinyjs/TinyJS.hpp"
 #include "../state.hpp"
-#include "domains/external/tinyjs/TinyJS.hpp"
 #include <Geode/DefaultInclude.hpp>
 #include <queue>
-#include "node.hpp"
 
 #include <Geode/modify/CCNode.hpp>
-
-struct CCNodeJSHooks::Fields{
-  bool retainedByJS = false;
-  dom::CScriptVarNode* associatedJSObject = nullptr;
-};
-void CCNodeJSHooks::release() {
-  if (m_uReference == 1) {
-    m_fields->associatedJSObject->signalRemoval();
+struct idk : geode::Modify<idk, cocos2d::CCNode> {
+  struct Fields {
+    bool retainedByJS = false;
+  };
+  void retain() {
+    if (!m_fields->retainedByJS) 
+      cocos2d::CCNode::retain();
+    m_fields->retainedByJS = false;
   }
-  cocos2d::CCNode::release();
-}
-void CCNodeJSHooks::setParent(cocos2d::CCNode* parent) {
-  cocos2d::CCNode::setParent(parent);
-  m_fields->associatedJSObject = new dom::CScriptVarNode(getState(), this);
-}
+};
 
-/*
-! ===========================================================================================
 static void finalize_Node(CScriptVar* v) {
-  auto n = static_cast<CCNodeJSHooks*>(v->getUserData());
+  auto n = static_cast<idk*>(v->getUserData());
   if (n->m_fields->retainedByJS) {
     n->release();
   }
 };
-*/
+
+static CScriptVarLinkPtr createNodeObjFrom(cocos2d::CCNode* n) {
+  auto nodeobj = getState()->evaluateComplex("new Node()");
+  static_cast<cocos2d::CCNode*>(nodeobj->getVarPtr()->getUserData())->release();
+  nodeobj->getVarPtr()->setUserData(n);
+  return nodeobj;
+}
 
 static void returnNode(CFunctionsScopePtr const& v, cocos2d::CCNode* n) {
-  v->setUserData(static_cast<CCNodeJSHooks*>(n)->m_fields->associatedJSObject);
+  v->setUserData(createNodeObjFrom(n)->getVarPtr().getVar());
 }
 //////
 /// Properties
@@ -46,11 +40,12 @@ static void returnNode(CFunctionsScopePtr const& v, cocos2d::CCNode* n) {
 $jsMethod(Node_childList_g) {
   auto arr = newScriptVar(getState(), Array);
   int idx = 0;
-  for (auto* c : geode::cocos::CCArrayExt<CCNodeJSHooks*>(
-    static_cast<dom::CScriptVarNodePtr>(v->findChild("this")->getVarPtr())
-    ->getNode()->getChildren()
-  )) {
-    arr->setArrayIndex(idx,c->m_fields->associatedJSObject);
+  for (auto* c : geode::cocos::CCArrayExt<cocos2d::CCNode*>(
+                  static_cast<cocos2d::CCNode*>(v->findChild("this")->getVarPtr()->getUserData())
+                  ->getChildren()
+                )
+  ) {
+    arr->setArrayIndex(idx,createNodeObjFrom(c));
     idx++;
   }
   v->setReturnVar(arr);
@@ -60,9 +55,9 @@ $jsMethod(Node_isConnected_g) {
   v->setReturnVar(
     newScriptVarBool(
       getState(),
-      static_cast<dom::CScriptVarNodePtr>(
-        v->findChild("this")->getVarPtr()
-      )->getNode()->isRunning() // this is usually the way to determine if its connected to the scene
+      static_cast<cocos2d::CCNode*>(
+        v->findChild("this")->getVarPtr()->getUserData()
+      )->isRunning() // this is usually the way to determine if its connected to the scene
                      // but you know you can never trust a modder
     )
   );
@@ -81,7 +76,7 @@ $jsMethod(Node_isSameNode) {
 }
 
 $jsMethod(Node_firstChild_g) {
-  auto node = static_cast<dom::CScriptVarNodePtr>(v->findChild("this")->getVarPtr())->getNode();
+  auto node = static_cast<cocos2d::CCNode*>(v->findChild("this")->getVarPtr()->getUserData());
   auto cl = node->getChildren();
   if (cl == nullptr || cl->count()==0) goto retnull; 
   returnNode(v, static_cast<cocos2d::CCNode*>(cl->firstObject())); return;
@@ -91,7 +86,7 @@ retnull:
 }
 
 $jsMethod(Node_lastChild_g) {
-  auto node = static_cast<dom::CScriptVarNodePtr>(v->findChild("this")->getVarPtr())->getNode();
+  auto node = static_cast<cocos2d::CCNode*>(v->findChild("this")->getVarPtr()->getUserData());
   auto cl = node->getChildren();
   if (cl == nullptr || cl->count()==0) goto retnull; 
   returnNode(v, static_cast<cocos2d::CCNode*>(cl->lastObject())); return;
@@ -102,7 +97,7 @@ retnull:
 
 
 $jsMethod(Node_nextSibling_g) {
-  auto node = static_cast<dom::CScriptVarNodePtr>(v->findChild("this")->getVarPtr())->getNode();
+  auto node = static_cast<cocos2d::CCNode*>(v->findChild("this")->getVarPtr()->getUserData());
   if (auto p = node->getParent()) {
     auto cl = p->getChildren();
     auto i = cl->indexOfObject(node);
@@ -115,7 +110,7 @@ retnull:
 }
 
 $jsMethod(Node_previousSibling_g) {
-  auto node = static_cast<dom::CScriptVarNodePtr>(v->findChild("this")->getVarPtr())->getNode();
+  auto node = static_cast<cocos2d::CCNode*>(v->findChild("this")->getVarPtr()->getUserData());
   if (auto p = node->getParent()) {
     auto cl = p->getChildren();
     auto i = cl->indexOfObject(node);
@@ -129,7 +124,7 @@ retnull:
 
 
 $jsMethod(Node_textContent_g) {
-  auto node = static_cast<dom::CScriptVarNodePtr>(v->findChild("this")->getVarPtr())->getNode();
+  auto node = static_cast<cocos2d::CCNode*>(v->findChild("this")->getVarPtr()->getUserData());
   cocos2d::CCLabelProtocol* textNode = geode::cast::typeinfo_cast<cocos2d::CCLabelTTF*>(node);
   if (textNode == nullptr) 
     textNode = geode::cast::typeinfo_cast<cocos2d::CCLabelBMFont*>(node);
@@ -142,7 +137,7 @@ retnull:
 $jsMethod(Node_textContent_s) {
   if (!v->getArgument(1)->isString()) goto ret;
   {
-    auto node = static_cast<dom::CScriptVarNodePtr>(v->findChild("this")->getVarPtr())->getNode();
+    auto node = static_cast<cocos2d::CCNode*>(v->findChild("this")->getVarPtr()->getUserData());
     cocos2d::CCLabelProtocol* textNode = geode::cast::typeinfo_cast<cocos2d::CCLabelTTF*>(node);
     if (textNode == nullptr) 
       textNode = geode::cast::typeinfo_cast<cocos2d::CCLabelBMFont*>(node);
@@ -165,16 +160,16 @@ $jsMethod(new_Node) {
   n = cocos2d::CCNode::create();
   // keep it until this object gets removed
   n->retain();
-  static_cast<CCNodeJSHooks*>(n)->m_fields->retainedByJS = true;
+  static_cast<idk*>(n)->m_fields->retainedByJS = true;
   auto obj = newScriptVar(getState(), Object,getState()->getRoot()->findChildByPath("Node.prototype"));
   obj->setUserData(n);
 };
 #define $getNodeOfVariable2(n, var) \
   cocos2d::CCNode* n = nullptr; \
   { \
-    auto vava = dynamic_cast<dom::CScriptVarNode*>(var.getVar()); \
-    n = vava != nullptr \
-      ? vava->getNode()  \
+    auto vava = var; \
+    n = vava->isObject() && vava->getUserData() != nullptr  \
+      ? static_cast<cocos2d::CCNode*>(vava->getUserData())  \
       : nullptr; \
     if (!n) { \
       v->throwError(ReferenceError, "Not a valid Node object."); \
@@ -184,22 +179,19 @@ $jsMethod(new_Node) {
 #define $getNodeOfVariable(var) $getNodeOfVariable2(n, var)
 
 $jsMethod(Node_appendChild) {
-  validateContext<dom::CScriptVarNode>(v);
   $getNodeOfVariable(v->getArgument("node"));
-  static_cast<dom::CScriptVarNodePtr>(v->findChild("this")->getVarPtr())->getNode()->addChild(n);
+  static_cast<idk*>(v->findChild("this")->getVarPtr()->getUserData())->addChild(n);
   v->setReturnVar(newScriptVarUndefined(getState()));
 }
 $jsMethod(Node_removeChild) {
-  validateContext<dom::CScriptVarNode>(v);
   $getNodeOfVariable(v->getArgument("node"));
-  static_cast<dom::CScriptVarNodePtr>(v->findChild("this")->getVarPtr())->getNode()->removeChild(n);
+  static_cast<idk*>(v->findChild("this")->getVarPtr()->getUserData())->removeChild(n);
   v->setReturnVar(newScriptVarUndefined(getState()));
 }
 $jsMethod(Node_replaceChild) {
-  validateContext<dom::CScriptVarNode>(v);
   $getNodeOfVariable2(oldNode, v->getArgument("oldChild"));
   $getNodeOfVariable2(newNode, v->getArgument("newChild"));
-  auto thisNode = static_cast<dom::CScriptVarNodePtr>(v->findChild("this")->getVarPtr())->getNode();
+  auto thisNode = static_cast<cocos2d::CCNode*>(v->findChild("this")->getVarPtr()->getUserData());
   auto children = thisNode->getChildren();
   int insertIndex = -1;
   if (children) {
@@ -217,24 +209,22 @@ $jsMethod(Node_replaceChild) {
   v->setReturnVar(newScriptVarUndefined(getState()));
 }
 $jsMethod(Node_insertBefore) {
-  validateContext<dom::CScriptVarNode>(v);
   $getNodeOfVariable(v->getArgument("node"));
   auto rnv = v->getArgument("refNode");
   if (rnv->isNull())
-    static_cast<dom::CScriptVarNodePtr>(v->findChild("this")->getVarPtr())->getNode()->addChild(n);
+    static_cast<idk*>(v->findChild("this")->getVarPtr()->getUserData())->addChild(n);
   else if (rnv->isObject())
-    static_cast<dom::CScriptVarNodePtr>(
-      v->findChild("this")->getVarPtr()
-    )->getNode()->insertBefore(
+    static_cast<idk*>(
+      v->findChild("this")->getVarPtr()->getUserData()
+    )->insertBefore(
       n, 
-      static_cast<CCNodeJSHooks*>(rnv->getUserData())
+      static_cast<idk*>(rnv->getUserData())
     );
 
   v->setReturnVar(newScriptVarUndefined(getState()));
 }
 
 $jsMethod(Node_contains) {
-  validateContext<dom::CScriptVarNode>(v);
   auto nodeVar = v->getArgument("node");
   if (nodeVar->isUndefined()) {
     v->throwError(ERROR_TYPES::Error, "node is required vro");
@@ -244,8 +234,8 @@ $jsMethod(Node_contains) {
     v->setReturnVar(newScriptVarBool(getState(), false));
     return;
   }
-  auto thisNode = static_cast<dom::CScriptVarNodePtr>(v->findChild("this")->getVarPtr())->getNode();
-  auto targetNode = static_cast<CCNodeJSHooks*>(nodeVar->getUserData());
+  auto thisNode = static_cast<idk*>(v->findChild("this")->getVarPtr()->getUserData());
+  auto targetNode = static_cast<idk*>(nodeVar->getUserData());
   if (thisNode == targetNode) {
     v->setReturnVar(newScriptVarBool(getState(), true));
     return;
@@ -271,8 +261,7 @@ $jsMethod(Node_contains) {
 }
 
 $jsMethod(Node_getRootNode) {
-  validateContext<dom::CScriptVarNode>(v);
-  auto thisNode = static_cast<dom::CScriptVarNodePtr>(v->findChild("this")->getVarPtr())->getNode();
+  auto thisNode = static_cast<idk*>(v->findChild("this")->getVarPtr()->getUserData());
 
   cocos2d::CCNode* lp = thisNode;
   cocos2d::CCNode* p = thisNode->getParent();
@@ -284,75 +273,44 @@ $jsMethod(Node_getRootNode) {
   returnNode(v, lp); return;
 }
 $jsMethod(Node_getChildById) {
-  validateContext<dom::CScriptVarNode>(v);
-  auto thisNode = static_cast<dom::CScriptVarNodePtr>(v->findChild("this")->getVarPtr());
+  auto thisNode = static_cast<idk*>(v->findChild("this")->getVarPtr()->getUserData());
   auto nodeId = v->getArgument("id")->toString();
 
-  auto node = thisNode->getNode()->getChildByID(nodeId);
+  auto node = thisNode->getChildByID(nodeId);
   if (node==nullptr) {
     v->throwError(Error, "No such child with ID \""+nodeId+"\"");
     return;
   }
 
-  return returnNode(v, node);
+  returnNode(v, node); return;
 }
 
 $jsMethod(Node_hasChildNodes) {
-  validateContext<dom::CScriptVarNode>(v);
   v->setReturnVar(
     newScriptVarBool(
       getState(),
-      static_cast<dom::CScriptVarNodePtr>(
-        v->findChild("this")->getVarPtr()
-      )->getNode()->getChildrenCount() != 0
+      static_cast<cocos2d::CCNode*>(
+        v->findChild("this")->getVarPtr()->getUserData()
+      )->getChildrenCount() != 0
     )
   );
 }
 #pragma endregion
 
-#pragma region CScriptVarNode
-CScriptVarPtr nodePrototype;
-
-namespace dom {
-  CScriptVarNode::CScriptVarNode(CTinyJS *Context, cocos2d::CCNode* node) 
-  : CScriptVarObject(Context, nodePrototype), node(node) {
-    addChild("childList", newScriptVarAccessor(Context, Node_childList_g,0,&nothing,0));
-    addChild("firstChild", newScriptVarAccessor(Context, Node_firstChild_g,0,&nothing,0));
-    addChild("isConnected", newScriptVarAccessor(Context, Node_isConnected_g,0,&nothing,0));
-    addChild("lastChild", newScriptVarAccessor(Context, Node_lastChild_g,0,&nothing,0));
-    addChild("nextSibling", newScriptVarAccessor(Context, Node_nextSibling_g,0,&nothing,0));
-    addChild("previousSibling", newScriptVarAccessor(Context, Node_previousSibling_g,0,&nothing,0));
-    addChild("textContent", newScriptVarAccessor(Context, Node_textContent_g,0,Node_textContent_s,0));
-  }
-
-  CScriptVarPtr CScriptVarNode::toString_CallBack(CScriptResult &execute, int radix) {
-    return newScriptVar(context, "node");
-  };
-  std::string CScriptVarNode::getParsableString(const std::string &indentString, const std::string &indent, uint32_t uniqueID, bool &hasRecursion) {
-    return "idk sorry";
-  };
-
-  void CScriptVarNode::signalRemoval() {
-    node = nullptr;
-  }
-};
-#pragma endregion
-
 extern "C" void registerDOMNodeObject() {
   auto s = getState();
   auto node = s->addNative("function Node()", new_Node,0,SCRIPTVARLINK_CONSTANT);
-  nodePrototype = node->findChild(TINYJS_PROTOTYPE_CLASS)->getVarPtr().getVar();
-  nodePrototype->addChild(TINYJS_CONSTRUCTOR_VAR, node, SCRIPTVARLINK_BUILDINDEFAULT);
+  auto proto = node->findChild(TINYJS_PROTOTYPE_CLASS)->getVarPtr();
+  proto->addChild(TINYJS_CONSTRUCTOR_VAR, node, SCRIPTVARLINK_BUILDINDEFAULT);
   {
-    /*
-    nodePrototype->addChild("childList", newScriptVarAccessor(s, Node_childList_g,0,&nothing,0));
-    nodePrototype->addChild("firstChild", newScriptVarAccessor(s, Node_firstChild_g,0,&nothing,0));
-    nodePrototype->addChild("isConnected", newScriptVarAccessor(s, Node_isConnected_g,0,&nothing,0));
-    nodePrototype->addChild("lastChild", newScriptVarAccessor(s, Node_lastChild_g,0,&nothing,0));
-    nodePrototype->addChild("nextSibling", newScriptVarAccessor(s, Node_nextSibling_g,0,&nothing,0));
-    nodePrototype->addChild("previousSibling", newScriptVarAccessor(s, Node_previousSibling_g,0,&nothing,0));
-    nodePrototype->addChild("textContent", newScriptVarAccessor(s, Node_textContent_g,0,Node_textContent_s,0));
-    */
+    proto->addChild("childList", newScriptVarAccessor(s, Node_childList_g,0,&nothing,0));
+    proto->addChild("firstChild", newScriptVarAccessor(s, Node_firstChild_g,0,&nothing,0));
+    proto->addChild("isConnected", newScriptVarAccessor(s, Node_isConnected_g,0,&nothing,0));
+    proto->addChild("lastChild", newScriptVarAccessor(s, Node_lastChild_g,0,&nothing,0));
+    proto->addChild("nextSibling", newScriptVarAccessor(s, Node_nextSibling_g,0,&nothing,0));
+    proto->addChild("previousSibling", newScriptVarAccessor(s, Node_previousSibling_g,0,&nothing,0));
+    proto->addChild("textContent", newScriptVarAccessor(s, Node_textContent_g,0,Node_textContent_s,0));
+
     s->addNative("function Node.prototype.appendChild(node)", Node_appendChild);
     s->addNative("function Node.prototype.contains(node)", Node_contains);
     s->addNative("function Node.prototype.getChildById(node, id)", Node_getChildById);
