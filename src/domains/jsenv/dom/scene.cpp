@@ -2,6 +2,7 @@
 #include <Geode/cocos/CCDirector.h>
 #include <Geode/modify/CCDirector.hpp>
 #include <chrono>
+#include "scene.hpp"
 
 std::chrono::milliseconds lastmod;
 using namespace cocos2d;
@@ -54,8 +55,7 @@ $jsMethod(Scene_lastModified_g) {
 $jsMethod(new_Scene) {
   auto state = getState();
   // creates a new one
-  auto obj = newScriptVar(state, Object, state->getRoot()->findChildByPath("Scene.prototype"));
-  obj->setUserData(CCDirector::sharedDirector()->getRunningScene());
+  auto obj = dom::newScriptVarScene(state);
   v->setReturnVar(obj);
 };
 
@@ -84,14 +84,40 @@ $jsMethod(Scene_exitFullscreen) {
 
 #pragma endregion
 
+#pragma region b
+
+CScriptVarPtr scenePrototype;
+
+namespace dom {
+  cocos2d::CCScene* lastRunningScene = nullptr;
+  CScriptVarScene::CScriptVarScene(CTinyJS *Context) 
+  : CScriptVarNode(Context, nullptr) {
+    addChildOrReplace(TINYJS___PROTO___VAR, scenePrototype);
+  }
+
+  CScriptVarPtr CScriptVarScene::toString_CallBack(CScriptResult &execute, int radix) {
+    return ::newScriptVar(context, "#document");
+  };
+
+  cocos2d::CCNode* CScriptVarScene::getNode() {
+    auto c = CCDirector::get()->getRunningScene();
+    if (dynamic_cast<cocos2d::CCTransitionScene*>(c) == nullptr) {
+      lastRunningScene = c;
+    }
+    return lastRunningScene;
+  }
+};
+#pragma endregion
+
+
 extern "C" void registerDOMSceneObject() {
   auto s = getState();
   auto node = s->addNative("function Scene()", new_Scene,0,SCRIPTVARLINK_CONSTANT);
-  auto proto = node->findChild(TINYJS_PROTOTYPE_CLASS)->getVarPtr();
-  proto->addChild(TINYJS_CONSTRUCTOR_VAR, node, SCRIPTVARLINK_BUILDINDEFAULT);
-  proto->addChildOrReplace(TINYJS___PROTO___VAR, s->getRoot()->findChildByPath("Node.prototype"));
+  scenePrototype = node->findChild(TINYJS_PROTOTYPE_CLASS)->getVarPtr();
+  scenePrototype->addChild(TINYJS_CONSTRUCTOR_VAR, node, SCRIPTVARLINK_BUILDINDEFAULT);
+  scenePrototype->addChildOrReplace(TINYJS___PROTO___VAR, s->getRoot()->findChildByPath("Node.prototype"));
   {
-    proto->addChild("fullscreenEnabled", newScriptVarAccessor(s, Scene_fullscreenEnabled_g, 0, nothing, 0));
+    scenePrototype->addChild("fullscreenEnabled", newScriptVarAccessor(s, Scene_fullscreenEnabled_g, 0, nothing, 0));
 
     s->addNative("function Scene.prototype.requestFullscreen(scene, borderless)", Scene_requestFullscreen);
     s->addNative("function Scene.prototype.exitFullscreen(scene, borderless)", Scene_exitFullscreen);

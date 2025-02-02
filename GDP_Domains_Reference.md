@@ -7,7 +7,6 @@ This .md file is generated from protocols.json so it's guaranteed to match with 
 
 > **Note** most of this docs will sound similar to the docs from the aforementioned protocol and it's intended. Don't ask anything about that.
 
-
 <style type="text/css">
   tbody>tr>td:first-child {text-align: right}
 </style>
@@ -65,6 +64,18 @@ objects, can be used for automation.
 entire subtree or provide an integer larger than 0.</td>
   </tr>
 </tbody>
+
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>node</code></td>
+    <td><strong><a href="#domnode">Node</a></strong><br>Node description.</td>
+  </tr>
+</tbody>
 </table>
 
 ### DOM.`disable`
@@ -92,6 +103,18 @@ Get a node's attribute.
     <td><strong>string</strong><br>The attribute's name</td>
   </tr>
 </tbody>
+
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>value</code></td>
+    <td><strong>any</strong><br>The attribute's value</td>
+  </tr>
+</tbody>
 </table>
 
 ### DOM.`getAttributes`
@@ -107,6 +130,18 @@ Returns attributes for the specified node.
   <tr>
     <td><code>nodeId</code></td>
     <td><strong><a href="#domnodeid">NodeId</a></strong><br>The target node's ID</td>
+  </tr>
+</tbody>
+
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>attributes</code></td>
+    <td><strong>object</strong><br>The node's attributes</td>
   </tr>
 </tbody>
 </table>
@@ -126,6 +161,18 @@ Returns attributes for the specified node.
     <td><strong><a href="#domnodeid">NodeId</a></strong><br>The target node's ID</td>
   </tr>
 </tbody>
+
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>model</code></td>
+    <td><strong><a href="#domboxmodel">BoxModel</a></strong></td>
+  </tr>
+</tbody>
 </table>
 
 ### DOM.`getDocument`
@@ -142,6 +189,18 @@ Implicitly enables the DOM domain events for the current target.
   <tr>
     <td><code>depth</code><br>(optional)</td>
     <td><strong>integer</strong><br>The maximum depth at which children should be retrieved, defaults to 1. Use -1 for the entire subtree or provide an integer larger than 0.</td>
+  </tr>
+</tbody>
+
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>root</code></td>
+    <td><strong><a href="#domnode">Node</a></strong></td>
   </tr>
 </tbody>
 </table>
@@ -163,6 +222,18 @@ Returns node id at given location. Depending on whether DOM domain is enabled, n
   <tr>
     <td><code>y</code></td>
     <td><strong>integer</strong><br>Y coordinate.</td>
+  </tr>
+</tbody>
+
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong></td>
   </tr>
 </tbody>
 </table>
@@ -207,6 +278,18 @@ Executes querySelector on a given node.
     <td><strong>string</strong><br>Selector string</td>
   </tr>
 </tbody>
+
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>result</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong></td>
+  </tr>
+</tbody>
 </table>
 
 ### DOM.`removeAttribute`
@@ -243,6 +326,64 @@ Removes node with given id.
   <tr>
     <td><code>nodeId</code></td>
     <td><strong><a href="#domnodeid">NodeId</a></strong><br>Id of the node to remove.</td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.`requestNode`
+Requests that the node is sent to the caller given the JavaScript node object reference.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>objectId</code></td>
+    <td><strong>string</strong><br>JavaScript object id to convert into node.</td>
+  </tr>
+</tbody>
+
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong><br>Node id for given object.</td>
+  </tr>
+</tbody>
+</table>
+
+### DOM.`resolveNode`
+Resolves the JavaScript node object for a given NodeId.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>nodeId</code></td>
+    <td><strong><a href="#domnodeid">NodeId</a></strong><br>Id of the node to resolve.</td>
+  </tr>
+</tbody>
+
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>object</code></td>
+    <td><strong><a href="#runtimeremoteobject">Runtime.RemoteObject</a></strong><br>JavaScript object wrapper for given node.</td>
   </tr>
 </tbody>
 </table>
@@ -439,7 +580,8 @@ fire DOM events for nodes known to the client.</td>
   </tr>
   <tr>
     <td><code>nodeType</code></td>
-    <td><strong>integer</strong><br>`Node`'s nodeType.</td>
+    <td><strong>integer</strong><br>`Node`'s nodeType.
+Mods can override this property by setting the `puppeteer/nodeTypeOverride` user object to a CCString of a valid node type.</td>
   </tr>
   <tr>
     <td><code>childNodeCount</code><br>(optional)</td>
@@ -520,6 +662,18 @@ Get a local list.
     <td><strong>boolean</strong><br>Bundle the levels with the response. Defaults to false.</td>
   </tr>
 </tbody>
+
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>list</code></td>
+    <td><strong><a href="#levellevellist">LevelList</a></strong></td>
+  </tr>
+</tbody>
 </table>
 
 ### Level.`getLevel`
@@ -541,6 +695,18 @@ Get a locally saved level, either created level or saved level.
     <td><strong><a href="#levelleveltype">LevelType</a></strong><br>The level type.</td>
   </tr>
 </tbody>
+
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>level</code></td>
+    <td><strong><a href="#levellevel">Level</a></strong></td>
+  </tr>
+</tbody>
 </table>
 
 ### Level.`getLevels`
@@ -557,6 +723,18 @@ To get levels from a list, use [getList](method:Level.getList) instead
   <tr>
     <td><code>page</code><br>(optional)</td>
     <td><strong>integer</strong><br>The page to retrieve the list from. Leave empty to fetch all of them</td>
+  </tr>
+</tbody>
+
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>levels</code></td>
+    <td><strong>array</strong></td>
   </tr>
 </tbody>
 </table>
@@ -599,6 +777,40 @@ Create a new local level.
   <tr>
     <td><code>description</code><br>(optional)</td>
     <td><strong>string</strong><br>The level description.</td>
+  </tr>
+</tbody>
+</table>
+
+### Level.`updateLevel`
+Update a local level info.
+All fields in the info is optional, and some fields will be ignored.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>id</code></td>
+    <td><strong>integer</strong><br>The level ID.</td>
+  </tr>
+  <tr>
+    <td><code>info</code></td>
+    <td><strong><a href="#levellevel">Level</a></strong><br>The updated level info. Unspecified fields will be left unchanged.</td>
+  </tr>
+</tbody>
+
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>info</code></td>
+    <td><strong><a href="#levellevel">Level</a></strong><br>The exact same level info with updated information.</td>
   </tr>
 </tbody>
 </table>
@@ -808,6 +1020,18 @@ Get non-custom(?) settings values
     <td><strong>array</strong><br>Limits return values to these keys</td>
   </tr>
 </tbody>
+
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>data</code></td>
+    <td><strong>object</strong></td>
+  </tr>
+</tbody>
 </table>
 
 ### Mod.`setSettings`
@@ -848,8 +1072,44 @@ Restart game gracefully.
 ### Game.`getVersion`
 Returns version information.
 
+<table>
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>protocolVersion</code></td>
+    <td><strong>array</strong><br>This mod's version in the style of `[major, minor, patch]`</td>
+  </tr>
+  <tr>
+    <td><code>loaderVersion</code></td>
+    <td><strong>array</strong><br>Geode version in the style of `[major, minor, patch]`</td>
+  </tr>
+  <tr>
+    <td><code>gameVersion</code></td>
+    <td><strong>string</strong><br>Geometry Dash version.</td>
+  </tr>
+</tbody>
+</table>
+
 ### Game.`getWindowBounds`
 Get position and size of the game window.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>bounds</code></td>
+    <td><strong><a href="#gamebounds">Bounds</a></strong></td>
+  </tr>
+</tbody>
+</table>
 
 ### Game.`getWindowBounds`
 Set position and/or size of the game window.
@@ -1021,6 +1281,18 @@ Enables Network agent.
     <td><strong>integer</strong></td>
   </tr>
 </tbody>
+
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>postData</code></td>
+    <td><strong>string</strong><br>Request body string</td>
+  </tr>
+</tbody>
 </table>
 
 
@@ -1043,6 +1315,119 @@ Evaluate the given JavaScript expression.
     <td><strong>string</strong></td>
   </tr>
 </tbody>
+
+<thead>
+<tr>
+<th colspan="2">Return Values</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>idk</code></td>
+    <td><strong>object</strong></td>
+  </tr>
+</tbody>
+</table>
+
+## Types
+### Runtime.`ObjectType`
+
+
+### Runtime.`ObjectSubtype`
+
+
+### Runtime.`PropertyPreview`
+Even smaller.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Properties</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>type</code></td>
+    <td><strong><a href="#runtimeobjecttype">ObjectType</a></strong><br>Object type.</td>
+  </tr>
+  <tr>
+    <td><code>subtype</code><br>(optional)</td>
+    <td><strong><a href="#runtimeobjectsubtype">ObjectSubtype</a></strong><br>Object subtype hint. Specified for object type `values` only.</td>
+  </tr>
+  <tr>
+    <td><code>value</code><br>(optional)</td>
+    <td><strong>string</strong><br>User-friendly property value string.</td>
+  </tr>
+  <tr>
+    <td><code>preview</code><br>(optional)</td>
+    <td><strong><a href="#runtimeobjectpreview">ObjectPreview</a></strong><br>Nested value preview.</td>
+  </tr>
+</tbody>
+</thead>
+</table>
+
+### Runtime.`ObjectPreview`
+Object containing abbreviated remote object value.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Properties</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>type</code></td>
+    <td><strong><a href="#runtimeobjecttype">ObjectType</a></strong><br>Object type.</td>
+  </tr>
+  <tr>
+    <td><code>subtype</code><br>(optional)</td>
+    <td><strong><a href="#runtimeobjectsubtype">ObjectSubtype</a></strong><br>Object subtype hint. Specified for object type `values` only.</td>
+  </tr>
+  <tr>
+    <td><code>description</code><br>(optional)</td>
+    <td><strong>string</strong><br>String representation of the object.</td>
+  </tr>
+  <tr>
+    <td><code>properties</code></td>
+    <td><strong>array</strong><br>List of the properties.</td>
+  </tr>
+</tbody>
+</thead>
+</table>
+
+### Runtime.`RemoteObject`
+Mirror object referencing original JavaScript object.
+
+<table>
+<thead>
+<tr>
+<th colspan="2">Properties</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>type</code></td>
+    <td><strong><a href="#runtimeobjecttype">ObjectType</a></strong><br>Object type.</td>
+  </tr>
+  <tr>
+    <td><code>subtype</code><br>(optional)</td>
+    <td><strong><a href="#runtimeobjectsubype">ObjectSubype</a></strong><br>Object subtype hint. Specified for object type `values` only.</td>
+  </tr>
+  <tr>
+    <td><code>value</code><br>(optional)</td>
+    <td><strong>any</strong><br>Remote object value in case of primitive values or JSON values (if it was requested).</td>
+  </tr>
+  <tr>
+    <td><code>objectId</code><br>(optional)</td>
+    <td><strong>string</strong><br>Unique object identifier (for non-primitive values).</td>
+  </tr>
+  <tr>
+    <td><code>preview</code><br>(optional)</td>
+    <td><strong><a href="#runtimeobjectpreview">ObjectPreview</a></strong><br>Preview containing abbreviated property values. Specified for object type values only.</td>
+  </tr>
+</tbody>
+</thead>
 </table>
 
 

@@ -197,6 +197,24 @@ domain DOM
       # Id of the node to remove.
       NodeId nodeId
   
+  # Requests that the node is sent to the caller given the JavaScript node object reference.
+  command requestNode
+    parameters
+      # JavaScript object id to convert into node.
+      string objectId
+    returns
+      # Node id for given object.
+      NodeId nodeId
+
+  # Resolves the JavaScript node object for a given NodeId.
+  command resolveNode
+    parameters
+      # Id of the node to resolve.
+      NodeId nodeId
+    returns
+      # JavaScript object wrapper for given node.
+      Runtime.RemoteObject object
+
   # Sets attribute for an element with given id.
   command setAttribute
     parameters
@@ -278,7 +296,8 @@ domain Level
       # The updated level info. Unspecified fields will be left unchanged.
       Level info
     returns
-      Level 
+      # The exact same level info with updated information.
+      Level info
 
   # Fired when a new list was created
   event listCreated
@@ -484,3 +503,64 @@ domain Runtime
       string expression
     returns
       object idk
+  
+  type ObjectType extends string
+    enum
+      object
+      function
+      undefined
+      string
+      number
+      boolean
+      symbol
+      bigint
+  type ObjectSubtype extends string
+    enum
+      array
+      null
+      node
+      regexp
+      iterator
+      generator
+      error
+
+  # Even smaller.
+  type PropertyPreview extends object
+    properties
+      # Object type.
+      ObjectType type
+      # Object subtype hint. Specified for object type `values` only.
+      optional ObjectSubtype subtype
+      # User-friendly property value string.
+      optional string value
+      # Nested value preview.
+      optional ObjectPreview preview
+
+  # Object containing abbreviated remote object value.
+  type ObjectPreview extends object
+    properties
+      # Object type.
+      ObjectType type
+      # Object subtype hint. Specified for object type `values` only.
+      optional ObjectSubtype subtype
+        
+      # String representation of the object.
+      optional string description
+      # List of the properties.
+      array of PropertyPreview properties
+
+  # Mirror object referencing original JavaScript object.
+  type RemoteObject extends object
+    properties
+      # Object type.
+      ObjectType type
+        
+      # Object subtype hint. Specified for object type `values` only.
+      optional ObjectSubype subtype
+        
+      # Remote object value in case of primitive values or JSON values (if it was requested).
+      optional any value
+      # Unique object identifier (for non-primitive values).
+      optional string objectId
+      # Preview containing abbreviated property values. Specified for object type values only.
+      optional ObjectPreview preview

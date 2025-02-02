@@ -1401,11 +1401,12 @@ define_dummy_t(Object);
 define_ScriptVarPtr_Type(Object);
 
 class CScriptVarObject : public CScriptVar {
+	void setObjectId();
 protected:
 	CScriptVarObject(CTinyJS *Context);
-	CScriptVarObject(CTinyJS *Context, const CScriptVarPtr &Prototype) : CScriptVar(Context, Prototype) {}
-	CScriptVarObject(CTinyJS *Context, const CScriptVarPrimitivePtr &Value, const CScriptVarPtr &Prototype) : CScriptVar(Context, Prototype), value(Value) {}
-	CScriptVarObject(const CScriptVarObject &Copy) : CScriptVar(Copy) {} ///< Copy protected -> use clone for public
+	CScriptVarObject(CTinyJS *Context, const CScriptVarPtr &Prototype) : CScriptVar(Context, Prototype) {setObjectId();}
+	CScriptVarObject(CTinyJS *Context, const CScriptVarPrimitivePtr &Value, const CScriptVarPtr &Prototype) : CScriptVar(Context, Prototype), value(Value) {setObjectId();}
+	CScriptVarObject(const CScriptVarObject &Copy) : CScriptVar(Copy) {setObjectId();} ///< Copy protected -> use clone for public
 public:
 	virtual ~CScriptVarObject();
 	virtual CScriptVarPtr clone();
@@ -1423,8 +1424,10 @@ public:
 	virtual CScriptVarPtr valueOf_CallBack();
 	virtual CScriptVarPtr toString_CallBack(CScriptResult &execute, int radix=0);
 	virtual void setTemporaryMark_recursive(uint32_t ID);
+	std::string const& getObjectId();
 protected:
 private:
+	std::string objectId;
 	CScriptVarPrimitivePtr value;
 	friend define_newScriptVar_Fnc(Object, CTinyJS *Context, Object_t);
 	friend define_newScriptVar_Fnc(Object, CTinyJS *Context, Object_t, const CScriptVarPtr &);

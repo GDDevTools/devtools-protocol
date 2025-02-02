@@ -55,7 +55,7 @@ class Domain(TypedDict,total=False):
 
 primitiveTypes = ['integer', 'number', 'boolean', 'string', 'object',
                   'any', 'array', 'binary']
-def genPropTable(p: ObjectProps):
+def genPropTable(d: str, p: ObjectProps):
     t = ""
     primitive = True
     if "type" in p:
@@ -66,7 +66,7 @@ def genPropTable(p: ObjectProps):
     return f"""
   <tr>
     <td><code>{p['name']}</code>{"<br>(optional)" if p.get('optional', False) else ""}</td>
-    <td><strong>{t if primitive else f'<a href="#{d.lower() if "." not in t else ""}{t.lower()}">{t}</a>'}</strong>{"<br>"+p['description'] if "description" in p else ""}{f"<br>Allowed Values: <code>{', '.join(p.get("enums",[]))}</code>" if t == "string" and len(p.get("enums",[])) != 0 else ""}</td>
+    <td><strong>{t if primitive else f'<a href="#{d.lower() if "." not in t else ""}{t.replace(".","").lower()}">{t}</a>'}</strong>{"<br>"+p['description'] if "description" in p else ""}{f"<br>Allowed Values: <code>{', '.join(p.get("enums",[]))}</code>" if t == "string" and len(p.get("enums",[])) != 0 else ""}</td>
   </tr>"""
 
 def genTypeDocTable(d: str, cmd: Type):
@@ -85,7 +85,7 @@ def genTypeDocTable(d: str, cmd: Type):
 </thead>
 <tbody>"""
         for p in properties:
-            doc+=genPropTable(p)
+            doc+=genPropTable(d,p)
         doc+="\n</tbody>\n</thead>\n</table>\n\n"
     return doc
 def genPropsTable(d: str, cmd: Event):
@@ -94,7 +94,7 @@ def genPropsTable(d: str, cmd: Event):
 
 """
     parameters = cmd.get("parameters")
-    ret = cmd.get("returnValue")
+    ret = cmd.get("returns")
     if (parameters != None or ret != None):
         doc+="<table>"
         if (parameters!=None):
@@ -106,7 +106,7 @@ def genPropsTable(d: str, cmd: Event):
 </thead>
 <tbody>"""
             for p in parameters:
-                doc+=genPropTable(p)
+                doc+=genPropTable(d, p)
             doc+="\n</tbody>\n"
         if (ret!=None):
             doc+="""
@@ -117,7 +117,7 @@ def genPropsTable(d: str, cmd: Event):
 </thead>
 <tbody>"""
             for r in ret:
-                doc+=genPropTable(r)
+                doc+=genPropTable(d, r)
             doc+="\n</tbody>\n"
         doc+="</table>\n\n"
     return doc

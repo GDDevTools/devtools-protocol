@@ -1,5 +1,6 @@
 #include <Geode/utils/cocos.hpp>
 #include "../WS.hpp"
+#include "Runtime.hpp"
 #include <matjson.hpp>
 #include <Geode/Geode.hpp>
 #include <queue>
@@ -490,6 +491,42 @@ $domainMethod(removeNode) {
   return emptyResponse();
 }
 
+#include "jsenv/state.hpp"
+#include "jsenv/dom/node.hpp"
+$domainAsyncMethod(requestNode) {
+  std::string objectId = params["objectId"].asString().unwrapOr("");
+  if (objectId.empty()) return finish(errors::invalidParameter("No, you won't get anything from that kind of id."));
+
+  geode::queueInMainThread([objectId, finish]{
+    CScriptVar* o = getState()->first;
+    while (o) {
+      if (auto node = dynamic_cast<dom::CScriptVarNode*>(o)) {
+        finish(geode::Ok(matjson::makeObject({
+          {"nodeId", nodeIdOf(node->getNode())}
+        })));
+      }
+      o = o->next;
+    }
+    return finish(errors::invalidParameter("No node with the specified ID was found."));
+  });
+}
+$domainMethod(resolveNode) {
+  auto nodeIdRes = params["nodeId"].asInt();
+  if (nodeIdRes.isOk()) {
+    int nodeId = nodeIdRes.unwrap();
+
+    auto node = getNodeAt(nodeId);
+    
+    if (node) return errors::invalidParameter("No node with the specified ID was found.");
+
+    return geode::Ok(matjson::makeObject({
+      {"object", serializeRemoteObject(getAssociatedJSObject(node))}
+    }));
+  } else {
+    return errors::invalidParameter("What are you looking for?");
+  }
+}
+
 CCObject* cocosObjOf(matjson::Value& val) {
   if (val.isNull()) return nullptr;
   else if (val.isArray()) {
@@ -538,8 +575,10 @@ $execute {
   p->registerFunction("DOM.getDocument", &getDocument);
   p->registerFunction("DOM.getNodeForLocation", &getNodeForLocation, {"nodeId", "x", "y"});
   p->registerFunction("DOM.moveTo", &moveTo, {"nodeId","targetNodeId"});
-  p->registerFunction("DOM.removeNode", &removeNode, {"nodeId"});
   p->registerFunction("DOM.querySelector", &querySelector, {"nodeId","selector"});
+  p->registerFunction("DOM.removeNode", &removeNode, {"nodeId"});
+  p->registerFunction("DOM.requestNode", &requestNode, {"objectId"});
+  p->registerFunction("DOM.resolveNode", &resolveNode, {"nodeId"});
   p->registerFunction("DOM.removeAttribute", &removeAttribute, {"nodeId","name"});
   p->registerFunction("DOM.setAttribute", &setAttribute, {"nodeId","name","value"});
 }

@@ -9,21 +9,29 @@
 #include "node.hpp"
 
 #include <Geode/modify/CCNode.hpp>
-
-struct CCNodeJSHooks::Fields{
-  bool retainedByJS = false;
-  dom::CScriptVarNode* associatedJSObject = nullptr;
-};
-void CCNodeJSHooks::release() {
-  if (m_uReference == 1) {
-    m_fields->associatedJSObject->signalRemoval();
+struct CCNodeJSHooks : geode::Modify<CCNodeJSHooks, cocos2d::CCNode> {
+  struct Fields {
+    bool jsSetup = false;
+    dom::CScriptVarNodePtr associatedJSObject;
+  };
+  void release() {
+    if (m_uReference == 1) {
+      m_fields->associatedJSObject->signalRemoval();
+    }
+    cocos2d::CCNode::release();
   }
-  cocos2d::CCNode::release();
-}
+  void setParent(cocos2d::CCNode* parent);
+};
 void CCNodeJSHooks::setParent(cocos2d::CCNode* parent) {
   cocos2d::CCNode::setParent(parent);
-  m_fields->associatedJSObject = new dom::CScriptVarNode(getState(), this);
+  if (!m_fields->jsSetup) {
+    m_fields->associatedJSObject = dom::newScriptVarNode(getState(), this);
+    m_fields->jsSetup = true;
+  }
 }
+CScriptVar* getAssociatedJSObject(cocos2d::CCNode* node) {
+  return static_cast<CCNodeJSHooks*>(node)->m_fields->associatedJSObject.getVar();
+};
 
 /*
 ! ===========================================================================================
@@ -36,7 +44,7 @@ static void finalize_Node(CScriptVar* v) {
 */
 
 static void returnNode(CFunctionsScopePtr const& v, cocos2d::CCNode* n) {
-  v->setUserData(static_cast<CCNodeJSHooks*>(n)->m_fields->associatedJSObject);
+  v->setReturnVar(static_cast<CCNodeJSHooks*>(n)->m_fields->associatedJSObject);
 }
 //////
 /// Properties
@@ -163,9 +171,6 @@ $jsMethod(new_Node) {
   cocos2d::CCNode* n;
   // creates a new one
   n = cocos2d::CCNode::create();
-  // keep it until this object gets removed
-  n->retain();
-  static_cast<CCNodeJSHooks*>(n)->m_fields->retainedByJS = true;
   auto obj = newScriptVar(getState(), Object,getState()->getRoot()->findChildByPath("Node.prototype"));
   obj->setUserData(n);
 };
@@ -326,7 +331,7 @@ namespace dom {
   }
 
   CScriptVarPtr CScriptVarNode::toString_CallBack(CScriptResult &execute, int radix) {
-    return newScriptVar(context, "node");
+    return ::newScriptVar(context, "node");
   };
   std::string CScriptVarNode::getParsableString(const std::string &indentString, const std::string &indent, uint32_t uniqueID, bool &hasRecursion) {
     return "idk sorry";
@@ -335,6 +340,10 @@ namespace dom {
   void CScriptVarNode::signalRemoval() {
     node = nullptr;
   }
+  CScriptVarNode::~CScriptVarNode() {
+    // ? should i remove the node if this got destroyed ?
+  };
+
 };
 #pragma endregion
 

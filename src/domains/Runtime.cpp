@@ -8,10 +8,10 @@
 #include "external/tinyjs/TinyJS.hpp"
 #include "jsenv/console.hpp"
 #include "jsenv/state.hpp"
+#include "Runtime.hpp"
 #undef inline
 
-std::string descriptionFor(CScriptVarLink* link) {
-  CScriptVar* var = link->getVarPtr().getVar();
+std::string descriptionFor(CScriptVar* var) {
   if (var->isObject()) {
     CScriptResult amogus;
     auto g = 
@@ -51,20 +51,21 @@ matjson::Value serializePreview(CScriptVar* val) {
   return ret;
 }
 
-matjson::Value serializeObjectPreview(CScriptVarLink* val);
-matjson::Value serializePropertyPreview(CScriptVarLink* val) {
+matjson::Value serializeObjectPreview(CScriptVar* val);
+matjson::Value serializePropertyPreview(CScriptVarLink* link) {
   /*
   
   */
-  auto ret = serializePreview(val->getVarPtr().getVar());
-  ret["name"] = val->getName();
+  auto val = link->getVarPtr().getVar();
+  auto ret = serializePreview(val);
+  ret["name"] = link->getName();
   // check if subtype exists before comparing or else it will create a new object under that property
-  if (val->getVarPtr()->isObject()) {
+  if (val->isObject()) {
     if (
       !ret.contains("subtype")  // doesnt have a subtype hint (custom class or just object)
       //ret["subtype"].asString().unwrapOr("").empty()
       ||                            // or
-      val->getVarPtr()->isArray()   // does have a subtype hint and is array (for now)
+      val->isArray()   // does have a subtype hint and is array (for now)
     )
     ret["valuePreview"] = serializeObjectPreview(val);
   }
@@ -72,8 +73,7 @@ matjson::Value serializePropertyPreview(CScriptVarLink* val) {
   return ret;
 }
 
-matjson::Value serializeObjectPreview(CScriptVarLink* link) {
-  auto val = link->getVarPtr().getVar();
+matjson::Value serializeObjectPreview(CScriptVar* val) {
   auto ret = serializePreview(val);
   if (val->isObject() && !val->isFunction()) {
     std::vector<matjson::Value> props;
@@ -86,16 +86,16 @@ matjson::Value serializeObjectPreview(CScriptVarLink* link) {
     }
     ret["properties"] = props;
   }
-  auto desc = descriptionFor(link);
+  auto desc = descriptionFor(val);
   if (!desc.empty()) ret["description"] = desc;
 
   return ret;
 }
 
-matjson::Value serializeRemoteObject(CScriptVarLink* val) {
+matjson::Value serializeRemoteObject(CScriptVar* val) {
   matjson::Value value;
   matjson::Value preview;
-  auto ret = serializePreview(val->getVarPtr().getVar());
+  auto ret = serializePreview(val);
   std::string type = ret["type"].asString().unwrap();
   preview = serializeObjectPreview(val);
   if (false) {}
@@ -109,6 +109,7 @@ matjson::Value serializeRemoteObject(CScriptVarLink* val) {
   } else if (type != "undefined") {
     ret["value"] = value;
   }
+  if (val->isObject()) ret["objectId"] = static_cast<CScriptVarObject*>(val)->getObjectId();
   return ret;
 }
 /*
@@ -174,7 +175,7 @@ $domainAsyncMethod(evaluate) {
     #endif
     try {
       auto ret = s->evaluateComplex(params["expression"].asString().unwrapOr("").c_str());
-      finish(geode::Ok(serializeRemoteObject(ret.getVar())));
+      finish(geode::Ok(serializeRemoteObject(ret->getVarPtr().getVar())));
     } catch (CScriptException* e) {
       geode::log::logImpl(geode::Severity::Error, theFakeJSMod(), "[JavaScript]: {}: {}", error_type_enum_name[e->errorType], e->message);
       finish(errors::internalError(fmt::format("{}: {}", error_type_enum_name[e->errorType], e->message)));

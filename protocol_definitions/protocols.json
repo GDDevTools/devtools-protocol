@@ -137,7 +137,7 @@
             },
             {
               "name": "nodeType",
-              "description": "`Node`'s nodeType.",
+              "description": "`Node`'s nodeType.\nMods can override this property by setting the `puppeteer/nodeTypeOverride` user object to a CCString of a valid node type.",
               "type": "integer"
             },
             {
@@ -369,6 +369,42 @@
           ]
         },
         {
+          "name": "requestNode",
+          "description": "Requests that the node is sent to the caller given the JavaScript node object reference.",
+          "parameters": [
+            {
+              "name": "objectId",
+              "description": "JavaScript object id to convert into node.",
+              "type": "string"
+            }
+          ],
+          "returns": [
+            {
+              "name": "nodeId",
+              "description": "Node id for given object.",
+              "$ref": "NodeId"
+            }
+          ]
+        },
+        {
+          "name": "resolveNode",
+          "description": "Resolves the JavaScript node object for a given NodeId.",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "description": "Id of the node to resolve.",
+              "$ref": "NodeId"
+            }
+          ],
+          "returns": [
+            {
+              "name": "object",
+              "description": "JavaScript object wrapper for given node.",
+              "$ref": "Runtime.RemoteObject"
+            }
+          ]
+        },
+        {
           "name": "setAttribute",
           "description": "Sets attribute for an element with given id.",
           "parameters": [
@@ -525,6 +561,29 @@
               "description": "The level description.",
               "optional": true,
               "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "updateLevel",
+          "description": "Update a local level info.\nAll fields in the info is optional, and some fields will be ignored.",
+          "parameters": [
+            {
+              "name": "id",
+              "description": "The level ID.",
+              "type": "integer"
+            },
+            {
+              "name": "info",
+              "description": "The updated level info. Unspecified fields will be left unchanged.",
+              "$ref": "Level"
+            }
+          ],
+          "returns": [
+            {
+              "name": "info",
+              "description": "The exact same level info with updated information.",
+              "$ref": "Level"
             }
           ]
         }
@@ -974,6 +1033,133 @@
             {
               "name": "idk",
               "type": "object"
+            }
+          ]
+        }
+      ],
+      "types": [
+        {
+          "id": "ObjectType",
+          "type": "string",
+          "enum": [
+            "object",
+            "function",
+            "undefined",
+            "string",
+            "number",
+            "boolean",
+            "symbol",
+            "bigint"
+          ]
+        },
+        {
+          "id": "ObjectSubtype",
+          "type": "string",
+          "enum": [
+            "array",
+            "null",
+            "node",
+            "regexp",
+            "iterator",
+            "generator",
+            "error"
+          ]
+        },
+        {
+          "id": "PropertyPreview",
+          "description": "Even smaller.",
+          "type": "object",
+          "properties": [
+            {
+              "name": "type",
+              "description": "Object type.",
+              "$ref": "ObjectType"
+            },
+            {
+              "name": "subtype",
+              "description": "Object subtype hint. Specified for object type `values` only.",
+              "optional": true,
+              "$ref": "ObjectSubtype"
+            },
+            {
+              "name": "value",
+              "description": "User-friendly property value string.",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "preview",
+              "description": "Nested value preview.",
+              "optional": true,
+              "$ref": "ObjectPreview"
+            }
+          ]
+        },
+        {
+          "id": "ObjectPreview",
+          "description": "Object containing abbreviated remote object value.",
+          "type": "object",
+          "properties": [
+            {
+              "name": "type",
+              "description": "Object type.",
+              "$ref": "ObjectType"
+            },
+            {
+              "name": "subtype",
+              "description": "Object subtype hint. Specified for object type `values` only.",
+              "optional": true,
+              "$ref": "ObjectSubtype"
+            },
+            {
+              "name": "description",
+              "description": "String representation of the object.",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "properties",
+              "description": "List of the properties.",
+              "type": "array",
+              "items": {
+                "$ref": "PropertyPreview"
+              }
+            }
+          ]
+        },
+        {
+          "id": "RemoteObject",
+          "description": "Mirror object referencing original JavaScript object.",
+          "type": "object",
+          "properties": [
+            {
+              "name": "type",
+              "description": "Object type.",
+              "$ref": "ObjectType"
+            },
+            {
+              "name": "subtype",
+              "description": "Object subtype hint. Specified for object type `values` only.",
+              "optional": true,
+              "$ref": "ObjectSubype"
+            },
+            {
+              "name": "value",
+              "description": "Remote object value in case of primitive values or JSON values (if it was requested).",
+              "optional": true,
+              "type": "any"
+            },
+            {
+              "name": "objectId",
+              "description": "Unique object identifier (for non-primitive values).",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "preview",
+              "description": "Preview containing abbreviated property values. Specified for object type values only.",
+              "optional": true,
+              "$ref": "ObjectPreview"
             }
           ]
         }
