@@ -7,7 +7,7 @@
     "name": "GD DevTools Protocol",
     "version": "v0.9.7",
     "developer": "Henry Spheria",
-    "description": "fake cocos python bindings' backend",
+    "description": "scriptkiddie's goto for geode python",
     "links": {
         "source":"https://github.com/HenrySck075/gd-devtools-protocol"
     },

@@ -25,7 +25,15 @@ bool Protocol::init() {
   // TODO: this only allows for 1 singular server instance to run
   auto idk = matjson::parse(g).unwrap();
   for (auto& d : idk["domains"].asArray().unwrap()) {
-    domainsList.push_back(d["domain"].asString().unwrap());
+    std::vector<matjson::Value> g;
+    bool containsAgentToggleMethod = false;
+    for (auto& m : d["methods"].asArray().unwrapOr(g)) {
+      if (m["name"] == "disable" || m["name"] == "enable") {
+        containsAgentToggleMethod = true;
+        break;
+      }
+    };
+    if (containsAgentToggleMethod) domainsList.push_back(d["domain"].asString().unwrap());
   }
   ws = new ix::WebSocketServer(1412,"127.0.0.1");
 

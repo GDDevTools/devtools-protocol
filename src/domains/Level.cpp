@@ -200,9 +200,11 @@ $domainMethod(updateLevel) {
 }
 
 $domainMethod(disableLevel) {
+  info.setDomainEnabled("Level", false);
   return emptyResponse();
 };
 $domainMethod(enableLevel) {
+  info.setDomainEnabled("Level", false);
   return emptyResponse();
 };
 

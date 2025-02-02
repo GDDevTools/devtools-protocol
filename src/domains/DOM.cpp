@@ -325,9 +325,11 @@ $domainMethod(describeNode) {
   }
 }
 $domainMethod(disableDOM) {
+  info.setDomainEnabled("DOM", false);
   return emptyResponse();
 }
 $domainMethod(enableDOM) {
+  info.setDomainEnabled("DOM", true);
   return emptyResponse();
 }
 $domainMethod(getAttributes) {

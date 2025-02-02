@@ -2,22 +2,34 @@
 #include <Geode/Geode.hpp>
 #include <matjson.hpp>
 
+#define typeinfo_cast_prelude = geode::cast::typeinfo_cast;
+bool isBrewingSomething() {
+  auto scene = cocos2d::CCDirector::get()->getRunningScene();
+  return 
+    scene->getChildByType<EditLevelLayer>(0) ||
+    scene->getChildByType<LevelEditorLayer>(0) ||
+    scene->getChildByType<PlayLayer>(0);
+}
+
 $domainMethod(closeGame) {
-  geode::queueInMainThread([]{
-    geode::utils::game::exit();
-  });
+  if (!isBrewingSomething())
+    geode::queueInMainThread([]{
+      geode::utils::game::exit();
+    });
   return emptyResponse();
 };
 $domainMethod(crash) {
-  geode::queueInMainThread([]{
-    throw std::runtime_error("Manually initiated crash");
-  });
+  if (!isBrewingSomething())
+    geode::queueInMainThread([]{
+      throw std::runtime_error("Manually initiated crash");
+    });
   return emptyResponse();
 };
 $domainMethod(restart) {
-  geode::queueInMainThread([]{
-    geode::utils::game::restart();
-  });
+  if (!isBrewingSomething())
+    geode::queueInMainThread([]{
+      geode::utils::game::restart();
+    });
   return emptyResponse();
 };
 $domainMethod(getVersion) {

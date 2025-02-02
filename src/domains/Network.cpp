@@ -218,11 +218,13 @@ $execute {
 */
 
 $domainMethod(disableNetwork) {
+  info.setDomainEnabled("Network", false);
   if (wrSendHook) wrSendHook->disable();
   //if (ccDispatchHook) ccDispatchHook->disable();
   return emptyResponse();
 }
 $domainMethod(enableNetwork) {
+  info.setDomainEnabled("Network", false);
   if (wrSendHook) wrSendHook->enable();
   //if (ccDispatchHook) ccDispatchHook->enable();
   return emptyResponse();
