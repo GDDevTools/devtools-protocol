@@ -2,7 +2,7 @@
 #ifndef NODESELECTORRESOLVER_H_
 #define NODESELECTORRESOLVER_H_
 
-#include "selectors/SelectorsHeader.h"
+#include "../selectors/SelectorsHeader.h"
 
 class INodeSelector;
 

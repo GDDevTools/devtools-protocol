@@ -6,7 +6,7 @@
 //  Copyright © 2018 1m0nster. All rights reserved.
 //
 
-#include "selectors/PseudoSelector.h"
+#include "../../include/selectors/PseudoSelector.h"
 
 namespace future {
 

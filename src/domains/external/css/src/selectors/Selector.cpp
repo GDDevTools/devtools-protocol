@@ -6,8 +6,8 @@
 //  Copyright © 2018 1m0nster. All rights reserved.
 //
 
-#include "selectors/Selector.h"
-#include "utils/CSSUtil.h"
+#include "../../include/selectors/Selector.h"
+#include "../../include/utils/CSSUtil.h"
 
 namespace future {
     Selector::Selector()

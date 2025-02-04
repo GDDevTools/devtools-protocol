@@ -6,7 +6,7 @@
 //  Copyright © 2018 1m0nster. All rights reserved.
 //
 
-#include "selectors/IdSelector.h"
+#include "../../include/selectors/IdSelector.h"
 
 namespace future {
 

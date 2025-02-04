@@ -6,7 +6,7 @@
 //  Copyright © 2018 1m0nster. All rights reserved.
 //
 
-#include "selectors/UniversalSelector.h"
+#include "../../include/selectors/UniversalSelector.h"
 
 namespace future {
 

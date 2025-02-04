@@ -6,7 +6,7 @@
 //  Copyright © 2018 1m0nster. All rights reserved.
 //
 
-#include "selectors/SelectorGroup.h"
+#include "../../include/selectors/SelectorGroup.h"
 
 namespace future {
     

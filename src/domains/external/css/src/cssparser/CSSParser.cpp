@@ -6,10 +6,10 @@
 //  Copyright © 2018 1m0nster. All rights reserved.
 //
 
-#include "cssparser/CSSParser.h"
-#include "cssparser/CSSLex.h"
-#include "utils/ContainerUtil.h"
-#include "utils/StringUtil.h"
+#include "../../include/cssparser/CSSParser.h"
+#include "../../include/cssparser/CSSLex.h"
+#include "../../include/utils/ContainerUtil.h"
+#include "../../include/utils/StringUtil.h"
 
 #include <string.h>
 #include <assert.h>

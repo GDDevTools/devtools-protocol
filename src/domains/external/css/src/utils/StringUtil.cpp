@@ -5,7 +5,7 @@
  *      Author: bingjian
  */
 
-#include "utils/StringUtil.h"
+#include "../../include/utils/StringUtil.h"
 
 #include <sstream>
 #include <iostream>

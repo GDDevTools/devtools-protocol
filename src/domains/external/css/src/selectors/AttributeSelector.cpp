@@ -6,7 +6,7 @@
 //  Copyright © 2018 1m0nster. All rights reserved.
 //
 
-#include "selectors/AttributeSelector.h"
+#include "../../include/selectors/AttributeSelector.h"
 
 namespace future {
 	bool AttributeSelector::isBaseSelector()

@@ -6,7 +6,7 @@
 //  Copyright © 2018 1m0nster. All rights reserved.
 //
 
-#include "selectors/SelectorSequence.h"
+#include "../../include/selectors/SelectorSequence.h"
 
 namespace future {
     void SequenceSelector::appendSelector(Selector *s)

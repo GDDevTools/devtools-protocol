@@ -7,7 +7,7 @@
 //  Copyright © 2018 1m0nster. All rights reserved.
 //
 
-#include "selectors/ClassSelector.h"
+#include "../../include/selectors/ClassSelector.h"
 
 namespace future {
 	bool ClassSelector::isBaseSelector()

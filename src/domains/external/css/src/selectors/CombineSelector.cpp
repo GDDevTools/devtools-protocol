@@ -6,7 +6,7 @@
 //  Copyright © 2018 1m0nster. All rights reserved.
 //
 
-#include "selectors/CombineSelector.h"
+#include "../../include/selectors/CombineSelector.h"
 
 #include <assert.h>
 

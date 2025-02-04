@@ -1,7 +1,7 @@
 
-#include "resolvers/NodePseudoSelectorResolver.h"
-#include "resolvers/INodeSelector.h"
-#include "utils/StringUtil.h"
+#include "../../include/resolvers/NodePseudoSelectorResolver.h"
+#include "../../include/resolvers/INodeSelector.h"
+#include "../../include/utils/StringUtil.h"
 
 #include <string>
 

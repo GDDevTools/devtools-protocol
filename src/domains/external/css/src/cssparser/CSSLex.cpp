@@ -6,8 +6,8 @@
 //  Copyright © 2018 1m0nster. All rights reserved.
 //
 
-#include "cssparser/CSSLex.h"
-#include "utils/ContainerUtil.h"
+#include "../../include/cssparser/CSSLex.h"
+#include "../../include/utils/ContainerUtil.h"
 
 #include <string.h>
 

@@ -6,7 +6,7 @@
 //  Copyright © 2018 1m0nster. All rights reserved.
 //
 
-#include "selectors/SignSelector.h"
+#include "../../include/selectors/SignSelector.h"
 
 namespace future {
     bool SignSelector::operator>(future::SignSelector *other)

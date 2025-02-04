@@ -1,8 +1,8 @@
 
-#include "resolvers/NodeSelectorResolver.h"
-#include "resolvers/NodePseudoSelectorResolver.h"
-#include "resolvers/INodeSelector.h"
-#include "utils/StringUtil.h"
+#include "../../include/resolvers/NodeSelectorResolver.h"
+#include "../../include/resolvers/NodePseudoSelectorResolver.h"
+#include "../../include/resolvers/INodeSelector.h"
+#include "../../include/utils/StringUtil.h"
 
 namespace future {
         

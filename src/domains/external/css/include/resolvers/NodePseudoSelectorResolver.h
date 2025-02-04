@@ -5,7 +5,7 @@
 #include <map>
 #include <stdio.h>
 
-#include "selectors/PseudoSelector.h"
+#include "../selectors/PseudoSelector.h"
 
 class INodeSelector;
 
