@@ -1,5 +1,6 @@
 #include "../../external/rapidxml/rapidxml.hpp"
 #include <Geode/Result.hpp>
+#include <Geode/Geode.hpp>
 #include "insanity.hpp"
 
 std::string value_of(rapidxml::xml_base<>* g) {
@@ -19,6 +20,24 @@ cocos2d::CCNode* whatNodeCouldThisBe(rapidxml::xml_node<>* node) {
     auto name = name_of(node);
     if (name == "scene") return CCScene::create();
     if (name == "p") return CCLabelBMFont::create(value_of(node).c_str(),"bigFont.fnt");
+    if (name == "img") {
+      auto img = value_of(node->first_attribute("src"));
+      CCNode* spr = nullptr;
+      if (node->first_attribute("sizable") == nullptr) {
+        spr = CCSprite::create(img.c_str());
+        if (spr == nullptr) {
+          spr = CCSprite::createWithSpriteFrameName(img.c_str());
+        }
+      } else {
+        spr = extension::CCScale9Sprite::create(img.c_str());
+        if (spr == nullptr) {
+          spr = extension::CCScale9Sprite::createWithSpriteFrameName(img.c_str());
+        }
+      }
+
+      if (spr == nullptr) spr = CCNode::create();
+      return spr;
+    }
 
     return CCNode::create();
 }

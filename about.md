@@ -3,7 +3,7 @@
 Casual users should **not** download this. It does nothing (except opening a WebSocket port for the entire game idk)
 
 # ello orld
-The Geometry Dash DevTools Protocol allows for tools to instrument, inspect, debug and profile GD instance. Nothing uses this protocol and I maintains this API.
+The Geometry Dash DevTools Protocol allows for tools to instrument and inspect GD instance. Nothing uses this protocol and I maintains this API.
 
 Instrumentation is divided into a number of domains (DOM, Input, Network etc.). Each domain defines a number of commands it supports and events it generates. Both commands and events are serialized JSON objects of a fixed structure.
 
@@ -28,7 +28,7 @@ The canonical protocol definitions live in the mod's source tree: (gd_protocol.p
 These canonical .pdl files are then used to generate the `protocols.json` file -and subsequently, the .md docs file-, which is included in the mod as a resource, and used as the response for the `getProtocolInformation` method.
 
 ## Does the protocol support multiple simultaneous clients?
-yeah sure go ahead but remember that events state are shared between clients
+yeah sure go ahead
 
 ## Can I have a catgirl?
 [no](https://www.pixiv.net/artworks/100528610)

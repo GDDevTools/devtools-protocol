@@ -5,9 +5,9 @@
     },
     "id": "henrysck075.puppeteer",
     "name": "GD DevTools Protocol",
-    "version": "v0.9.77",
+    "version": "v0.9.81",
     "developer": "Henry Spheria",
-    "description": "scriptkiddie's goto for geode python",
+    "description": "Chrome DevTools for Geometry Dash",
     "links": {
         "source":"https://github.com/HenrySck075/gd-devtools-protocol"
     },
@@ -17,6 +17,7 @@
             "importance": "required"
         }
     },
+    "tags": ["online", "utility", "universal", "developer"],
     "settings": {
         "autostart": {
             "type": "bool",
@@ -25,7 +26,8 @@
     },
     "resources": {
         "files": [
-            "protocol_definitions/protocols.json"
+            "protocol_definitions/protocols.json",
+            "GDP_Domains_Reference.md"
         ],
         "fonts": {
             "consola": {
