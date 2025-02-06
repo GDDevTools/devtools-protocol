@@ -1,8 +1,8 @@
-#include "Geode/DefaultInclude.hpp"
+#include <Geode/Geode.hpp>
 extern "C" void registerDOMNodeObject();
 extern "C" void registerDOMSceneObject();
 
-$execute {
+$on_mod(Loaded) {
   registerDOMNodeObject();
   registerDOMSceneObject();
 }

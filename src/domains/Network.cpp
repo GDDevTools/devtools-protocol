@@ -204,7 +204,7 @@ class $modify(cocos2d::extension::CCHttpClient) {
   }
 };
 geode::Hook* ccDispatchHook;
-$execute {
+$on_mod(Loaded) {
   ccDispatchHook = geode::Mod::get()->hook(
     reinterpret_cast<void*>(base+dispatchRespOrig_addr),
     &dispatchResponseCallbacks,
@@ -247,7 +247,7 @@ $domainMethod(getResponseBody) {
   }
   return errors::internalError("No request with specified ID.");
 }
-$execute {
+$on_mod(Loaded) {
   wrSendHook = geode::Mod::get()->hook(
     reinterpret_cast<void*>(
       geode::addresser::getNonVirtual(

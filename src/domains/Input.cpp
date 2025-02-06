@@ -1,3 +1,10 @@
+// this domain has 3 boolean to manage its states
+//
+// inputExplicitlyDisabled for when the mod explicitly disables the domain (e.g. on inputz)
+// ignoreInputs to ignore calls to dispatchKey/MouseEvent
+// and the domain enabled state itself
+
+
 #include "../WS.hpp"
 // clangd is bad
 #include "Geode/cocos/robtop/mouse_dispatcher/CCMouseDispatcher.h"
@@ -8,6 +15,44 @@
 #include <Geode/cocos/robtop/keyboard_dispatcher/CCKeyboardDispatcher.h>
 #include <chrono>
 
+/*
+bool inputExplicitlyDisabled = false;
+
+#include <Geode/modify/AccountLoginLayer.hpp>
+struct ALLayerBlock : public geode::Modify<ALLayerBlock,AccountLoginLayer> {
+  struct Fields {
+    bool iAwaitForMyDismission = false;
+  };
+  bool init(gd::string gus) {
+    if (!AccountLoginLayer::init(gus)) return false;
+    inputExplicitlyDisabled = true;
+    return true;
+  }
+  void loginAccountFinished(int nico, int ni) {
+    AccountLoginLayer::loginAccountFinished(nico, ni);
+    m_fields->iAwaitForMyDismission = true;
+  }
+  void setParent(cocos2d::CCNode* parent) {
+    if (parent != nullptr) {
+      m_fields->iAwaitForMyDismission = true;
+    }
+    AccountLoginLayer::setParent(parent);
+  }
+  void removeFromParent() {
+    AccountLoginLayer::removeFromParent();
+    // set this to false
+    m_fields->iAwaitForMyDismission = false;
+    // wait 1 frame later
+    geode::queueInMainThread([this]{
+      // check if it's still false
+      if (!m_fields->iAwaitForMyDismission) {
+        // break free :DD
+        inputExplicitlyDisabled = false;
+      }
+    });
+  }
+};
+*/
 inline bool bit(int n, int k) {
   return (n & ( 1 << k )) >> k;
 }
@@ -146,7 +191,7 @@ $domainMethodUndepended(handleCharEvent) {
 }
 bool ignoreInputs = false;
 $domainAsyncMethod(dispatchKeyEvent) {
-  if (ignoreInputs) return finish(emptyResponse());
+  if (!info.isDomainEnabled("Input")||ignoreInputs) return finish(emptyResponse());
   auto type = params["type"].asString().unwrap();
   
   auto tsDiff = params["timestamp"].asInt().unwrapOr(0) - std::chrono::duration_cast<std::chrono::seconds>(
@@ -168,7 +213,7 @@ const std::string mouseButton[8] = {
 int touchId = 0;
 geode::cocos::CCArrayExt<cocos2d::CCTouch*> touches;
 $domainAsyncMethod(dispatchMouseEvent) {
-  if (ignoreInputs) return finish(emptyResponse());
+  if (!info.isDomainEnabled("Input")||ignoreInputs) return finish(emptyResponse());
   auto type = params["type"].asString().unwrap();
   
   auto tsDiff = params["timestamp"].asInt().unwrapOr(0) - std::chrono::duration_cast<std::chrono::seconds>(
@@ -230,8 +275,18 @@ $domainMethod(setIgnoreInputEvents) {
   ignoreInputs = params["ignore"].asBool().unwrap();
   return emptyResponse();
 }
-$execute {
+$domainMethod(disableInput) {
+  info.setDomainEnabled("Input", false);
+  return emptyResponse();
+}
+$domainMethod(enableInput) {
+  info.setDomainEnabled("Input", true);
+  return emptyResponse();
+}
+$on_mod(Loaded) {
   auto p = Protocol::get();
+  p->registerFunction("Input.disable", &disableInput);
+  p->registerFunction("Input.enable", &enableInput);
   p->registerFunction("Input.dispatchKeyEvent", &dispatchKeyEvent);
   p->registerFunction("Input.dispatchMouseEvent", &dispatchMouseEvent, {"type","x","y","button"});
   p->registerFunction("Input.setIgnoreInputEvents", &setIgnoreInputEvents, {"input"});

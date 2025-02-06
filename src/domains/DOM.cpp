@@ -565,7 +565,7 @@ $domainMethod(removeAttribute) {
   return setAttribute(info, params);
 }
 
-$execute {
+$on_mod(Loaded) {
   auto p = Protocol::get();
   p->registerFunction("DOM.click", &click, {"nodeId"});
   p->registerFunction("DOM.describeNode", &describeNode, {"nodeId"});

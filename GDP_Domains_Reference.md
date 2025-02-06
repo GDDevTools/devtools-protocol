@@ -12,6 +12,7 @@ This .md file is generated from protocols.json so it's guaranteed to match with 
 </style>
 
 # `DOM` Domain
+
 This domain exposes DOM read/write operations. Each DOM Node is represented with its mirror object
 that has an `id`. This `id` can be used to get additional information on the Node, and more.
 It is important that client receives DOM events only for the nodes that are known to the client.
@@ -20,6 +21,7 @@ It is client's responsibility to collect information about the nodes that were s
 
 ## Methods
 ### DOM.`click`
+
 Try sending a click to the node without actually clicking.
 Only works for `button` nodes.
 
@@ -44,6 +46,7 @@ If you want real click events then you can use [Input.dispatchMouseEvent](method
 </table>
 
 ### DOM.`describeNode`
+
 Describes node given its id, does not require domain to be enabled. Does not start tracking any
 objects, can be used for automation.
 
@@ -79,12 +82,15 @@ entire subtree or provide an integer larger than 0.</td>
 </table>
 
 ### DOM.`disable`
+
 Disables DOM agent.
 
 ### DOM.`enable`
+
 Enables DOM agent.
 
 ### DOM.`getAttribute`
+
 Get a node's attribute.
 
 <table>
@@ -118,6 +124,7 @@ Get a node's attribute.
 </table>
 
 ### DOM.`getAttributes`
+
 Returns attributes for the specified node.
 
 <table>
@@ -149,6 +156,7 @@ Returns attributes for the specified node.
 ### DOM.`getBoxModel`
 
 
+
 <table>
 <thead>
 <tr>
@@ -176,6 +184,7 @@ Returns attributes for the specified node.
 </table>
 
 ### DOM.`getDocument`
+
 Returns the root DOM node (the scene) (and optionally the subtree) to the caller.
 Implicitly enables the DOM domain events for the current target.
 
@@ -206,6 +215,7 @@ Implicitly enables the DOM domain events for the current target.
 </table>
 
 ### DOM.`getNodeForLocation`
+
 Returns node id at given location. Depending on whether DOM domain is enabled, nodeId is either returned or not.
 
 <table>
@@ -239,6 +249,7 @@ Returns node id at given location. Depending on whether DOM domain is enabled, n
 </table>
 
 ### DOM.`moveTo`
+
 Moves node into the new parent, places it before the given anchor.
 
 <table>
@@ -260,6 +271,7 @@ Moves node into the new parent, places it before the given anchor.
 </table>
 
 ### DOM.`querySelector`
+
 Executes querySelector on a given node.
 
 <table>
@@ -293,6 +305,7 @@ Executes querySelector on a given node.
 </table>
 
 ### DOM.`removeAttribute`
+
 Removes attribute with given name from an element with given id.
 
 <table>
@@ -314,6 +327,7 @@ Removes attribute with given name from an element with given id.
 </table>
 
 ### DOM.`removeNode`
+
 Removes node with given id.
 
 <table>
@@ -331,6 +345,7 @@ Removes node with given id.
 </table>
 
 ### DOM.`requestNode`
+
 Requests that the node is sent to the caller given the JavaScript node object reference.
 
 <table>
@@ -360,6 +375,7 @@ Requests that the node is sent to the caller given the JavaScript node object re
 </table>
 
 ### DOM.`resolveNode`
+
 Resolves the JavaScript node object for a given NodeId.
 
 <table>
@@ -389,6 +405,7 @@ Resolves the JavaScript node object for a given NodeId.
 </table>
 
 ### DOM.`setAttribute`
+
 Sets attribute for an element with given id.
 
 <table>
@@ -415,6 +432,7 @@ Sets attribute for an element with given id.
 
 ## Events
 ### DOM.`attributeModified`
+
 Fired when [Node](type:DOM.Node)'s attribute is modified.
 
 <table>
@@ -440,6 +458,7 @@ Fired when [Node](type:DOM.Node)'s attribute is modified.
 </table>
 
 ### DOM.`attributeRemoved`
+
 Fired when [Node](type:DOM.Node)'s attribute is removed.
 
 <table>
@@ -461,6 +480,7 @@ Fired when [Node](type:DOM.Node)'s attribute is removed.
 </table>
 
 ### DOM.`childNodeCountUpdated`
+
 Fired when Node's children count has changed.
 Called in conjunction with other child-related events.
 
@@ -483,6 +503,7 @@ Called in conjunction with other child-related events.
 </table>
 
 ### DOM.`childNodeInserted`
+
 Fired when Node added a child.
 
 <table>
@@ -508,6 +529,7 @@ Fired when Node added a child.
 </table>
 
 ### DOM.`childNodeRemoved`
+
 Fired when Node removed a child.
 
 <table>
@@ -529,13 +551,16 @@ Fired when Node removed a child.
 </table>
 
 ### DOM.`documentUpdated`
+
 Fired when the Scene has been replaced.
 
 ## Types
 ### DOM.`NodeId`
+
 the
 
 ### DOM.`BoxModel`
+
 Box model.
 
 <table>
@@ -558,6 +583,7 @@ Box model.
 </table>
 
 ### DOM.`Node`
+
 DOM interaction is implemented in terms of mirror objects that represent the actual DOM nodes.
 DOMNode is a base node mirror type.
 
@@ -601,17 +627,21 @@ Mods can override this property by setting the `puppeteer/nodeTypeOverride` user
 
 
 # `Log` Domain
+
 Get events whenever a log is pushed.
 
 ## Methods
 ### Log.`disable`
 
 
+
 ### Log.`enable`
+
 
 
 ## Events
 ### Log.`entryAdded`
+
 Issued when a new message was logged.
 
 <table>
@@ -630,16 +660,20 @@ Issued when a new message was logged.
 
 
 # `Level` Domain
+
 Manages the levels list.
 
 ## Methods
 ### Level.`disable`
+
 Disables the Level agent.
 
 ### Level.`enable`
+
 Enables the Level agent.
 
 ### Level.`getList`
+
 Get a local list.
 
 <table>
@@ -677,6 +711,7 @@ Get a local list.
 </table>
 
 ### Level.`getLevel`
+
 Get a locally saved level, either created level or saved level.
 
 <table>
@@ -710,6 +745,7 @@ Get a locally saved level, either created level or saved level.
 </table>
 
 ### Level.`getLevels`
+
 Get some online level.
 To get levels from a list, use [getList](method:Level.getList) instead
 
@@ -740,6 +776,7 @@ To get levels from a list, use [getList](method:Level.getList) instead
 </table>
 
 ### Level.`deleteLevel`
+
 Delete a level. Asks the user before doing so and returns an error if the user rejects the request.
 
 <table>
@@ -761,6 +798,7 @@ Delete a level. Asks the user before doing so and returns an error if the user r
 </table>
 
 ### Level.`createLevel`
+
 Create a new local level.
 
 <table>
@@ -782,6 +820,7 @@ Create a new local level.
 </table>
 
 ### Level.`updateLevel`
+
 Update a local level info.
 All fields in the info is optional, and some fields will be ignored.
 
@@ -817,6 +856,7 @@ All fields in the info is optional, and some fields will be ignored.
 
 ## Events
 ### Level.`listCreated`
+
 Fired when a new list was created
 
 <table>
@@ -834,6 +874,7 @@ Fired when a new list was created
 </table>
 
 ### Level.`listDeleted`
+
 Fired when a list was deleted
 
 <table>
@@ -851,6 +892,7 @@ Fired when a list was deleted
 </table>
 
 ### Level.`levelCreated`
+
 Fired when a new level was created
 
 <table>
@@ -868,6 +910,7 @@ Fired when a new level was created
 </table>
 
 ### Level.`levelDeleted`
+
 Fired when a level was deleted
 
 <table>
@@ -886,6 +929,7 @@ Fired when a level was deleted
 
 ## Types
 ### Level.`LevelList`
+
 yo list
 
 <table>
@@ -926,7 +970,9 @@ yo list
 ### Level.`LevelType`
 
 
+
 ### Level.`Level`
+
 yo level
 
 <table>
@@ -962,10 +1008,12 @@ yo level
 
 
 # `Mod` Domain
+
 Manages a mod.
 
 ## Methods
 ### Mod.`disableMod`
+
 Disables a specific mod.
 It won't actually be disabled until you [restart](domain:Game) the game.
 
@@ -984,6 +1032,7 @@ It won't actually be disabled until you [restart](domain:Game) the game.
 </table>
 
 ### Mod.`enableMod`
+
 Enables a specific mod.
 It won't actually be enabled until you [restart](domain:Game) the game.
 
@@ -1002,6 +1051,7 @@ It won't actually be enabled until you [restart](domain:Game) the game.
 </table>
 
 ### Mod.`getSettingsItems`
+
 Get non-custom(?) settings values
 
 <table>
@@ -1035,6 +1085,7 @@ Get non-custom(?) settings values
 </table>
 
 ### Mod.`setSettings`
+
 Set non-custom(?) settings values
 
 <table>
@@ -1057,19 +1108,24 @@ Set non-custom(?) settings values
 
 
 # `Game` Domain
+
 held the player's game session hostage
 
 ## Methods
 ### Game.`close`
+
 Close game gracefully.
 
 ### Game.`crash`
+
 Close game gracelessly. (raises an std::runtime_error)
 
 ### Game.`restart`
+
 Restart game gracefully.
 
 ### Game.`getVersion`
+
 Returns version information.
 
 <table>
@@ -1095,6 +1151,7 @@ Returns version information.
 </table>
 
 ### Game.`getWindowBounds`
+
 Get position and size of the game window.
 
 <table>
@@ -1112,6 +1169,7 @@ Get position and size of the game window.
 </table>
 
 ### Game.`getWindowBounds`
+
 Set position and/or size of the game window.
 
 <table>
@@ -1130,6 +1188,7 @@ Set position and/or size of the game window.
 
 ## Types
 ### Game.`Bounds`
+
 Game window bounds information
 
 <table>
@@ -1165,10 +1224,12 @@ Game window bounds information
 
 
 # `Input` Domain
+
 User inputs.
 
 ## Methods
 ### Input.`dispatchMouseEvent`
+
 Dispatches a mouse event to the game.
 
 <table>
@@ -1210,6 +1271,7 @@ Dispatches a mouse event to the game.
 </table>
 
 ### Input.`dispatchKeyEvent`
+
 Dispatches a key event to the game.
 
 <table>
@@ -1241,6 +1303,7 @@ Dispatches a key event to the game.
 ### Input.`setIgnoreInputEvents`
 
 
+
 <table>
 <thead>
 <tr>
@@ -1257,16 +1320,21 @@ Dispatches a key event to the game.
 
 
 # `Network` Domain
+**EXPERIMENTAL FEATURE** - Things are expected to break, please do NOT send a bug report.  
+
 Network domain allows tracking network activities of the page. It exposes information about http, file, data and other requests and responses, their headers, bodies, timing, etc.
 
 ## Methods
 ### Network.`disable`
+
 Disables Network agent.
 
 ### Network.`enable`
+
 Enables Network agent.
 
 ### Network.`getRequestPostData`
+
 
 
 <table>
@@ -1297,10 +1365,12 @@ Enables Network agent.
 
 
 # `Runtime` Domain
+
 javascriptin
 
 ## Methods
 ### Runtime.`evaluate`
+
 Evaluate the given JavaScript expression.
 
 <table>
@@ -1333,10 +1403,13 @@ Evaluate the given JavaScript expression.
 ### Runtime.`ObjectType`
 
 
+
 ### Runtime.`ObjectSubtype`
 
 
+
 ### Runtime.`PropertyPreview`
+
 Even smaller.
 
 <table>
@@ -1367,6 +1440,7 @@ Even smaller.
 </table>
 
 ### Runtime.`ObjectPreview`
+
 Object containing abbreviated remote object value.
 
 <table>
@@ -1397,6 +1471,7 @@ Object containing abbreviated remote object value.
 </table>
 
 ### Runtime.`RemoteObject`
+
 Mirror object referencing original JavaScript object.
 
 <table>

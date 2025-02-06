@@ -4,6 +4,7 @@
 
 #include <Geode/Result.hpp>
 #include <Geode/loader/Dispatch.hpp>
+#include <Geode/utils/Task.hpp>
 #include <matjson.hpp>
 #include <variant>
 using matjsonObjectInitType = std::initializer_list<std::pair<std::string, matjson::Value>>;

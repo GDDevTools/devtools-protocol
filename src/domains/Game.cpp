@@ -166,7 +166,7 @@ $domainMethod(setWindowBounds) {
 }
 
 
-$execute {
+$on_mod(Loaded) {
   auto p = Protocol::get();
   p->registerFunction("Game.close", &closeGame);
   p->registerFunction("Game.crash", &crash);

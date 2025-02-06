@@ -3,11 +3,11 @@
 
 //#include "../../../external/tinyjs/TinyJS.hpp"
 #include "../state.hpp"
+#include "Geode/utils/cocos.hpp"
 #include "domains/external/tinyjs/TinyJS.hpp"
 #include <Geode/DefaultInclude.hpp>
 #include <queue>
 #include "node.hpp"
-
 #include <Geode/modify/CCNode.hpp>
 struct CCNodeJSHooks : geode::Modify<CCNodeJSHooks, cocos2d::CCNode> {
   struct Fields {
@@ -20,15 +20,14 @@ struct CCNodeJSHooks : geode::Modify<CCNodeJSHooks, cocos2d::CCNode> {
     }
     cocos2d::CCNode::release();
   }
-  void setParent(cocos2d::CCNode* parent);
-};
-void CCNodeJSHooks::setParent(cocos2d::CCNode* parent) {
-  cocos2d::CCNode::setParent(parent);
-  if (!m_fields->jsSetup) {
-    m_fields->associatedJSObject = dom::newScriptVarNode(getState(), this);
-    m_fields->jsSetup = true;
+  void setParent(cocos2d::CCNode* parent) {
+    cocos2d::CCNode::setParent(parent);
+    if (!m_fields->jsSetup) {
+      m_fields->associatedJSObject = dom::newScriptVarNode(getState(), this);
+      m_fields->jsSetup = true;
+    }
   }
-}
+};
 CScriptVar* getAssociatedJSObject(cocos2d::CCNode* node) {
   return static_cast<CCNodeJSHooks*>(node)->m_fields->associatedJSObject.getVar();
 };
@@ -44,7 +43,7 @@ static void finalize_Node(CScriptVar* v) {
 */
 
 static void returnNode(CFunctionsScopePtr const& v, cocos2d::CCNode* n) {
-  v->setReturnVar(static_cast<CCNodeJSHooks*>(n)->m_fields->associatedJSObject);
+  v->setReturnVar(getAssociatedJSObject(n));
 }
 //////
 /// Properties
@@ -54,11 +53,11 @@ static void returnNode(CFunctionsScopePtr const& v, cocos2d::CCNode* n) {
 $jsMethod(Node_childList_g) {
   auto arr = newScriptVar(getState(), Array);
   int idx = 0;
-  for (auto* c : geode::cocos::CCArrayExt<CCNodeJSHooks*>(
+  for (auto* c : geode::cocos::CCArrayExt<cocos2d::CCNode*>(
     static_cast<dom::CScriptVarNodePtr>(v->findChild("this")->getVarPtr())
     ->getNode()->getChildren()
   )) {
-    arr->setArrayIndex(idx,c->m_fields->associatedJSObject);
+    arr->setArrayIndex(idx,getAssociatedJSObject(c));
     idx++;
   }
   v->setReturnVar(arr);
@@ -171,8 +170,8 @@ $jsMethod(new_Node) {
   cocos2d::CCNode* n;
   // creates a new one
   n = cocos2d::CCNode::create();
-  auto obj = newScriptVar(getState(), Object,getState()->getRoot()->findChildByPath("Node.prototype"));
-  obj->setUserData(n);
+  auto obj = newScriptVarNode(getState(), n);
+  v->setReturnVar(obj);
 };
 #define $getNodeOfVariable2(n, var) \
   cocos2d::CCNode* n = nullptr; \

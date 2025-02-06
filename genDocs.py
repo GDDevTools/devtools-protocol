@@ -25,6 +25,8 @@ class ObjectArrayType(TypedDict, total=False):
     description: str
     optional: bool 
 
+class Experiment(TypedDict, total=False):
+    experimental: bool
 _ObjectProps = TypedDict("_ObjectProps", {
     "type": str,
     "$ref": str,
@@ -32,21 +34,21 @@ _ObjectProps = TypedDict("_ObjectProps", {
     # seems to be so
 }, total=False)
 
-class ObjectProps(_ObjectProps, ObjectArrayType, total=False):
+class ObjectProps(_ObjectProps, ObjectArrayType, Experiment, total=False):
     items: list[ObjectArrayType]
 
-class Event(TypedDict, total=False):
+class Event(Experiment, total=False):
     name: Required[str]
     description: str
     parameters: list[ObjectProps]
 class Command(Event, total=False):
     returnValue: list[ObjectProps]
-class Type(_ObjectProps, total=False):
+class Type(ObjectProps, total=False):
     id: Required[str]
     description: str
     properties: list[ObjectProps]
 
-class Domain(TypedDict,total=False):
+class Domain(Experiment,total=False):
     domain: Required[str]
     description: str
     types: list[Type]
@@ -69,8 +71,12 @@ def genPropTable(d: str, p: ObjectProps):
     <td><strong>{t if primitive else f'<a href="#{d.lower() if "." not in t else ""}{t.replace(".","").lower()}">{t}</a>'}</strong>{"<br>"+p['description'] if "description" in p else ""}{f"<br>Allowed Values: <code>{', '.join(p.get("enums",[]))}</code>" if t == "string" and len(p.get("enums",[])) != 0 else ""}</td>
   </tr>"""
 
+def annotateExperimental(o: Experiment):
+    return "**EXPERIMENTAL FEATURE** - Things are expected to break, please do NOT send a bug report.  \n" if "experimental" in o and o["experimental"] else ""
+
 def genTypeDocTable(d: str, cmd: Type):
     doc=f"""### {d}.`{cmd['id']}`
+{annotateExperimental(cmd)}
 {cmd.get("description","")}
 
 """
@@ -90,6 +96,7 @@ def genTypeDocTable(d: str, cmd: Type):
     return doc
 def genPropsTable(d: str, cmd: Event):
     doc=f"""### {d}.`{cmd['name']}`
+{annotateExperimental(cmd)}
 {cmd.get("description","")}
 
 """
@@ -127,6 +134,7 @@ domains: list[Domain] = file["domains"]
 for i in domains:
     d = i['domain']
     doc = f"""# `{d}` Domain
+{annotateExperimental(i)}
 {i.get('description','')}
 
 """

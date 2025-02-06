@@ -56,7 +56,7 @@ $domainMethod(enableLog) {
   return errors::internalError("vlogImpl hook not available.");
 }
 
-$execute {
+$on_mod(Loaded) {
   vlogHook = geode::Mod::get()->hook( 
     reinterpret_cast<void*>(geode::addresser::getNonVirtual(
       geode::modifier::Resolve<

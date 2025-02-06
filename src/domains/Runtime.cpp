@@ -183,7 +183,7 @@ $domainAsyncMethod(evaluate) {
   });
 }
 
-$execute {
+$on_mod(Loaded) {
   auto p = Protocol::get();
   p->registerFunction("Runtime.evaluate", &evaluate, {"expression"});
 }

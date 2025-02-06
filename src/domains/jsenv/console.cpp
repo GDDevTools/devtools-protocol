@@ -216,7 +216,7 @@ $jsMethod(Console_timeEnd) {
   timers.erase(label);
 }
 
-$execute{
+$on_mod(Loaded) {
   geode::ModMetadata meta("henrysck075.puppeteer.js");
 
   meta.setName("JavaScript");

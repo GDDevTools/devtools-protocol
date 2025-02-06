@@ -49,7 +49,7 @@ $domainMethod(setSettings) {
   return errors::invalidParameter("Mod not installed.");
 }
 
-$execute {
+$on_mod(Loaded) {
   auto p = Protocol::get();
   p->registerFunction("Mod.disableMod", &disableMod, {"mod"});
   p->registerFunction("Mod.enableMod", &disableMod, {"mod"});

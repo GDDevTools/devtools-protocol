@@ -1766,6 +1766,8 @@ inline define_newScriptVar_Fnc(Scope, CTinyJS *Context, Scope_t) { return new CS
 /// CScriptVarScopeFnc
 //////////////////////////////////////////////////////////////////////////
 
+template<class T>
+concept ScriptVarPtrT = std::is_base_of_v<CScriptVarPtr,T>;
 define_dummy_t(ScopeFnc);
 define_ScriptVarPtr_Type(ScopeFnc);
 class CScriptVarScopeFnc : public CScriptVarScope {
@@ -1775,6 +1777,13 @@ protected: // only derived classes or friends can be created
 public:
 	virtual ~CScriptVarScopeFnc();
 	virtual CScriptVarLinkWorkPtr findInScopes(const std::string &childName);
+  
+  template<ScriptVarPtrT T>
+  inline T getThisPtr() {
+    return static_cast<T>(
+      findChild("this")->getVarPtr()
+    );
+  };
 	
 	void setReturnVar(const CScriptVarPtr &var); ///< Set the result value. Use this when setting complex return data as it avoids a deepCopy()
 	

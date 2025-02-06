@@ -209,7 +209,7 @@ $domainMethod(enableLevel) {
 };
 
 
-$execute {
+$on_mod(Loaded) {
   auto p = Protocol::get();
   
   p->registerFunction("Level.disable", disableLevel);

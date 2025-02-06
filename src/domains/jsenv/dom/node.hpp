@@ -1,5 +1,6 @@
 #include "../state.hpp"
 #include "domains/external/tinyjs/TinyJS.hpp"
+#include <Geode/cocos/include/cocos2d.h>
 CScriptVar* getAssociatedJSObject(cocos2d::CCNode* node);
 namespace dom {
   define_dummy_t(Node);

@@ -481,7 +481,7 @@ domain Input
       boolean ignore
 
 # Network domain allows tracking network activities of the page. It exposes information about http, file, data and other requests and responses, their headers, bodies, timing, etc.
-domain Network
+experimental domain Network
   # Disables Network agent.
   command disable
 
