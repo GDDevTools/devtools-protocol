@@ -1,6 +1,8 @@
 #include "../state.hpp"
 #include "node.hpp"
 #include <Geode/cocos/include/cocos2d.h>
+
+#define CSS_CLASSNAME_OBJ "css/className"
 //CScriptVar* getAssociatedJSObject(cocos2d::CCNode* node);
 namespace dom {
   define_dummy_t(Element);
@@ -12,11 +14,10 @@ namespace dom {
 
   public:
     void signalRemoval();
-    virtual ~CScriptVarElement();
+    //virtual ~CScriptVarElement();
 
-    virtual std::string getParsableString(const std::string &indentString, const std::string &indent, uint32_t uniqueID, bool &hasRecursion);
-
-    virtual CScriptVarPtr toString_CallBack(CScriptResult &execute, int radix=0);
+    CScriptVarPtr toString_CallBack(CScriptResult &execute,
+                                    int radix = 0) override;
 
     friend struct CCNodeJSHooks;
     friend define_newScriptVar_NamedFnc(Element, CTinyJS*, cocos2d::CCNode*);

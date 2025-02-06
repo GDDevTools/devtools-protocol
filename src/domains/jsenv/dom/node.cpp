@@ -3,19 +3,21 @@
 
 //#include "../../../external/tinyjs/TinyJS.hpp"
 #include "../state.hpp"
+#include "Geode/platform/windows.hpp"
+#include "element.hpp"
 #include "Geode/utils/cocos.hpp"
 #include "domains/external/tinyjs/TinyJS.hpp"
 #include <Geode/DefaultInclude.hpp>
 #include <queue>
-#include "node.hpp"
 #include <Geode/modify/CCNode.hpp>
+// ! yes it is an element
 struct CCNodeJSHooks : geode::Modify<CCNodeJSHooks, cocos2d::CCNode> {
   struct Fields {
     bool jsSetup = false;
-    dom::CScriptVarNodePtr associatedJSObject;
+    dom::CScriptVarElementPtr associatedJSObject;
   };
   void release() {
-    if (m_uReference == 1) {
+    if (m_uReference == 1 && m_fields->associatedJSObject) {
       m_fields->associatedJSObject->signalRemoval();
     }
     cocos2d::CCNode::release();
@@ -23,12 +25,18 @@ struct CCNodeJSHooks : geode::Modify<CCNodeJSHooks, cocos2d::CCNode> {
   void setParent(cocos2d::CCNode* parent) {
     cocos2d::CCNode::setParent(parent);
     if (!m_fields->jsSetup) {
-      m_fields->associatedJSObject = dom::newScriptVarNode(getState(), this);
+      m_fields->associatedJSObject = dom::newScriptVarElement(getState(), this);
       m_fields->jsSetup = true;
     }
   }
 };
 CScriptVar* getAssociatedJSObject(cocos2d::CCNode* node) {
+  if (
+    geode::cast::typeinfo_cast<cocos2d::CCScene*>(node) &&
+    node->getParent() == nullptr
+  ) {
+    return getState()->getRoot()->findChild("document")->getVarPtr().getVar();
+  }
   return static_cast<CCNodeJSHooks*>(node)->m_fields->associatedJSObject.getVar();
 };
 

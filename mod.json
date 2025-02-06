@@ -9,7 +9,7 @@
     "developer": "Henry Spheria",
     "description": "Chrome DevTools for Geometry Dash",
     "links": {
-        "source":"https://github.com/HenrySck075/gd-devtools-protocol"
+        "source":"https://github.com/GDDevTools/devtools-protocol"
     },
     "dependencies": {
         "cvolton.level-id-api": {
