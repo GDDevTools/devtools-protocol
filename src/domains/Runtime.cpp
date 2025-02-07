@@ -177,8 +177,8 @@ $domainAsyncMethod(evaluate) {
       auto ret = s->evaluateComplex(params["expression"].asString().unwrapOr("").c_str());
       finish(geode::Ok(serializeRemoteObject(ret->getVarPtr().getVar())));
     } catch (CScriptException* e) {
-      geode::log::logImpl(geode::Severity::Error, theFakeJSMod(), "[JavaScript]: {}: {}", error_type_enum_name[e->errorType], e->message);
-      finish(errors::internalError(fmt::format("{}: {}", error_type_enum_name[e->errorType], e->message)));
+      geode::log::logImpl(geode::Severity::Error, theFakeJSMod(), "[JavaScript]: {}: {}", e->errorType, e->message);
+      finish(errors::internalError(fmt::format("{}: {}", e->errorType, e->message)));
     }
   });
 }
