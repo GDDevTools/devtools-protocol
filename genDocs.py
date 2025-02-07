@@ -27,15 +27,19 @@ class ObjectArrayType(TypedDict, total=False):
 
 class Experiment(TypedDict, total=False):
     experimental: bool
-_ObjectProps = TypedDict("_ObjectProps", {
-    "type": str,
-    "$ref": str,
-    "enums": list[str],
-    # seems to be so
-}, total=False)
 
-class ObjectProps(_ObjectProps, ObjectArrayType, Experiment, total=False):
+class PrimitiveObjectProps(ObjectArrayType, Experiment, total=False):
+    type: str
+    enums: list[str]
     items: list[ObjectArrayType]
+
+_ObjectProps = TypedDict("_ObjectProps", {
+    # seems to be so
+    "$ref": str
+}, total=False)
+class ObjectProps(_ObjectProps, PrimitiveObjectProps, total=False):
+    pass
+
 
 class Event(Experiment, total=False):
     name: Required[str]
@@ -78,6 +82,7 @@ def genTypeDocTable(d: str, cmd: Type):
     doc=f"""### {d}.`{cmd['id']}`
 {annotateExperimental(cmd)}
 {cmd.get("description","")}
+Type: **{cmd.get('type', cmd.get("$ref","idk they didnt specify it"))}**
 
 """
     properties = cmd.get("properties")

@@ -558,10 +558,12 @@ Fired when the Scene has been replaced.
 ### DOM.`NodeId`
 
 the
+Type: **integer**
 
 ### DOM.`BoxModel`
 
 Box model.
+Type: **object**
 
 <table>
 <thead>
@@ -586,6 +588,7 @@ Box model.
 
 DOM interaction is implemented in terms of mirror objects that represent the actual DOM nodes.
 DOMNode is a base node mirror type.
+Type: **object**
 
 <table>
 <thead>
@@ -931,6 +934,7 @@ Fired when a level was deleted
 ### Level.`LevelList`
 
 yo list
+Type: **object**
 
 <table>
 <thead>
@@ -970,10 +974,12 @@ yo list
 ### Level.`LevelType`
 
 
+Type: **string**
 
 ### Level.`Level`
 
 yo level
+Type: **object**
 
 <table>
 <thead>
@@ -1190,6 +1196,7 @@ Set position and/or size of the game window.
 ### Game.`Bounds`
 
 Game window bounds information
+Type: **object**
 
 <table>
 <thead>
@@ -1228,6 +1235,14 @@ Game window bounds information
 User inputs.
 
 ## Methods
+### Input.`disable`
+
+snooze
+
+### Input.`enable`
+
+idk what do you think
+
 ### Input.`dispatchMouseEvent`
 
 Dispatches a mouse event to the game.
@@ -1403,14 +1418,17 @@ Evaluate the given JavaScript expression.
 ### Runtime.`ObjectType`
 
 
+Type: **string**
 
 ### Runtime.`ObjectSubtype`
 
 
+Type: **string**
 
 ### Runtime.`PropertyPreview`
 
 Even smaller.
+Type: **object**
 
 <table>
 <thead>
@@ -1442,6 +1460,7 @@ Even smaller.
 ### Runtime.`ObjectPreview`
 
 Object containing abbreviated remote object value.
+Type: **object**
 
 <table>
 <thead>
@@ -1473,6 +1492,7 @@ Object containing abbreviated remote object value.
 ### Runtime.`RemoteObject`
 
 Mirror object referencing original JavaScript object.
+Type: **object**
 
 <table>
 <thead>
