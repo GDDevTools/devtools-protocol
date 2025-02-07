@@ -436,6 +436,10 @@ domain Game
 
 # User inputs.
 domain Input
+  # snooze
+  command disable
+  # idk what do you think
+  command enable
   # Dispatches a mouse event to the game.
   command dispatchMouseEvent
     parameters

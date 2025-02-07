@@ -892,6 +892,14 @@
       "description": "User inputs.",
       "commands": [
         {
+          "name": "disable",
+          "description": "snooze"
+        },
+        {
+          "name": "enable",
+          "description": "idk what do you think"
+        },
+        {
           "name": "dispatchMouseEvent",
           "description": "Dispatches a mouse event to the game.",
           "parameters": [
