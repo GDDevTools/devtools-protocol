@@ -1,4 +1,5 @@
 #include "element.hpp"
+#include "domains/jsenv/state.hpp"
 
 CScriptVarPtr elementPrototype;
 
@@ -51,7 +52,10 @@ $jsMethod(Element_after) {
       if (elem==nullptr) continue;
       parent->insertAfter(elem->getNode(),node);
     }
+  } else {
+    throw newScriptVarCustomError(v->getContext(), "HierarchyRequestError", "No parent found for this node.");
   }
+
 }
 $jsMethod(Element_before) {
   int l = v->getArgumentsLength();
@@ -62,7 +66,25 @@ $jsMethod(Element_before) {
       if (elem==nullptr) continue;
       parent->insertBefore(elem->getNode(),node);
     }
+  } else {
+    throw newScriptVarCustomError(v->getContext(), "HierarchyRequestError", "No parent found for this node.");
   }
+}
+
+$jsMethod(Element_querySelector) {
+  auto node = validateContext<dom::CScriptVarElement>(v)->getNode();
+  auto query = v->getArgument("selector");
+  if (query->isString()) {
+    auto ret = node->querySelector(query->toString());
+    if (ret==nullptr) return v->setReturnVar(newScriptVarNull(v->getContext()));
+    v->setReturnVar(getAssociatedJSObject(ret));
+  } else {
+    v->getContext()->throwException(TypeError,"hi im kekcroc");
+  }
+}
+
+$jsMethod(Element_remove) {
+  validateContext<dom::CScriptVarElement>(v)->getNode()->removeFromParent();
 }
 #pragma endregion
 
@@ -93,6 +115,12 @@ extern "C" void registerDOMElementObject() {
   auto elem = s->addNative("function Element()", new_Element,0,SCRIPTVARLINK_CONSTANT);
   elementPrototype = elem->findChild(TINYJS_PROTOTYPE_CLASS)->getVarPtr();
   elementPrototype->addChildOrReplace(TINYJS___PROTO___VAR, s->getRoot()->findChildByPath("Node.prototype"));
+  {
+    elementPrototype->addChild("after", newScriptVar(s, Element_after, 0, "after"));
+    elementPrototype->addChild("before", newScriptVar(s, Element_before, 0, "before"));
+    s->addNative("Element.prototype.querySelector(selector)", Element_querySelector);
+    s->addNative("Element.prototype.remove()", Element_remove);
+  }
   auto var = s->addNative("function Element.__constructor__()", new_Element, 0, SCRIPTVARLINK_CONSTANT);
   var->getFunctionData()->name = "Element";
 }
