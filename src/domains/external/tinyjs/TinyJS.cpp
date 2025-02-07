@@ -240,7 +240,7 @@ static inline string getIDString(const string& str) {
 
 string CScriptException::toString() {
 	ostringstream msg;
-	msg << ERROR_NAME[errorType] << ": " << message;
+	msg << errorType << ": " << message;
 	if(lineNumber >= 0) msg << " at Line:" << lineNumber+1;
 	if(column >=0) msg << " Column:" << column+1;
 	if(fileName.length()) msg << " in " << fileName;
@@ -1750,7 +1750,7 @@ void CScriptTokenizer::_tokenizeLiteralObject(ScriptTokenState &State, int Flags
 			l->match(LEX_ID, LEX_STR);
 		if(assign) {
 			l->match(':');
-			int dFlags = Flags | (l->tk == '{' || l->tk == '[') ? TOKENIZE_FLAGS_nestedObject : 0;
+			int dFlags = Flags | ((l->tk == '{' || l->tk == '[') ? TOKENIZE_FLAGS_nestedObject : 0);
 			State.pushLeftHandState();
 			State.Tokens.swap(element.value);
 			tokenizeAssignment(State, dFlags);
@@ -1798,7 +1798,7 @@ void CScriptTokenizer::_tokenizeLiteralArray(ScriptTokenState &State, int Flags)
 		CScriptTokenDataObjectLiteral::ELEMENT element;
 		element.id = int2string(idx++);
 		if(l->tk != ',') {
-			int dFlags = Flags | (l->tk == '{' || l->tk == '[') ? TOKENIZE_FLAGS_nestedObject : 0;
+			int dFlags = Flags | ((l->tk == '{' || l->tk == '[') ? TOKENIZE_FLAGS_nestedObject : 0);
 			State.pushLeftHandState();
 			State.Tokens.swap(element.value);
 			tokenizeAssignment(State, dFlags);
@@ -3633,6 +3633,7 @@ std::string CScriptVarObjectTypeTagged::getVarTypeTagName() { return typeTagName
 /// CScriptVarError
 //////////////////////////////////////////////////////////////////////////
 
+const char *ERROR_NAME[ERROR_COUNT] = {"Error", "EvalError", "RangeError", "ReferenceError", "SyntaxError", "TypeError"};
 
 CScriptVarError::CScriptVarError(CTinyJS *Context, ERROR_TYPES type, const char *message, const char *file, int line, int column) : CScriptVarObject(Context, Context->getErrorPrototype(type)) {
 	if(message && *message) addChild("message", newScriptVar(message));
@@ -3676,7 +3677,6 @@ CScriptException *CScriptVarError::toCScriptException()
 	int column=-1; link = findChildWithPrototypeChain("column"); if(link) column = link->toNumber().toInt32()-1;
 	return new CScriptException((enum ERROR_TYPES)ErrorCode, message, fileName, lineNumber, column); 
 }
-const char *ERROR_NAME[ERROR_COUNT] = {"Error", "EvalError", "RangeError", "ReferenceError", "SyntaxError", "TypeError"}
 CScriptVarCustomError::CScriptVarCustomError(CTinyJS *Context, const char* name, const char *message, const char *file, int line, int column) 
 : CScriptVarError(Context, Error, message, file, line, column) {
 	if(name && *name) addChildOrReplace("name", newScriptVar(name));
@@ -4706,7 +4706,7 @@ CScriptVarPtr CTinyJS::callFunction(CScriptResult &execute, const CScriptVarFunc
 				throw err;
 			}
 			else
-				throw new CScriptException(Error, "uncaught exception: '"+v->toString(function_execute)+"' in native function '"+Fnc->name+"'");
+				throw new CScriptException("Error", "uncaught exception: '"+v->toString(function_execute)+"' in native function '"+Fnc->name+"'");
 		}
 	} else {
 		/* we just want to execute the block, but something could
@@ -4978,7 +4978,7 @@ CScriptVarPtr CTinyJS::mathsOp(CScriptResult &execute, const CScriptVarPtr &A, c
 	case LEX_LEQUAL:	return a->constScriptVar(da<=db);
 	case '>':			return a->constScriptVar(da>db);
 	case LEX_GEQUAL:	return a->constScriptVar(da>=db);
-	default: throw new CScriptException("This operation not supported on the int datatype");
+	default: throw new CScriptException("This operation not supported on the int datatype","<string>");
 	}	
 }
 
@@ -6483,7 +6483,7 @@ void CTinyJS::native_eval(const CFunctionsScopePtr &c, void *data) {
 		t = oldTokenizer; // restore tokenizer
 		scopes.push_back(scEvalScope); // restore Scopes;
 		if(haveTry) { // an Error in eval is always catchable
-			CScriptVarPtr E = newScriptVarError(this, e->errorType, e->message.c_str(), e->fileName.c_str(), e->lineNumber, e->column);
+			CScriptVarPtr E = newScriptVarCustomError(this, e->errorType.c_str(), e->message.c_str(), e->fileName.c_str(), e->lineNumber, e->column);
 			delete e;
 			throw E;
 		} else

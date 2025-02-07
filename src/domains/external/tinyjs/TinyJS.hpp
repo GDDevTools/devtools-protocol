@@ -1473,7 +1473,6 @@ inline define_newScriptVar_Fnc(Object, CTinyJS *Context, const CScriptVarPtr &Pr
 ////////////////////////////////////////////////////////////////////////// 
 /// CScriptVarError
 ////////////////////////////////////////////////////////////////////////// 
-const char *ERROR_NAME[ERROR_COUNT];
 
 
 define_ScriptVarPtr_Type(Error);
@@ -1498,8 +1497,9 @@ private:
 inline define_newScriptVar_NamedFnc(Error, CTinyJS *Context, ERROR_TYPES type, const char *message=0, const char *file=0, int line=-1, int column=-1) { return new CScriptVarError(Context, type, message, file, line, column); }
 inline define_newScriptVar_NamedFnc(Error, CTinyJS *Context, const CScriptException &Exception){ 
 	int ErrorCode;
-	for(ErrorCode=(sizeof(ERROR_NAME)/sizeof(ERROR_NAME[0]))-1; ErrorCode>0; ErrorCode--) {
-		if(Exception.errorType == ERROR_NAME[ErrorCode]) break;
+const char *ERROR_NAME_tuah[ERROR_COUNT] = {"Error", "EvalError", "RangeError", "ReferenceError", "SyntaxError", "TypeError"};
+	for(ErrorCode=(sizeof(ERROR_NAME_tuah)/sizeof(ERROR_NAME_tuah[0]))-1; ErrorCode>0; ErrorCode--) {
+		if(Exception.errorType == ERROR_NAME_tuah[ErrorCode]) break;
 	}
 	return new CScriptVarError(Context, (enum ERROR_TYPES)ErrorCode, Exception.message.c_str(), Exception.fileName.c_str(), Exception.lineNumber, Exception.column); 
 };
