@@ -3667,16 +3667,14 @@ CScriptException *CScriptVarError::toCScriptException()
 	CScriptVarLinkPtr link;
 	string name = ERROR_NAME[Error];
 	link = findChildWithPrototypeChain("name"); if(link) name = link->toString();
-	int ErrorCode;
-	for(ErrorCode=(sizeof(ERROR_NAME)/sizeof(ERROR_NAME[0]))-1; ErrorCode>0; ErrorCode--) {
-		if(name == ERROR_NAME[ErrorCode]) break;
-	}
 	string message; link = findChildWithPrototypeChain("message"); if(link) message = link->toString();
 	string fileName; link = findChildWithPrototypeChain("fileName"); if(link) fileName = link->toString();
 	int lineNumber=-1; link = findChildWithPrototypeChain("lineNumber"); if(link) lineNumber = link->toNumber().toInt32()-1;
 	int column=-1; link = findChildWithPrototypeChain("column"); if(link) column = link->toNumber().toInt32()-1;
-	return new CScriptException((enum ERROR_TYPES)ErrorCode, message, fileName, lineNumber, column); 
+	return new CScriptException(name, message, fileName, lineNumber, column); 
 }
+
+
 CScriptVarCustomError::CScriptVarCustomError(CTinyJS *Context, const char* name, const char *message, const char *file, int line, int column) 
 : CScriptVarError(Context, Error, message, file, line, column) {
 	if(name && *name) addChildOrReplace("name", newScriptVar(name));

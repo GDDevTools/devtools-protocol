@@ -1521,7 +1521,7 @@ public:
 //	virtual std::string getParsableString(const std::string &indentString, const std::string &indent); ///< get Data as a parsable javascript string
 
 	//virtual CScriptVarPtr toString_CallBack(CScriptResult &execute, int radix=0);
-	CScriptException *toCScriptException() override;
+	//CScriptException *toCScriptException() override;
 private:
 	friend define_newScriptVar_NamedFnc(CustomError, CTinyJS *Context, const char* name, const char *message, const char *file, int line, int column);
 	friend define_newScriptVar_NamedFnc(CustomError, CTinyJS *Context, const CScriptException &Exception);
