@@ -256,19 +256,23 @@ std::string float2string(const double &floatData);
 
 class CScriptException {
 public:
-	ERROR_TYPES errorType;
+	std::string errorType;
 	std::string message;
 	std::string fileName;
 	int lineNumber;
 	int column;
 	CScriptException(const std::string &Message, const std::string &File, int Line=-1, int Column=-1) :
-						errorType(Error), message(Message), fileName(File), lineNumber(Line), column(Column){}
+						errorType("Error"), message(Message), fileName(File), lineNumber(Line), column(Column){}
+	CScriptException(const std::string &ErrorType, const std::string &Message, const std::string &File, int Line=-1, int Column=-1) :
+						errorType(ErrorType), message(Message), fileName(File), lineNumber(Line), column(Column){}
 	CScriptException(ERROR_TYPES ErrorType, const std::string &Message, const std::string &File, int Line=-1, int Column=-1) :
-						errorType(ErrorType), message(Message), fileName(File), lineNumber(Line), column(Column){}
+						errorType(ERROR_NAME[ErrorType]), message(Message), fileName(File), lineNumber(Line), column(Column) {}
+	/*
 	CScriptException(const std::string &Message, const char *File="", int Line=-1, int Column=-1) :
-						errorType(Error), message(Message), fileName(File), lineNumber(Line), column(Column){}
-	CScriptException(ERROR_TYPES ErrorType, const std::string &Message, const char *File="", int Line=-1, int Column=-1) :
+						errorType("Error"), message(Message), fileName(File), lineNumber(Line), column(Column){}
+	CScriptException(const std::string &ErrorType, const std::string &Message, const char *File="", int Line=-1, int Column=-1) :
 						errorType(ErrorType), message(Message), fileName(File), lineNumber(Line), column(Column){}
+						*/
 	std::string toString();
 };
 
@@ -1469,6 +1473,8 @@ inline define_newScriptVar_Fnc(Object, CTinyJS *Context, const CScriptVarPtr &Pr
 ////////////////////////////////////////////////////////////////////////// 
 /// CScriptVarError
 ////////////////////////////////////////////////////////////////////////// 
+const char *ERROR_NAME[ERROR_COUNT];
+
 
 define_ScriptVarPtr_Type(Error);
 
@@ -1484,13 +1490,45 @@ public:
 //	virtual std::string getParsableString(const std::string &indentString, const std::string &indent); ///< get Data as a parsable javascript string
 
 	virtual CScriptVarPtr toString_CallBack(CScriptResult &execute, int radix=0);
-	CScriptException *toCScriptException();
+	virtual CScriptException *toCScriptException();
 private:
 	friend define_newScriptVar_NamedFnc(Error, CTinyJS *Context, ERROR_TYPES type, const char *message, const char *file, int line, int column);
 	friend define_newScriptVar_NamedFnc(Error, CTinyJS *Context, const CScriptException &Exception);
 };
 inline define_newScriptVar_NamedFnc(Error, CTinyJS *Context, ERROR_TYPES type, const char *message=0, const char *file=0, int line=-1, int column=-1) { return new CScriptVarError(Context, type, message, file, line, column); }
-inline define_newScriptVar_NamedFnc(Error, CTinyJS *Context, const CScriptException &Exception) { return new CScriptVarError(Context, Exception.errorType, Exception.message.c_str(), Exception.fileName.c_str(), Exception.lineNumber, Exception.column); }
+inline define_newScriptVar_NamedFnc(Error, CTinyJS *Context, const CScriptException &Exception){ 
+	int ErrorCode;
+	for(ErrorCode=(sizeof(ERROR_NAME)/sizeof(ERROR_NAME[0]))-1; ErrorCode>0; ErrorCode--) {
+		if(Exception.errorType == ERROR_NAME[ErrorCode]) break;
+	}
+	return new CScriptVarError(Context, (enum ERROR_TYPES)ErrorCode, Exception.message.c_str(), Exception.fileName.c_str(), Exception.lineNumber, Exception.column); 
+};
+
+////////////////////////////////////////////////////////////////////////// 
+/// CScriptVarCustomError
+////////////////////////////////////////////////////////////////////////// 
+
+define_ScriptVarPtr_Type(CustomError);
+
+class CScriptVarCustomError : public CScriptVarError {
+protected:
+	CScriptVarCustomError(CTinyJS *Context, const char* name, const char *message, const char *file, int line, int column);// : CScriptVarObject(Context), value(Value) {}
+	CScriptVarCustomError(const CScriptVarCustomError &Copy) : CScriptVarError(Copy) {} ///< Copy protected -> use clone for public
+public:
+	virtual ~CScriptVarCustomError() {};
+	//virtual CScriptVarPtr clone();
+
+//	virtual std::string getParsableString(const std::string &indentString, const std::string &indent); ///< get Data as a parsable javascript string
+
+	//virtual CScriptVarPtr toString_CallBack(CScriptResult &execute, int radix=0);
+	CScriptException *toCScriptException() override;
+private:
+	friend define_newScriptVar_NamedFnc(CustomError, CTinyJS *Context, const char* name, const char *message, const char *file, int line, int column);
+	friend define_newScriptVar_NamedFnc(CustomError, CTinyJS *Context, const CScriptException &Exception);
+};
+inline define_newScriptVar_NamedFnc(CustomError, CTinyJS *Context, const char* name, const char *message=0, const char *file=0, int line=-1, int column=-1) { return new CScriptVarCustomError(Context, name, message, file, line, column); }
+inline define_newScriptVar_NamedFnc(CustomError, CTinyJS *Context, const CScriptException &Exception) { return new CScriptVarCustomError(Context, Exception.errorType.c_str(), Exception.message.c_str(), Exception.fileName.c_str(), Exception.lineNumber, Exception.column); }
+
 
 ////////////////////////////////////////////////////////////////////////// 
 /// CScriptVarArray

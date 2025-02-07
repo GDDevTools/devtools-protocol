@@ -2,6 +2,8 @@
 
 CScriptVarPtr elementPrototype;
 
+
+#pragma region Properties
 $jsMethod(Element_id_g) {
   validateContext<dom::CScriptVarElement>(v);
   v->setReturnVar(newScriptVar(
@@ -36,6 +38,33 @@ $jsMethod(Element_className_s) {
     );
   v->setReturnVar(newScriptVarUndefined(v->getContext()));
 }
+#pragma endregion
+
+
+#pragma region Functions
+$jsMethod(Element_after) {
+  int l = v->getArgumentsLength();
+  auto node = validateContext<dom::CScriptVarElement>(v)->getNode();
+  if (auto parent = node->getParent()) {
+    for (int i = l-1; i>=0; i--) {
+      auto elem = dynamic_cast<dom::CScriptVarElement*>(v->getArgument(i).getVar());
+      if (elem==nullptr) continue;
+      parent->insertAfter(elem->getNode(),node);
+    }
+  }
+}
+$jsMethod(Element_before) {
+  int l = v->getArgumentsLength();
+  auto node = validateContext<dom::CScriptVarElement>(v)->getNode();
+  if (auto parent = node->getParent()) {
+    for (int i = 0; i<l; i++) {
+      auto elem = dynamic_cast<dom::CScriptVarElement*>(v->getArgument(i).getVar());
+      if (elem==nullptr) continue;
+      parent->insertBefore(elem->getNode(),node);
+    }
+  }
+}
+#pragma endregion
 
 namespace dom {
   CScriptVarElement::CScriptVarElement(CTinyJS *Context, cocos2d::CCNode* node)
@@ -51,7 +80,7 @@ namespace dom {
   ) {
     return newScriptVar("#element (TODO)");
   };
-  }; // namespace dom
+}; // namespace dom
 $jsMethod(new_Element) {
   cocos2d::CCNode* n;
   // creates a new one

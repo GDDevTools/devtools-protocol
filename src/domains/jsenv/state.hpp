@@ -14,8 +14,10 @@ template<class T>
 concept ScriptObjectType = std::is_base_of_v<CScriptVarObject, T>;
 
 template<ScriptObjectType T>
-inline void validateContext(const CScriptVarScopePtr &v) {
-  if (dynamic_cast<T*>(v.getVar()->findChild("this")->getVarPtr().getVar()) == nullptr) {
+inline T* validateContext(const CScriptVarScopePtr &v) {
+  T* ret = dynamic_cast<T*>(v.getVar()->findChild("this")->getVarPtr().getVar());
+  if (ret == nullptr) {
     getState()->throwException(TypeError, "Illegal invocation");
   }
+  return ret;
 }

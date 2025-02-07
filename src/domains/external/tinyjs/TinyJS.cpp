@@ -3633,7 +3633,6 @@ std::string CScriptVarObjectTypeTagged::getVarTypeTagName() { return typeTagName
 /// CScriptVarError
 //////////////////////////////////////////////////////////////////////////
 
-const char *ERROR_NAME[] = {"Error", "EvalError", "RangeError", "ReferenceError", "SyntaxError", "TypeError"};
 
 CScriptVarError::CScriptVarError(CTinyJS *Context, ERROR_TYPES type, const char *message, const char *file, int line, int column) : CScriptVarObject(Context, Context->getErrorPrototype(type)) {
 	if(message && *message) addChild("message", newScriptVar(message));
@@ -3676,6 +3675,11 @@ CScriptException *CScriptVarError::toCScriptException()
 	int lineNumber=-1; link = findChildWithPrototypeChain("lineNumber"); if(link) lineNumber = link->toNumber().toInt32()-1;
 	int column=-1; link = findChildWithPrototypeChain("column"); if(link) column = link->toNumber().toInt32()-1;
 	return new CScriptException((enum ERROR_TYPES)ErrorCode, message, fileName, lineNumber, column); 
+}
+const char *ERROR_NAME[ERROR_COUNT] = {"Error", "EvalError", "RangeError", "ReferenceError", "SyntaxError", "TypeError"}
+CScriptVarCustomError::CScriptVarCustomError(CTinyJS *Context, const char* name, const char *message, const char *file, int line, int column) 
+: CScriptVarError(Context, Error, message, file, line, column) {
+	if(name && *name) addChildOrReplace("name", newScriptVar(name));
 }
 
 
