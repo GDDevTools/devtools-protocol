@@ -3551,14 +3551,10 @@ CScriptVarPtr CScriptVarBool::toObject() { return newScriptVar(CScriptVarPrimiti
 ////////////////////////////////////////////////////////////////////////// 
 /// CScriptVarObject
 //////////////////////////////////////////////////////////////////////////
-#include <chrono>
-
-int objectId2 = 0;
+#include "id.hpp"
 string const& CScriptVarObject::getObjectId() {return objectId;};
 void CScriptVarObject::setObjectId() {
-	objectId = to_string(
-		chrono::duration_cast<chrono::seconds>(chrono::system_clock::now().time_since_epoch()).count()
-	)+"."+std::to_string(objectId2++);
+	objectId = createUniqueId();
 }
 declare_dummy_t(Object);
 CScriptVarObject::CScriptVarObject(CTinyJS *Context) : CScriptVar(Context, Context->objectPrototype) {

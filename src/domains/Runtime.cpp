@@ -4,7 +4,10 @@
 #include "../WS.hpp"
 #include <fmt/format.h>
 #include <matjson.hpp>
+#include <unordered_map>
+#include <vector>
 #include "Geode/loader/Loader.hpp"
+#include "domains/external/tinyjs/id.hpp"
 #include "external/tinyjs/TinyJS.hpp"
 #include "jsenv/console.hpp"
 #include "jsenv/state.hpp"
@@ -170,9 +173,6 @@ std::string error_type_enum_name[6] = {
 $domainAsyncMethod(evaluate) {
   geode::queueInMainThread([params, finish]{
     auto s = getState();
-    #ifdef GEODE_IS_WINDOWS
-    if (IsDebuggerPresent()) DebugBreak();
-    #endif
     try {
       auto ret = s->evaluateComplex(params["expression"].asString().unwrapOr("").c_str());
       finish(geode::Ok(serializeRemoteObject(ret->getVarPtr().getVar())));
@@ -182,8 +182,66 @@ $domainAsyncMethod(evaluate) {
     }
   });
 }
+/// should we clear
+std::unordered_map<std::string, CScriptTokenizer> compiledExpressions;
+$domainMethod(compileScript) {
+  auto expr = params["expression"].asString().unwrapOr("");
+  auto id = createUniqueId(); 
+  compiledExpressions[id] = CScriptTokenizer(expr.c_str());
+
+  return geode::Ok(matjson::makeObject({
+    {"scriptId", id}
+  }));
+}
+$domainAsyncMethod(runScript) {
+  geode::queueInMainThread([params, finish]{
+    auto s = getState();
+    try {
+      auto ret = s->evaluateComplex(compiledExpressions[params["scriptId"].asString().unwrap()]);
+      finish(geode::Ok(serializeRemoteObject(ret->getVarPtr().getVar())));
+    } catch (CScriptException* e) {
+      geode::log::logImpl(geode::Severity::Error, theFakeJSMod(), "[JavaScript]: {}: {}", e->errorType, e->message);
+      finish(errors::internalError(fmt::format("{}: {}", e->errorType, e->message)));
+    }
+  });
+}
+$domainMethod(releaseCompiledScript) {
+  auto id = params["scriptId"].asString().unwrap();
+  compiledExpressions.erase(id);
+  return emptyResponse();
+}
+
+$domainMethod(queryObjects) {
+  auto protoId = params["prototypeObjectId"];
+  auto c = getState()->first;
+
+  std::vector<matjson::Value> ret;
+
+  while (c) {
+    if (c->isObject()) {
+      if (static_cast<CScriptVarObject*>(c)->getObjectId() == protoId) continue;
+      auto proto = dynamic_cast<CScriptVarObject*>(
+        c->findChild("__proto__")->getVarPtr().getVar()
+      );
+      while (proto && proto->isNull()) {
+        if (proto->getObjectId() == protoId) {
+          ret.push_back(serializeRemoteObject(c));
+          break;
+        }
+        proto = dynamic_cast<CScriptVarObject*>(
+          proto->findChild("__proto__")->getVarPtr().getVar()
+        );
+      }
+    }
+    c = c->next;
+  }
+  return geode::Ok(ret);
+}
 
 $on_mod(Loaded) {
   auto p = Protocol::get();
   p->registerFunction("Runtime.evaluate", &evaluate, {"expression"});
+  p->registerFunction("Runtime.compileScript", &compileScript, {"expression"});
+  p->registerFunction("Runtime.runScript", &runScript, {"scriptId"});
+  p->registerFunction("Runtime.queryObjects", &queryObjects, {"prototypeObjectId"});
 }

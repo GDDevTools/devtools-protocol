@@ -2,7 +2,9 @@
 //#include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocketServer.h>
 #include <matjson.hpp>
-#include "Geode/ui/Notification.hpp"
+#include <Geode/ui/Notification.hpp>
+#include <Geode/utils/file.hpp>
+#include <Geode/loader/Mod.hpp>
 
 std::shared_ptr<Protocol> prot = nullptr;
 /// theres only one protocol instance for the entire lifetime so
